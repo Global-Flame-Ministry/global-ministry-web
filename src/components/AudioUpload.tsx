@@ -128,7 +128,7 @@ const AudioUpload: React.FC<AudioUploadProps> = ({
                   Click to upload audio
                 </p>
                 <p className="text-xs text-slate-400 mt-1">
-                  MP3, WAV, M4A up to 100MB
+                  MP3, WAV, M4A up to 200MB
                 </p>
               </div>
             </div>
