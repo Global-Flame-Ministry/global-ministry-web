@@ -3,18 +3,19 @@ import { MINISTRIES } from '../constants';
 import { ArrowLeft, ArrowRight, X, CheckCircle2, ChevronRight } from 'lucide-react';
 import DaughtersOfHonour from './DaughtersOfHonour';
 import GlobalChoir from './GlobalChoir';
-import HomeOfLove from './HomeOfLove'; // Import the new component
+import HomeOfLove from './HomeOfLove';
+import Youth from './Youths'; // 1. Imported Youth Component
 
 const Ministries: React.FC = () => {
-  // Added 'hol' to the currentView state
-  const [currentView, setCurrentView] = useState<'list' | 'doh' | 'choir' | 'hol'>('list');
+  // 2. Added 'youth' to the currentView state type
+  const [currentView, setCurrentView] = useState<'list' | 'doh' | 'choir' | 'hol' | 'youth'>('list');
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [isDiscoveryModalOpen, setIsDiscoveryModalOpen] = useState(false);
   const [selectedMinistry, setSelectedMinistry] = useState<any>(null);
   const [formSubmitted, setFormSubmitted] = useState(false);
 
-  // Unified Scroll-to-Top Navigation
-  const navigateTo = (view: 'list' | 'doh' | 'choir' | 'hol') => {
+  // 3. Updated navigation type to include 'youth'
+  const navigateTo = (view: 'list' | 'doh' | 'choir' | 'hol' | 'youth') => {
     setCurrentView(view);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -68,11 +69,20 @@ const Ministries: React.FC = () => {
     );
   }
 
-  // Merged Home of Love View
   if (currentView === 'hol') {
     return (
       <div className="bg-white animate-in fade-in duration-500">
         <HomeOfLove onBack={() => navigateTo('list')} />
+      </div>
+    );
+  }
+
+  // 4. Added Youth View Rendering
+  if (currentView === 'youth') {
+    return (
+      <div className="bg-white animate-in fade-in duration-500">
+        <BackNavbar />
+        <Youth />
       </div>
     );
   }
@@ -100,7 +110,8 @@ const Ministries: React.FC = () => {
           {MINISTRIES.map((ministry, index) => {
             const isChoir = ministry.name.toLowerCase().includes('choir');
             const isDOH = ministry.name === "Daughters of Honour";
-            const isHOL = ministry.name === "Home of Love"; // Detect Home of Love
+            const isHOL = ministry.name === "Home of Love";
+            const isYouth = ministry.name.toLowerCase().includes('youth'); // 5. Detect Youth
 
             return (
               <div
@@ -135,13 +146,14 @@ const Ministries: React.FC = () => {
                     onClick={() => {
                       if (isChoir) navigateTo('choir');
                       else if (isDOH) navigateTo('doh');
-                      else if (isHOL) navigateTo('hol'); // Route to HOL
+                      else if (isHOL) navigateTo('hol');
+                      else if (isYouth) navigateTo('youth'); // 6. Route to Youth
                       else handleGetInvolved(ministry);
                     }}
                     className="group/link inline-flex items-center gap-4 text-sm font-bold uppercase tracking-widest text-gray-900 transition-all outline-none"
                   >
                     <span className="border-b-2 border-black pb-1 group-hover/link:border-brand-600 group-hover/link:text-brand-600 transition-all">
-                      {isChoir || isDOH || isHOL ? 'View Details & Gallery' : 'Get Involved'}
+                      {isChoir || isDOH || isHOL || isYouth ? 'View Details & Gallery' : 'Get Involved'}
                     </span>
                     <div className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center group-hover/link:bg-black group-hover/link:text-white transition-all">
                       <ArrowRight className="w-4 h-4" />
@@ -154,7 +166,7 @@ const Ministries: React.FC = () => {
         </div>
       </section>
 
-      {/* --- MODALS (Discovery & Join) --- */}
+      {/* --- MODALS --- */}
       {/* Discovery Modal */}
       {isDiscoveryModalOpen && (
         <div className="fixed inset-0 z-110 flex items-center justify-center p-4">
