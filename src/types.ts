@@ -1,5 +1,4 @@
-// ─── HER ORIGINAL TYPES ───────────────────────────────────────────────────────
-
+// ORIGINAL TYPES
 export interface Sermon {
   id: string;
   title: string;
@@ -42,8 +41,7 @@ export interface Ministry {
   contactEmail: string;
 }
 
-// ─── API TYPES ────────────────────────────────────────────────────────────────
-
+// API RESPONSE TYPES 
 export interface ApiResponse<T> {
   isSuccess: boolean;
   message: string;
@@ -61,8 +59,7 @@ export interface PagedResult<T> {
   hasNextPage?: boolean;
 }
 
-// ─── AUTH ─────────────────────────────────────────────────────────────────────
-
+// AUTH 
 export interface NewUserDto {
   id: string;
   firstName: string;
@@ -105,8 +102,7 @@ export interface ResendConfirmationDto {
   email: string;
 }
 
-// ─── USER ─────────────────────────────────────────────────────────────────────
-
+// USER 
 export interface UserDto {
   id: string;
   firstName: string;
@@ -121,8 +117,7 @@ export interface UserDto {
   roles: string[];
 }
 
-// ─── SERMON ──────────────────────────────────────────────────────────────────
-
+// SERMON 
 export interface SermonDto {
   id: number;
   title: string;
@@ -137,8 +132,7 @@ export interface SermonDto {
   createdOn: string;
 }
 
-// ─── ANNOUNCEMENT ─────────────────────────────────────────────────────────────
-
+// ANNOUNCEMENT 
 export interface AnnouncementDto {
   id: number;
   title: string;
@@ -150,8 +144,7 @@ export interface AnnouncementDto {
   updatedOn: string | null;
 }
 
-// ─── EVENT ────────────────────────────────────────────────────────────────────
-
+// EVENT 
 export interface EventDto {
   id: number;
   title: string;
@@ -168,8 +161,7 @@ export interface EventDto {
   createdOn: string;
 }
 
-// ─── TESTIMONY ────────────────────────────────────────────────────────────────
-
+// TESTIMONY 
 export interface TestimonyDto {
   id: number;
   name: string;
@@ -184,8 +176,7 @@ export interface CreateTestimonyDto {
   content: string;
 }
 
-// ─── CONTACT ──────────────────────────────────────────────────────────────────
-
+// CONTACT 
 export interface CreateContactDto {
   fullName: string;
   email: string;
@@ -209,8 +200,7 @@ export interface UpdateContactStatusDto {
   status: number;
 }
 
-// ─── PRAYER REQUEST ───────────────────────────────────────────────────────────
-
+// PRAYER REQUEST 
 export interface CreatePrayerRequestDto {
   name?: string;
   email?: string;
@@ -226,7 +216,7 @@ export interface PrayerRequestDto {
   createdAt: string;
 }
 
-// ─── DONATION ─────────────────────────────────────────────────────────────────
+// DONATION 
 
 export interface CreateDonationDto {
   donorName: string;
@@ -267,8 +257,7 @@ export interface DonationStatsDto {
   byCurrency: DonationGroupDto[];
 }
 
-// ─── BOOK ─────────────────────────────────────────────────────────────────────
-
+// BOOK 
 export interface BookDto {
   id: number;
   title: string;
@@ -311,8 +300,7 @@ export interface UpdateBookDto {
   isPublished: boolean;
 }
 
-// ─── TEAM MEMBER ──────────────────────────────────────────────────────────────
-
+// TEAM MEMBER 
 export interface TeamMemberDto {
   id: number;
   name: string;
@@ -326,8 +314,7 @@ export interface TeamMemberDto {
   isPublished: boolean;
 }
 
-// ─── MINISTRY DEPARTMENT ──────────────────────────────────────────────────────
-
+// MINISTRY DEPARTMENT 
 export interface MinistryDepartmentDto {
   id: number;
   name: string;
@@ -338,8 +325,7 @@ export interface MinistryDepartmentDto {
   isPublished: boolean;
 }
 
-// ─── ACTIVITY ─────────────────────────────────────────────────────────────────
-
+// ACTIVITY 
 export interface ActivityDto {
   id: number;
   title: string;
@@ -351,8 +337,7 @@ export interface ActivityDto {
   isPublished: boolean;
 }
 
-// ─── DASHBOARD ────────────────────────────────────────────────────────────────
-
+// DASHBOARD STATS
 export interface DashboardStatsDto {
   // Users
   totalUsers: number;
@@ -400,4 +385,36 @@ export interface DashboardStatsDto {
   publishedBooks: number;
   draftBooks: number;
   featuredBooks: number;
+}
+
+// BULK EMAIL 
+export interface SendBulkEmailDto {
+  subject: string;
+  htmlBody: string;
+  targetGroup: 'All' | 'Ministry' | 'Youth' | 'Custom';
+  customEmails?: string;
+  scheduledAt?: string | null;
+}
+
+export interface BulkEmailResponseDto {
+  id: number;
+  subject: string;
+  targetGroup: string;
+  status: string;
+  totalRecipients: number;
+  successCount: number;
+  failedCount: number;
+  scheduledAt: string | null;
+  sentAt: string | null;
+  createdOn: string;
+  createdByName: string | null;
+  errorMessage: string | null;
+}
+
+export interface BulkEmailStatsDto {
+  totalEmailsSent: number;
+  totalRecipientsReached: number;
+  totalScheduled: number;
+  totalFailed: number;
+  successRate: number;
 }

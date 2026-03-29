@@ -41,6 +41,7 @@ import AdminTestimonies from './pages/Admin/AdminTestimonies';
 import AdminUsers from './pages/Admin/AdminUsers';
 import AdminBooks from './pages/Admin/AdminBooks';
 import AdminDonations from './pages/Admin/AdminDonations';
+import AdminBulkEmail from './pages/Admin/AdminBulkEmail';
 
 // ─── SCROLL TO TOP ────────────────────────────────────────────────────────────
 const ScrollToTop = () => {
@@ -178,8 +179,12 @@ const App: React.FC = () => {
               <Route path="users" element={
                 <AdminLayout><AdminUsers /></AdminLayout>
               } />
-              <Route path="/admin/donations" element={<AdminLayout><AdminDonations /></AdminLayout>} />
-              <Route path="/admin/books"element={<AdminLayout><AdminBooks /></AdminLayout>} />
+              <Route path="donations" element={
+                <AdminLayout><AdminDonations /></AdminLayout>} />
+              <Route path="books" element={
+                <AdminLayout><AdminBooks /></AdminLayout>} />
+              <Route path="bulk-email" element={
+                <AdminLayout><AdminBulkEmail /></AdminLayout>} />
             </Route>
 
             {/* ── 404 ───────────────────────────────────────────────── */}
