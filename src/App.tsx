@@ -10,38 +10,47 @@ import Footer from './components/Footer';
 import BookStore from './pages/BookStore';
 
 // ─── MINISTRY PAGES ───────────────────────────────────────────────────────────
-import Home from './pages/Home';
-import About from './pages/About';
-import Sermons from './pages/Sermons';
-import SermonDetail from './pages/SermonDetail';
-import Events from './pages/Events';
-import Ministries from './pages/Ministries';
-import Give from './pages/Give';
-import Announcements from './pages/AnnouncementsPage';
-import Contact from './pages/Contact';
+import Home            from './pages/Home';
+import Sermons         from './pages/Sermons';
+import SermonDetail    from './pages/SermonDetail';
+import Events          from './pages/Events';
+import Ministries      from './pages/Ministries';
+import Give            from './pages/Give';
+import Announcements   from './pages/AnnouncementsPage';
+import Contact         from './pages/Contact';
 import DaughtersOfHonour from './pages/DaughtersOfHonour';
-import GlobalChoir from './pages/GlobalChoir';
-import HomeOfLove from './pages/HomeOfLove';
+import GlobalChoir     from './pages/GlobalChoir';
+import HomeOfLove      from './pages/HomeOfLove';
+
+// ─── ABOUT PAGES ──────────────────────────────────────────────────────────────
+import OurStory        from './pages/OurStory';
+import OurMission      from './pages/OurMission';
+import SeniorPastor    from './pages/SeniorPastor';
+import CoPastor        from './pages/CoPastor';
+import CoreBeliefs     from './pages/CoreBeliefs';
+
+// ─── PRAYER REQUEST PAGE ──────────────────────────────────────────────────────
+import PrayerRequestPage from './pages/PrayerRequestPage';
 
 // ─── AUTH PAGES ───────────────────────────────────────────────────────────────
-import LoginPage from './pages/auth/LoginPage';
-import RegisterPage from './pages/auth/RegisterPage';
-import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
-import ResetPasswordPage from './pages/auth/ResetPasswordPage';
-import ResendConfirmPage from './pages/auth/ResendConfirmPage';
+import LoginPage           from './pages/auth/LoginPage';
+import RegisterPage        from './pages/auth/RegisterPage';
+import ForgotPasswordPage  from './pages/auth/ForgotPasswordPage';
+import ResetPasswordPage   from './pages/auth/ResetPasswordPage';
+import ResendConfirmPage   from './pages/auth/ResendConfirmPage';
 
 // ─── ADMIN PAGES ──────────────────────────────────────────────────────────────
-import Admin from './pages/Admin/Admin';
-import AdminContacts from './pages/Admin/AdminContacts';
-import AdminAnnouncements from './pages/Admin/AdminAnnouncements';
-import AdminEvents from './pages/Admin/AdminEvents';
-import AdminSermons from './pages/Admin/AdminSermons';
+import Admin               from './pages/Admin/Admin';
+import AdminContacts       from './pages/Admin/AdminContacts';
+import AdminAnnouncements  from './pages/Admin/AdminAnnouncements';
+import AdminEvents         from './pages/Admin/AdminEvents';
+import AdminSermons        from './pages/Admin/AdminSermons';
 import AdminPrayerRequests from './pages/Admin/AdminPrayerRequests';
-import AdminTestimonies from './pages/Admin/AdminTestimonies';
-import AdminUsers from './pages/Admin/AdminUsers';
-import AdminBooks from './pages/Admin/AdminBooks';
-import AdminDonations from './pages/Admin/AdminDonations';
-import AdminBulkEmail from './pages/Admin/AdminBulkEmail';
+import AdminTestimonies    from './pages/Admin/AdminTestimonies';
+import AdminUsers          from './pages/Admin/AdminUsers';
+import AdminBooks          from './pages/Admin/AdminBooks';
+import AdminDonations      from './pages/Admin/AdminDonations';
+import AdminBulkEmail      from './pages/Admin/AdminBulkEmail';
 
 // ─── SCROLL TO TOP ────────────────────────────────────────────────────────────
 const ScrollToTop = () => {
@@ -60,9 +69,7 @@ const PublicLayout = ({ children }: { children: React.ReactNode }) => (
 );
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => (
-  <div className="min-h-screen bg-gray-50">
-    {children}
-  </div>
+  <div className="min-h-screen bg-gray-50">{children}</div>
 );
 
 // ─── 404 ──────────────────────────────────────────────────────────────────────
@@ -71,9 +78,7 @@ function NotFoundPage() {
     <div className="flex flex-col items-center justify-center h-screen text-center">
       <h1 className="text-5xl font-bold text-purple-700 mb-4">404</h1>
       <p className="text-gray-600 mb-6">Page not found.</p>
-      <a href="/" className="px-6 py-2 bg-purple-700 text-white rounded-lg">
-        Go Back Home
-      </a>
+      <a href="/" className="px-6 py-2 bg-purple-700 text-white rounded-lg">Go Back Home</a>
     </div>
   );
 }
@@ -99,13 +104,25 @@ const App: React.FC = () => {
             {/* ── PUBLIC ROUTES ─────────────────────────────────────── */}
             <Route path="/"
               element={<PublicLayout><Home /></PublicLayout>} />
-            <Route path="/about"
-              element={<PublicLayout><About /></PublicLayout>} />
-            
-            {/* MERGED: BookStore Route added below */}
+
+            {/* About — individual pages, no generic /about */}
+            <Route path="/our-story"
+              element={<PublicLayout><OurStory /></PublicLayout>} />
+            <Route path="/our-mission"
+              element={<PublicLayout><OurMission /></PublicLayout>} />
+            <Route path="/senior-pastor"
+              element={<PublicLayout><SeniorPastor /></PublicLayout>} />
+            <Route path="/co-pastor"
+              element={<PublicLayout><CoPastor /></PublicLayout>} />
+            <Route path="/core-beliefs"
+              element={<PublicLayout><CoreBeliefs /></PublicLayout>} />
+
+            {/* Prayer Request */}
+            <Route path="/prayer-request"
+              element={<PublicLayout><PrayerRequestPage /></PublicLayout>} />
+
             <Route path="/books"
               element={<PublicLayout><BookStore /></PublicLayout>} />
-
             <Route path="/sermons"
               element={<PublicLayout><Sermons /></PublicLayout>} />
             <Route path="/sermons/:id"
@@ -155,36 +172,17 @@ const App: React.FC = () => {
 
             {/* ── ADMIN ROUTES ──────────────────────────────────────── */}
             <Route path="/admin" element={<AdminRoute />}>
-              <Route index element={
-                <AdminLayout><Admin /></AdminLayout>
-              } />
-              <Route path="contacts" element={
-                <AdminLayout><AdminContacts /></AdminLayout>
-              } />
-              <Route path="announcements" element={
-                <AdminLayout><AdminAnnouncements /></AdminLayout>
-              } />
-              <Route path="events" element={
-                <AdminLayout><AdminEvents /></AdminLayout>
-              } />
-              <Route path="sermons" element={
-                <AdminLayout><AdminSermons /></AdminLayout>
-              } />
-              <Route path="prayer-requests" element={
-                <AdminLayout><AdminPrayerRequests /></AdminLayout>
-              } />
-              <Route path="testimonies" element={
-                <AdminLayout><AdminTestimonies /></AdminLayout>
-              } />
-              <Route path="users" element={
-                <AdminLayout><AdminUsers /></AdminLayout>
-              } />
-              <Route path="donations" element={
-                <AdminLayout><AdminDonations /></AdminLayout>} />
-              <Route path="books" element={
-                <AdminLayout><AdminBooks /></AdminLayout>} />
-              <Route path="bulk-email" element={
-                <AdminLayout><AdminBulkEmail /></AdminLayout>} />
+              <Route index element={<AdminLayout><Admin /></AdminLayout>} />
+              <Route path="contacts"       element={<AdminLayout><AdminContacts /></AdminLayout>} />
+              <Route path="announcements"  element={<AdminLayout><AdminAnnouncements /></AdminLayout>} />
+              <Route path="events"         element={<AdminLayout><AdminEvents /></AdminLayout>} />
+              <Route path="sermons"        element={<AdminLayout><AdminSermons /></AdminLayout>} />
+              <Route path="prayer-requests" element={<AdminLayout><AdminPrayerRequests /></AdminLayout>} />
+              <Route path="testimonies"    element={<AdminLayout><AdminTestimonies /></AdminLayout>} />
+              <Route path="users"          element={<AdminLayout><AdminUsers /></AdminLayout>} />
+              <Route path="donations"      element={<AdminLayout><AdminDonations /></AdminLayout>} />
+              <Route path="books"          element={<AdminLayout><AdminBooks /></AdminLayout>} />
+              <Route path="bulk-email"     element={<AdminLayout><AdminBulkEmail /></AdminLayout>} />
             </Route>
 
             {/* ── 404 ───────────────────────────────────────────────── */}
