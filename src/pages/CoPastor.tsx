@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import dadandmum from '../assets/dadandmum.jpg';
+import dadandmum from '../assets/mummy.jpg';
 
 const CoPastor: React.FC = () => (
   <div className="min-h-screen bg-white pt-28 pb-20">
@@ -11,8 +11,8 @@ const CoPastor: React.FC = () => (
         Co-Pastor
       </p>
       <h1 className="font-serif text-5xl md:text-6xl text-slate-900 mb-8 leading-tight">
-        Apostle <br />
-        <span className="italic text-fuchsia-600">Faith Musa.</span>
+        APOSTLE <br />
+        <span className="italic text-fuchsia-600">FAITH MUSA.</span>
       </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 mb-14">
@@ -25,10 +25,10 @@ const CoPastor: React.FC = () => (
         <div className="lg:col-span-3 prose prose-slate prose-lg max-w-none">
           <p>
             Apostle Faith Musa serves as the Co-Pastor of Global Flame Ministries alongside
-            her husband, Apostle Danjuma Musa. Her name is not incidental — faith is both
-            her identity and her ministry. She moves in a remarkable grace for strengthening
-            believers and calling out the potential God has placed in every person she
-            encounters.
+            her husband, Apostle Danjuma Musa.
+            Her name is not incidental — Faith is both her identity and her ministry.
+            She moves in a remarkable grace for strengthening believers and calling out 
+            the potential God has placed in every person she encounters.
           </p>
           <p>
             Her ministry has a particular anointing for women's empowerment, family

@@ -41,9 +41,9 @@ const Hero: React.FC = () => {
             </span>
 
             <h1 className="text-5xl md:text-7xl font-serif font-bold text-white tracking-tight leading-tight">
-              Discover Your Purpose.<br />
+              Raising a people of power who will manifest the kingdom<br />
               <span className="text-transparent bg-clip-text bg-linear-to-r from-brand-300 to-white">
-                Live with Hope.
+                and the realities of the fullness of Christ through the Spirit.
               </span>
             </h1>
 
