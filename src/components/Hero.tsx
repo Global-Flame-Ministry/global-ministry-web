@@ -40,7 +40,7 @@ const Hero: React.FC = () => {
               Welcome Home
             </span>
 
-            <h1 className="text-5xl md:text-7xl font-serif font-bold text-white tracking-tight leading-tight">
+            <h1 className="text-5xl md:text-5xl font-serif font-bold text-white tracking-tight leading-tight">
               Raising a people of power who will manifest the kingdom<br />
               <span className="text-transparent bg-clip-text bg-linear-to-r from-brand-300 to-white">
                 and the realities of the fullness of Christ through the Spirit.
