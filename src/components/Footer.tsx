@@ -73,9 +73,9 @@ const Footer: React.FC = () => {
             {/* Social */}
             <div className="flex items-center gap-3 pt-1">
               {[
-                { icon: <Facebook className="w-4 h-4" />,  href: '#', label: 'Facebook' },
-                { icon: <Instagram className="w-4 h-4" />, href: '#', label: 'Instagram' },
-                { icon: <Youtube className="w-4 h-4" />,   href: '#', label: 'YouTube' },
+                { icon: <Facebook className="w-4 h-4" />,  href: 'https://www.facebook.com/GlobalFlameMinistry', label: 'Facebook' },
+                { icon: <Instagram className="w-4 h-4" />, href: 'https://www.instagram.com/globalflamemin?igsh=NGVweWQybTY4YmNm', label: 'Instagram' },
+                { icon: <Youtube className="w-4 h-4" />,   href: 'https://youtube.com/@globalflame273?si=gj50JPNrITMBZS2P', label: 'YouTube' },
               ].map(social => (
                 <a
                   key={social.label}

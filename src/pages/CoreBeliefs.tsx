@@ -48,8 +48,8 @@ const CoreBeliefs: React.FC = () => (
         Core Beliefs
       </p>
       <h1 className="font-serif text-5xl md:text-6xl text-slate-900 mb-4 leading-tight">
-        What we <br />
-        <span className="italic text-fuchsia-600">stand on.</span>
+        WHAT WE <br />
+        <span className="italic text-fuchsia-600">STAND ON.</span>
       </h1>
       <p className="text-slate-500 text-lg mb-14 max-w-xl">
         These foundational beliefs are not negotiable. They are the bedrock on which
