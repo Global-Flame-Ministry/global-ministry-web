@@ -153,6 +153,9 @@ export interface EventDto {
   endDate: string;
   location: string;
   imageUrl: string | null;
+  ministryId: number | null;
+  ministryName: string | null;
+  ministrySlug: string | null;
   module: string;
   isCancelled: boolean;
   acceptsRegistrations: boolean;
@@ -417,4 +420,58 @@ export interface BulkEmailStatsDto {
   totalScheduled: number;
   totalFailed: number;
   successRate: number;
+}
+
+// MINISTRY DEPARTMENT 
+
+export interface MinistryResponseDto {
+  id: number;
+  name: string;
+  slug: string;
+  shortDescription: string;
+  description: string | null;
+  coverImageUrl: string | null;
+  leaderName: string | null;
+  leaderTitle: string | null;
+  leaderImageUrl: string | null;
+  contactEmail: string | null;
+  displayOrder: number;
+  isPublished: boolean;
+  createdOn: string;
+  updatedOn: string | null;
+}
+
+export interface CreateMinistryDto {
+  name: string;
+  shortDescription: string;
+  description?: string;
+  coverImageUrl?: string;
+  leaderName?: string;
+  leaderTitle?: string;
+  leaderImageUrl?: string;
+  contactEmail?: string;
+  displayOrder: number;
+  isPublished: boolean;
+}
+
+export interface UpdateMinistryDto {
+  name: string;
+  shortDescription: string;
+  description?: string;
+  coverImageUrl?: string;
+  leaderName?: string;
+  leaderTitle?: string;
+  leaderImageUrl?: string;
+  contactEmail?: string;
+  displayOrder: number;
+  isPublished: boolean;
+}
+
+export interface MinistryQueryObject {
+  name?: string;
+  isPublished?: boolean;
+  pageNumber?: number;
+  pageSize?: number;
+  sortBy?: string;
+  isDescending?: boolean;
 }

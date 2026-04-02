@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Plus, Trash2, RefreshCw, Search, Pencil,
-  X, Calendar, MapPin, Filter, Ban
+  X, Calendar, MapPin, Filter, Ban, Building2
 } from 'lucide-react';
 import { eventApi, type CreateEventDto, type UpdateEventDto } from '../../api/eventApi';
-import type { EventDto } from '../../types';
+import { ministryApi } from '../../api/ministryApi';
+import type { EventDto, MinistryResponseDto } from '../../types';
 import toast from 'react-hot-toast';
 import { useAdminTheme } from '../../context/AdminThemeContext';
 import ImageUpload from '../../components/ImageUpload';
@@ -14,8 +15,9 @@ const MODULES = ['Ministry', 'Youth'];
 const emptyForm = (): CreateEventDto => ({
   title: '', description: '', startDate: '', endDate: '',
   location: '', imageUrl: '', module: 'Ministry',
+  ministryId: null,
   acceptsDonations: false, donationLabel: '',
-  acceptsRegistrations: true, // ✅ default true
+  acceptsRegistrations: true,
 });
 
 const TEXT_FIELDS: { label: string; key: keyof CreateEventDto; placeholder: string }[] = [
@@ -61,6 +63,9 @@ const AdminEvents = () => {
   const [deleteTarget, setDeleteTarget]       = useState<EventDto | null>(null);
   const [isDeleting, setIsDeleting]           = useState(false);
 
+  // Ministry list for dropdown
+  const [ministries, setMinistries] = useState<MinistryResponseDto[]>([]);
+
   const fetchEvents = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -78,6 +83,17 @@ const AdminEvents = () => {
     } catch { toast.error('Failed to load events'); }
     finally { setIsLoading(false); }
   }, [search, filterModule, filterCancelled, pageNumber]);
+
+  // Fetch ministries for the dropdown
+  useEffect(() => {
+    ministryApi.adminGetAll({ pageSize: 100 })
+      .then(res => {
+        if (res.data.isSuccess && res.data.data) {
+          setMinistries(res.data.data.items);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => { fetchEvents(); }, [fetchEvents]);
   useEffect(() => { setPageNumber(1); }, [search, filterModule, filterCancelled]);
@@ -99,9 +115,10 @@ const AdminEvents = () => {
       endDate:              e.endDate.slice(0, 16),
       location:             e.location,
       imageUrl:             e.imageUrl ?? '',
+      ministryId:           e.ministryId ?? null,
       acceptsDonations:     e.acceptsDonations,
       donationLabel:        e.donationLabel ?? '',
-      acceptsRegistrations: e.acceptsRegistrations, // ✅
+      acceptsRegistrations: e.acceptsRegistrations,
     });
     setIsCancelledForm(e.isCancelled);
     setShowForm(true);
@@ -115,34 +132,44 @@ const AdminEvents = () => {
 
     setIsSaving(true);
     try {
+      // Sanitize — empty string imageUrl → undefined
+      const sanitized = {
+        ...form,
+        imageUrl:     form.imageUrl?.trim()    || undefined,
+        description:  form.description?.trim() || undefined,
+        donationLabel: form.donationLabel?.trim() || undefined,
+        ministryId:   form.ministryId || null,
+      };
+
       if (editing) {
         const updateDto: UpdateEventDto = {
-          title:                form.title,
-          description:          form.description,
-          startDate:            form.startDate,
-          endDate:              form.endDate,
-          location:             form.location,
-          imageUrl:             form.imageUrl,
+          title:                sanitized.title,
+          description:          sanitized.description,
+          startDate:            sanitized.startDate,
+          endDate:              sanitized.endDate,
+          location:             sanitized.location,
+          imageUrl:             sanitized.imageUrl,
           isCancelled:          isCancelledForm,
-          acceptsDonations:     form.acceptsDonations,
-          donationLabel:        form.donationLabel,
-          acceptsRegistrations: form.acceptsRegistrations, // ✅
+          ministryId:           sanitized.ministryId,
+          acceptsDonations:     sanitized.acceptsDonations,
+          donationLabel:        sanitized.donationLabel,
+          acceptsRegistrations: sanitized.acceptsRegistrations,
         };
         const res = await eventApi.update(editing.id, updateDto);
         if (res.data.isSuccess) {
-          toast.success('Updated');
+          toast.success('Event updated');
           setShowForm(false);
           fetchEvents();
         }
       } else {
-        const res = await eventApi.create(form);
+        const res = await eventApi.create(sanitized);
         if (res.data.isSuccess) {
-          toast.success('Created');
+          toast.success('Event created');
           setShowForm(false);
           fetchEvents();
         }
       }
-    } catch { toast.error('Failed to save'); }
+    } catch { toast.error('Failed to save event'); }
     finally { setIsSaving(false); }
   };
 
@@ -154,12 +181,13 @@ const AdminEvents = () => {
       setEvents(prev => prev.filter(e => e.id !== deleteTarget.id));
       setTotalCount(n => n - 1);
       setDeleteTarget(null);
-      toast.success('Deleted');
-    } catch { toast.error('Failed to delete'); }
+      toast.success('Event deleted');
+    } catch { toast.error('Failed to delete event'); }
     finally { setIsDeleting(false); }
   };
 
   const totalPages = Math.ceil(totalCount / pageSize);
+
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString('en-US', {
       month: 'short', day: 'numeric', year: 'numeric'
@@ -181,9 +209,10 @@ const AdminEvents = () => {
           </button>
           <button
             onClick={openCreate}
-            className="flex items-center gap-2 px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-500 rounded-lg text-sm font-bold uppercase tracking-widest transition-colors text-white"
+            className="flex items-center gap-2 px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-500
+              rounded-lg text-sm font-bold uppercase tracking-widest transition-colors text-white"
           >
-            <Plus className="w-4 h-4" /> New
+            <Plus className="w-4 h-4" /> New Event
           </button>
         </div>
       </div>
@@ -242,22 +271,33 @@ const AdminEvents = () => {
                 key={e.id}
                 className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${t.row}`}
               >
+                {/* Thumbnail */}
+                {e.imageUrl && (
+                  <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0">
+                    <img src={e.imageUrl} alt={e.title} className="w-full h-full object-cover" />
+                  </div>
+                )}
+
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <p className="font-bold text-sm truncate">{e.title}</p>
                     {e.isCancelled && (
-                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-500/20 text-red-500 flex-shrink-0">
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full
+                        bg-red-500/20 text-red-500">
                         Cancelled
                       </span>
                     )}
-                    {!e.acceptsRegistrations && (
-                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-slate-200 text-slate-500 flex-shrink-0">
-                        No Registration
-                      </span>
-                    )}
-                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-fuchsia-500/20 text-fuchsia-600 flex-shrink-0">
+                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full
+                      bg-fuchsia-500/20 text-fuchsia-600">
                       {e.module}
                     </span>
+                    {e.ministryName && (
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full
+                        bg-blue-500/20 text-blue-600 flex items-center gap-1">
+                        <Building2 className="w-2.5 h-2.5" />
+                        {e.ministryName}
+                      </span>
+                    )}
                   </div>
                   <div className={`flex items-center gap-4 text-xs ${t.subtext}`}>
                     <span className="flex items-center gap-1">
@@ -268,7 +308,8 @@ const AdminEvents = () => {
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
+
+                <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => openEdit(e)}
                     className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}
@@ -297,16 +338,12 @@ const AdminEvents = () => {
                 onClick={() => setPageNumber(p => Math.max(1, p - 1))}
                 disabled={pageNumber === 1}
                 className={`px-3 py-1.5 rounded disabled:opacity-30 text-xs transition-colors ${t.btnGhost}`}
-              >
-                Prev
-              </button>
+              >Prev</button>
               <button
                 onClick={() => setPageNumber(p => Math.min(totalPages, p + 1))}
                 disabled={pageNumber === totalPages}
                 className={`px-3 py-1.5 rounded disabled:opacity-30 text-xs transition-colors ${t.btnGhost}`}
-              >
-                Next
-              </button>
+              >Next</button>
             </div>
           </div>
         )}
@@ -315,27 +352,25 @@ const AdminEvents = () => {
       {/* Form Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => setShowForm(false)}
-          />
-          <div className={`relative rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto border ${t.modal}`}>
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setShowForm(false)} />
+          <div className={`relative rounded-2xl w-full max-w-lg shadow-2xl
+            max-h-[90vh] overflow-y-auto border ${t.modal}`}>
+
             <div
-              className={`flex items-center justify-between px-6 py-4 border-b ${t.border} sticky top-0`}
+              className={`flex items-center justify-between px-6 py-4 border-b ${t.border} sticky top-0 z-10`}
               style={{ background: isDark ? '#161616' : 'white' }}
             >
-              <h3 className="font-bold">{editing ? 'Edit Event' : 'New Event'}</h3>
-              <button
-                onClick={() => setShowForm(false)}
-                className={`p-1.5 rounded-lg transition-colors ${t.btnGhost}`}
-              >
+              <h3 className="font-bold text-lg">{editing ? 'Edit Event' : 'New Event'}</h3>
+              <button onClick={() => setShowForm(false)}
+                className={`p-1.5 rounded-lg transition-colors ${t.btnGhost}`}>
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="px-6 py-5 space-y-4">
+            <div className="px-6 py-5 space-y-5">
 
-              {/* Text Fields */}
+              {/* Text fields */}
               {TEXT_FIELDS.map(f => (
                 <div key={f.key}>
                   <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
@@ -351,14 +386,14 @@ const AdminEvents = () => {
                 </div>
               ))}
 
-              {/* Image Upload */}
+              {/* Image Upload — uses Cloudinary */}
               <ImageUpload
                 value={form.imageUrl || ''}
                 onChange={url => setForm(p => ({ ...p, imageUrl: url }))}
                 label="Event Image"
               />
 
-              {/* Start + End Date */}
+              {/* Dates */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
@@ -412,37 +447,59 @@ const AdminEvents = () => {
                 </select>
               </div>
 
-              {/* ✅ Accepts Registrations toggle */}
-              <label className="flex items-center gap-3 cursor-pointer">
-                <div
-                  onClick={() => setForm(p => ({ ...p, acceptsRegistrations: !p.acceptsRegistrations }))}
-                  className={`w-11 h-6 rounded-full transition-colors ${
-                    form.acceptsRegistrations ? 'bg-fuchsia-600' : t.toggle
-                  }`}
+              {/* Ministry — NEW FIELD */}
+              <div>
+                <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
+                  Ministry (optional)
+                </label>
+                <select
+                  value={form.ministryId ?? ''}
+                  onChange={e => setForm(p => ({
+                    ...p,
+                    ministryId: e.target.value ? Number(e.target.value) : null
+                  }))}
+                  className={`w-full px-4 py-3 border rounded-xl text-sm outline-none appearance-none ${t.modalInput}`}
                 >
+                  <option value="">— No ministry (general event) —</option>
+                  {ministries.map(m => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+                <p className={`text-xs mt-1 ${t.label}`}>
+                  Link this event to a ministry so it appears on that ministry's page.
+                </p>
+              </div>
+
+              {/* Accepts Registrations */}
+              <div
+                className="flex items-center gap-3 cursor-pointer"
+                onClick={() => setForm(p => ({ ...p, acceptsRegistrations: !p.acceptsRegistrations }))}
+              >
+                <div className={`w-11 h-6 rounded-full transition-colors ${
+                  form.acceptsRegistrations ? 'bg-fuchsia-600' : t.toggle
+                }`}>
                   <div className={`w-5 h-5 bg-white rounded-full mt-0.5 transition-transform ${
                     form.acceptsRegistrations ? 'translate-x-5' : 'translate-x-0.5'
                   }`} />
                 </div>
                 <span className={`text-sm ${t.subtext}`}>Accepts registrations</span>
-              </label>
+              </div>
 
-              {/* Accepts Donations toggle */}
-              <label className="flex items-center gap-3 cursor-pointer">
-                <div
-                  onClick={() => setForm(p => ({ ...p, acceptsDonations: !p.acceptsDonations }))}
-                  className={`w-11 h-6 rounded-full transition-colors ${
-                    form.acceptsDonations ? 'bg-fuchsia-600' : t.toggle
-                  }`}
-                >
+              {/* Accepts Donations */}
+              <div
+                className="flex items-center gap-3 cursor-pointer"
+                onClick={() => setForm(p => ({ ...p, acceptsDonations: !p.acceptsDonations }))}
+              >
+                <div className={`w-11 h-6 rounded-full transition-colors ${
+                  form.acceptsDonations ? 'bg-fuchsia-600' : t.toggle
+                }`}>
                   <div className={`w-5 h-5 bg-white rounded-full mt-0.5 transition-transform ${
                     form.acceptsDonations ? 'translate-x-5' : 'translate-x-0.5'
                   }`} />
                 </div>
                 <span className={`text-sm ${t.subtext}`}>Accepts donations</span>
-              </label>
+              </div>
 
-              {/* Donation label — only if acceptsDonations */}
               {form.acceptsDonations && (
                 <input
                   type="text"
@@ -453,15 +510,15 @@ const AdminEvents = () => {
                 />
               )}
 
-              {/* Mark as cancelled — edit only */}
+              {/* Cancelled — edit only */}
               {editing && (
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <div
-                    onClick={() => setIsCancelledForm(v => !v)}
-                    className={`w-11 h-6 rounded-full transition-colors ${
-                      isCancelledForm ? 'bg-red-600' : t.toggle
-                    }`}
-                  >
+                <div
+                  className="flex items-center gap-3 cursor-pointer"
+                  onClick={() => setIsCancelledForm(v => !v)}
+                >
+                  <div className={`w-11 h-6 rounded-full transition-colors ${
+                    isCancelledForm ? 'bg-red-600' : t.toggle
+                  }`}>
                     <div className={`w-5 h-5 bg-white rounded-full mt-0.5 transition-transform ${
                       isCancelledForm ? 'translate-x-5' : 'translate-x-0.5'
                     }`} />
@@ -469,27 +526,26 @@ const AdminEvents = () => {
                   <span className={`text-sm flex items-center gap-2 ${t.subtext}`}>
                     <Ban className="w-4 h-4 text-red-500" /> Mark as cancelled
                   </span>
-                </label>
+                </div>
               )}
             </div>
 
             <div
-              className={`px-6 py-4 border-t ${t.border} flex gap-3 justify-end sticky bottom-0`}
+              className={`px-6 py-4 border-t ${t.border} flex gap-3 justify-end sticky bottom-0 z-10`}
               style={{ background: isDark ? '#161616' : 'white' }}
             >
-              <button
-                onClick={() => setShowForm(false)}
-                className={`px-4 py-2 rounded-lg text-sm transition-colors ${t.btnGhost}`}
-              >
+              <button onClick={() => setShowForm(false)}
+                className={`px-4 py-2 rounded-lg text-sm transition-colors ${t.btnGhost}`}>
                 Cancel
               </button>
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="px-5 py-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500 disabled:opacity-50 text-sm font-bold text-white flex items-center gap-2"
+                className="px-5 py-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500
+                  disabled:opacity-50 text-sm font-bold text-white flex items-center gap-2"
               >
                 {isSaving && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
-                {editing ? 'Update' : 'Create'}
+                {editing ? 'Update Event' : 'Create Event'}
               </button>
             </div>
           </div>
@@ -499,10 +555,8 @@ const AdminEvents = () => {
       {/* Delete Confirm */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => setDeleteTarget(null)}
-          />
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setDeleteTarget(null)} />
           <div className={`relative rounded-2xl p-8 w-full max-w-sm text-center border ${t.modal}`}>
             <Trash2 className="w-8 h-8 text-red-500 mx-auto mb-4" />
             <h3 className="font-bold text-lg mb-2">Delete event?</h3>
@@ -510,18 +564,19 @@ const AdminEvents = () => {
               "{deleteTarget.title}" will be permanently deleted.
             </p>
             <div className="flex gap-3">
-              <button
-                onClick={() => setDeleteTarget(null)}
-                className={`flex-1 py-2.5 rounded-lg text-sm transition-colors ${t.btnGhost}`}
-              >
+              <button onClick={() => setDeleteTarget(null)}
+                className={`flex-1 py-2.5 rounded-lg text-sm transition-colors ${t.btnGhost}`}>
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="flex-1 py-2.5 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-50 text-sm font-bold text-white"
+                className="flex-1 py-2.5 rounded-lg bg-red-500 hover:bg-red-600
+                  disabled:opacity-50 text-sm font-bold text-white
+                  flex items-center justify-center gap-2"
               >
-                {isDeleting ? 'Deleting...' : 'Delete'}
+                {isDeleting && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                Delete
               </button>
             </div>
           </div>

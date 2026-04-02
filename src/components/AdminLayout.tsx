@@ -6,6 +6,7 @@ import {
   Sun, Moon, BookOpen, Heart, Library, Mail, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { Building2 } from 'lucide-react';
 import { AdminThemeProvider, useAdminTheme } from '../context/AdminThemeContext';
 
 const NAV_ITEMS = [
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
   { icon: <Heart size={18} />,           label: 'Donations',       route: '/admin/donations' },
   { icon: <Library size={18} />,         label: 'Books',           route: '/admin/books' },
   { icon: <Mail size={18} />, label: 'Bulk Email', route: '/admin/bulk-email' },
+  { icon: <Building2 size={18} />, label: 'Ministries', route: '/admin/ministries' },
 ];
 
 const AdminLayoutInner: React.FC<{ children: React.ReactNode }> = ({ children }) => {

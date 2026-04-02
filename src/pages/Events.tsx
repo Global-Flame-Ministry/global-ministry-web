@@ -1,142 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowRight, X, Calendar, MapPin, Heart } from 'lucide-react';
 import { eventApi } from '../api/eventApi';
 import type { EventDto } from '../types';
 import toast from 'react-hot-toast';
 
-const Events: React.FC = () => {
-  const [upcomingEvents, setUpcomingEvents] = useState<EventDto[]>([]);
-  const [ongoingEvents, setOngoingEvents] = useState<EventDto[]>([]);
-  const [pastEvents, setPastEvents] = useState<EventDto[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedEvent, setSelectedEvent] = useState<EventDto | null>(null);
-  const [showDonateModal, setShowDonateModal] = useState(false);
-  const [donateEvent, setDonateEvent] = useState<EventDto | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showAllPast, setShowAllPast] = useState(false);
-
-  const [regForm, setRegForm] = useState({
-    fullName: '', email: '', phone: ''
-  });
-  const [donationForm, setDonationForm] = useState({
-    donorName: '', donorEmail: '', amount: '', currency: 'NGN'
-  });
-
+/* ── Scroll animation hook ─────────────────────────────────────────── */
+const useReveal = (delay = 0) => {
+  const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const fetchAll = async () => {
-      setIsLoading(true);
-      try {
-        const [upRes, onRes, paRes] = await Promise.allSettled([
-          eventApi.getUpcoming({ pageSize: 20 }),
-          eventApi.getOngoing({ pageSize: 20 }),
-          eventApi.getPast({ pageSize: 20 }),
-        ]);
-
-        if (upRes.status === 'fulfilled' &&
-          upRes.value.data.isSuccess &&
-          upRes.value.data.data) {
-          setUpcomingEvents(upRes.value.data.data.items);
+    const el = ref.current;
+    if (!el) return;
+    // ✅ Set initial invisible state INSIDE the hook, not as JSX inline style
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(32px)';
+    el.style.transition = 'opacity 0.7s ease-out, transform 0.7s ease-out';
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+          }, delay);
+          observer.disconnect();
         }
-        if (onRes.status === 'fulfilled' &&
-          onRes.value.data.isSuccess &&
-          onRes.value.data.data) {
-          setOngoingEvents(onRes.value.data.data.items);
-        }
-        if (paRes.status === 'fulfilled' &&
-          paRes.value.data.isSuccess &&
-          paRes.value.data.data) {
-          setPastEvents(paRes.value.data.data.items);
-        }
-      } catch (error) {
-        console.error('Failed to fetch events:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchAll();
-  }, []);
+      },
+      { threshold: 0.05, rootMargin: '0px 0px -40px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay]);
+  return ref;
+};
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric', month: 'long', day: 'numeric'
-    });
-  };
+/* ── Event Card ────────────────────────────────────────────────────── */
+const EventCard: React.FC<{
+  event: EventDto;
+  badge?: string;
+  index?: number;
+  onRegister: (e: EventDto) => void;
+  onDonate: (e: EventDto) => void;
+  formatDate: (d: string) => string;
+}> = ({ event, badge, index = 0, onRegister, onDonate, formatDate }) => {
+  const ref = useReveal(index * 80);
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedEvent) return;
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch(
-        `http://localhost:5020/api/ministry/events/${selectedEvent.id}/register`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fullName: regForm.fullName,
-            email: regForm.email,
-            phoneNumber: regForm.phone || null
-          })
-        }
-      );
-
-      const data = await response.json();
-
-      if (data.isSuccess) {
-        toast.success(
-          `Registered! Check ${regForm.email} for your confirmation email. 📧`
-        );
-        setSelectedEvent(null);
-        setRegForm({ fullName: '', email: '', phone: '' });
-      } else {
-        toast.error(data.message || 'Registration failed');
-      }
-    } catch {
-      toast.error('Something went wrong. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const initiateDonation = async (method: 'paystack' | 'flutterwave') => {
-    if (!donateEvent) return;
-    setIsSubmitting(true);
-    try {
-      const res = await fetch(
-        `http://localhost:5020/api/ministry/donations/${method}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            donorName: donationForm.donorName,
-            donorEmail: donationForm.donorEmail,
-            amount: parseFloat(donationForm.amount),
-            currency: donationForm.currency,
-            paymentMethod: method === 'paystack' ? 'Paystack' : 'Flutterwave',
-            donationType: 'Event',
-            eventId: donateEvent.id,
-            eventTitle: donateEvent.title
-          })
-        }
-      );
-      const data = await res.json();
-      if (data.isSuccess && data.data?.paymentUrl) {
-        window.location.href = data.data.paymentUrl;
-      } else {
-        toast.error('Failed to initialize payment');
-      }
-    } catch {
-      toast.error('Something went wrong. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // ── Reusable event card ───────────────────────────────────────────────────
-  const EventCard = ({ event, badge }: { event: EventDto; badge?: string }) => (
+  return (
     <div
-      key={event.id}
+      ref={ref}
       className="group flex flex-col md:flex-row items-center gap-8 md:gap-16 border-b border-gray-100 pb-16 last:border-0"
     >
       <div className="w-full md:w-1/2 aspect-video overflow-hidden bg-gray-100">
@@ -180,32 +89,25 @@ const Events: React.FC = () => {
           <MapPin className="w-4 h-4" /> {event.location}
         </div>
         {event.description && (
-          <p className="text-gray-600 leading-relaxed mb-8 text-lg font-light">
+          <p className="text-gray-600 leading-relaxed mb-8 text-lg font-light text-justify">
             {event.description}
           </p>
         )}
 
         {!event.isCancelled && (
           <div className="flex flex-wrap gap-3">
-
-            {/* ✅ Register button — only if acceptsRegistrations */}
             {event.acceptsRegistrations && (
               <button
-                onClick={() => setSelectedEvent(event)}
+                onClick={() => onRegister(event)}
                 className="group/btn inline-flex items-center gap-3 bg-gray-900 text-white px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-fuchsia-600 transition-all duration-300"
               >
                 Register Now
                 <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
               </button>
             )}
-
-            {/* ✅ Give button — only if acceptsDonations */}
             {event.acceptsDonations && (
               <button
-                onClick={() => {
-                  setDonateEvent(event);
-                  setShowDonateModal(true);
-                }}
+                onClick={() => onDonate(event)}
                 className="inline-flex items-center gap-2 border-2 border-gray-900 text-gray-900 px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-gray-900 hover:text-white transition-all duration-300"
               >
                 <Heart className="w-4 h-4" />
@@ -223,13 +125,133 @@ const Events: React.FC = () => {
       </div>
     </div>
   );
+};
+
+/* ── Main Events Page ──────────────────────────────────────────────── */
+const Events: React.FC = () => {
+  const [upcomingEvents, setUpcomingEvents] = useState<EventDto[]>([]);
+  const [ongoingEvents,  setOngoingEvents]  = useState<EventDto[]>([]);
+  const [pastEvents,     setPastEvents]     = useState<EventDto[]>([]);
+  const [isLoading,      setIsLoading]      = useState(true);
+  const [selectedEvent,  setSelectedEvent]  = useState<EventDto | null>(null);
+  const [showDonateModal, setShowDonateModal] = useState(false);
+  const [donateEvent,    setDonateEvent]    = useState<EventDto | null>(null);
+  const [isSubmitting,   setIsSubmitting]   = useState(false);
+  const [showAllPast,    setShowAllPast]    = useState(false);
+
+  const rHero     = useReveal(0);
+  const rOngoing  = useReveal(0);
+  const rUpcoming = useReveal(0);
+  const rPast     = useReveal(0);
+
+  const [regForm, setRegForm] = useState({ fullName: '', email: '', phone: '' });
+  const [donationForm, setDonationForm] = useState({
+    donorName: '', donorEmail: '', amount: '', currency: 'NGN'
+  });
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      setIsLoading(true);
+      try {
+        const [upRes, onRes, paRes] = await Promise.allSettled([
+          eventApi.getUpcoming({ pageSize: 20 }),
+          eventApi.getOngoing({ pageSize: 20 }),
+          eventApi.getPast({ pageSize: 20 }),
+        ]);
+        if (upRes.status === 'fulfilled' && upRes.value.data.isSuccess && upRes.value.data.data)
+          setUpcomingEvents(upRes.value.data.data.items);
+        if (onRes.status === 'fulfilled' && onRes.value.data.isSuccess && onRes.value.data.data)
+          setOngoingEvents(onRes.value.data.data.items);
+        if (paRes.status === 'fulfilled' && paRes.value.data.isSuccess && paRes.value.data.data)
+          setPastEvents(paRes.value.data.data.items);
+      } catch (error) {
+        console.error('Failed to fetch events:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchAll();
+  }, []);
+
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedEvent) return;
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(
+        `http://localhost:5020/api/ministry/events/${selectedEvent.id}/register`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fullName: regForm.fullName,
+            email: regForm.email,
+            phoneNumber: regForm.phone || null
+          })
+        }
+      );
+      const data = await response.json();
+      if (data.isSuccess) {
+        toast.success(`Registered! Check ${regForm.email} for your confirmation email. 📧`);
+        setSelectedEvent(null);
+        setRegForm({ fullName: '', email: '', phone: '' });
+      } else {
+        toast.error(data.message || 'Registration failed');
+      }
+    } catch {
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const initiateDonation = async (method: 'paystack' | 'flutterwave') => {
+    if (!donateEvent) return;
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`http://localhost:5020/api/ministry/donations/${method}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          donorName: donationForm.donorName,
+          donorEmail: donationForm.donorEmail,
+          amount: parseFloat(donationForm.amount),
+          currency: donationForm.currency,
+          paymentMethod: method === 'paystack' ? 'Paystack' : 'Flutterwave',
+          donationType: 'Event',
+          eventId: donateEvent.id,
+          eventTitle: donateEvent.title
+        })
+      });
+      const data = await res.json();
+      if (data.isSuccess && data.data?.paymentUrl) {
+        window.location.href = data.data.paymentUrl;
+      } else {
+        toast.error('Failed to initialize payment');
+      }
+    } catch {
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDonate = (event: EventDto) => {
+    setDonateEvent(event);
+    setShowDonateModal(true);
+  };
 
   return (
     <div className="bg-white relative">
 
-      {/* Hero */}
+      {/* ── HERO ─────────────────────────────────────────────────────── */}
       <div className="bg-[#0a0a0a] py-24 md:py-32">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+        <div ref={rHero} className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
           <h2 className="text-fuchsia-500 uppercase tracking-[0.3em] text-sm font-bold mb-4">
             Our Community
           </h2>
@@ -240,31 +262,39 @@ const Events: React.FC = () => {
         </div>
       </div>
 
-      {/* ── ONGOING EVENTS ──────────────────────────────────────────────── */}
+      {/* ── ONGOING ──────────────────────────────────────────────────── */}
       {!isLoading && ongoingEvents.length > 0 && (
         <div className="bg-green-50 border-b border-green-100">
-          <div className="max-w-6xl mx-auto px-6 py-16">
+          <div ref={rOngoing} className="max-w-6xl mx-auto px-6 py-16">
             <div className="flex items-center gap-3 mb-12">
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-              <h2 className="text-2xl font-serif font-medium text-gray-900">
-                Happening Now
-              </h2>
+              <h2 className="text-2xl font-serif font-medium text-gray-900">Happening Now</h2>
             </div>
             <div className="flex flex-col gap-16">
-              {ongoingEvents.map(event => (
-                <EventCard key={event.id} event={event} badge="Happening Now" />
+              {ongoingEvents.map((event, i) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  badge="Happening Now"
+                  index={i}
+                  onRegister={setSelectedEvent}
+                  onDonate={handleDonate}
+                  formatDate={formatDate}
+                />
               ))}
             </div>
           </div>
         </div>
       )}
 
-      {/* ── UPCOMING EVENTS ─────────────────────────────────────────────── */}
+      {/* ── UPCOMING ─────────────────────────────────────────────────── */}
       <div className="max-w-6xl mx-auto px-6 py-24">
-        <h2 className="text-2xl font-serif font-medium text-gray-900 mb-12 flex items-center gap-3">
-          <Calendar className="w-6 h-6 text-fuchsia-600" />
-          Upcoming Events
-        </h2>
+        <div ref={rUpcoming}>
+          <h2 className="text-2xl font-serif font-medium text-gray-900 mb-12 flex items-center gap-3">
+            <Calendar className="w-6 h-6 text-fuchsia-600" />
+            Upcoming Events
+          </h2>
+        </div>
 
         {isLoading && (
           <div className="flex flex-col gap-16">
@@ -291,17 +321,25 @@ const Events: React.FC = () => {
 
         {!isLoading && upcomingEvents.length > 0 && (
           <div className="flex flex-col gap-16">
-            {upcomingEvents.map(event => (
-              <EventCard key={event.id} event={event} badge="Upcoming" />
+            {upcomingEvents.map((event, i) => (
+              <EventCard
+                key={event.id}
+                event={event}
+                badge="Upcoming"
+                index={i}
+                onRegister={setSelectedEvent}
+                onDonate={handleDonate}
+                formatDate={formatDate}
+              />
             ))}
           </div>
         )}
       </div>
 
-      {/* ── PAST EVENTS ─────────────────────────────────────────────────── */}
+      {/* ── PAST EVENTS ──────────────────────────────────────────────── */}
       {!isLoading && pastEvents.length > 0 && (
         <div className="bg-slate-50 py-24">
-          <div className="max-w-6xl mx-auto px-6">
+          <div ref={rPast} className="max-w-6xl mx-auto px-6">
             <div className="flex flex-col md:flex-row justify-between items-end mb-16">
               <div>
                 <h2 className="text-fuchsia-600 uppercase tracking-[0.3em] text-sm font-bold mb-3">
@@ -310,17 +348,18 @@ const Events: React.FC = () => {
                 <h3 className="text-3xl md:text-4xl font-serif font-medium text-gray-900">
                   Past Events
                 </h3>
-                <p className="text-gray-500 mt-2">
+                <p className="text-gray-500 mt-2 text-justify">
                   A look back at what God has done through our community.
                 </p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {(showAllPast ? pastEvents : pastEvents.slice(0, 3)).map(event => (
+              {(showAllPast ? pastEvents : pastEvents.slice(0, 3)).map((event, i) => (
                 <div
                   key={event.id}
-                  className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 group"
+                  className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 group animate-fadeUp"
+                  style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'both' }}
                 >
                   <div className="aspect-video overflow-hidden bg-gray-100">
                     {event.imageUrl ? (
@@ -364,10 +403,7 @@ const Events: React.FC = () => {
                   onClick={() => setShowAllPast(!showAllPast)}
                   className="inline-flex items-center gap-2 border-2 border-gray-900 text-gray-900 px-8 py-3 text-sm font-bold uppercase tracking-widest hover:bg-gray-900 hover:text-white transition-all"
                 >
-                  {showAllPast
-                    ? 'Show Less'
-                    : `View All Past Events (${pastEvents.length})`
-                  }
+                  {showAllPast ? 'Show Less' : `View All Past Events (${pastEvents.length})`}
                   <ArrowRight className={`w-4 h-4 transition-transform ${showAllPast ? 'rotate-180' : ''}`} />
                 </button>
               </div>
@@ -376,75 +412,45 @@ const Events: React.FC = () => {
         </div>
       )}
 
-      {/* ── REGISTRATION MODAL ───────────────────────────────────────────── */}
+      {/* ── REGISTRATION MODAL ───────────────────────────────────────── */}
       {selectedEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            onClick={() => setSelectedEvent(null)}
-          />
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setSelectedEvent(null)} />
           <div className="relative bg-white w-full max-w-lg overflow-hidden shadow-2xl">
-            <button
-              onClick={() => setSelectedEvent(null)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-black"
-            >
+            <button onClick={() => setSelectedEvent(null)} className="absolute top-4 right-4 text-gray-400 hover:text-black">
               <X className="w-6 h-6" />
             </button>
             <div className="p-8 md:p-12">
-              <h2 className="text-fuchsia-600 uppercase tracking-widest text-xs font-bold mb-2">
-                Registration
-              </h2>
-              <h3 className="text-2xl md:text-3xl font-serif mb-2">
-                {selectedEvent.title}
-              </h3>
+              <h2 className="text-fuchsia-600 uppercase tracking-widest text-xs font-bold mb-2">Registration</h2>
+              <h3 className="text-2xl md:text-3xl font-serif mb-2">{selectedEvent.title}</h3>
               <p className="text-gray-500 text-sm mb-6 flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
                 {formatDate(selectedEvent.startDate)} — {selectedEvent.location}
               </p>
               <form onSubmit={handleRegister} className="space-y-5">
                 <div>
-                  <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">
-                    Full Name
-                  </label>
-                  <input
-                    required
-                    type="text"
-                    value={regForm.fullName}
+                  <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">Full Name</label>
+                  <input required type="text" value={regForm.fullName}
                     onChange={e => setRegForm({ ...regForm, fullName: e.target.value })}
                     className="w-full border-b border-gray-300 py-2 focus:border-fuchsia-600 outline-none transition-colors font-light text-lg"
-                    placeholder="John Doe"
-                  />
+                    placeholder="John Doe" />
                 </div>
                 <div>
-                  <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">
-                    Email Address
-                  </label>
-                  <input
-                    required
-                    type="email"
-                    value={regForm.email}
+                  <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">Email Address</label>
+                  <input required type="email" value={regForm.email}
                     onChange={e => setRegForm({ ...regForm, email: e.target.value })}
                     className="w-full border-b border-gray-300 py-2 focus:border-fuchsia-600 outline-none transition-colors font-light text-lg"
-                    placeholder="john@example.com"
-                  />
+                    placeholder="john@example.com" />
                 </div>
                 <div>
-                  <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">
-                    Phone Number (Optional)
-                  </label>
-                  <input
-                    type="tel"
-                    value={regForm.phone}
+                  <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">Phone Number (Optional)</label>
+                  <input type="tel" value={regForm.phone}
                     onChange={e => setRegForm({ ...regForm, phone: e.target.value })}
                     className="w-full border-b border-gray-300 py-2 focus:border-fuchsia-600 outline-none transition-colors font-light text-lg"
-                    placeholder="+234..."
-                  />
+                    placeholder="+234..." />
                 </div>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full mt-8 bg-gray-900 text-white py-4 font-bold uppercase tracking-widest hover:bg-fuchsia-600 disabled:bg-gray-400 transition-all"
-                >
+                <button type="submit" disabled={isSubmitting}
+                  className="w-full mt-8 bg-gray-900 text-white py-4 font-bold uppercase tracking-widest hover:bg-fuchsia-600 disabled:bg-gray-400 transition-all">
                   {isSubmitting ? 'Processing...' : 'Confirm Registration'}
                 </button>
               </form>
@@ -453,70 +459,41 @@ const Events: React.FC = () => {
         </div>
       )}
 
-      {/* ── DONATION MODAL ───────────────────────────────────────────────── */}
+      {/* ── DONATION MODAL ───────────────────────────────────────────── */}
       {showDonateModal && donateEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            onClick={() => setShowDonateModal(false)}
-          />
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowDonateModal(false)} />
           <div className="relative bg-white w-full max-w-lg overflow-hidden shadow-2xl">
-            <button
-              onClick={() => setShowDonateModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-black"
-            >
+            <button onClick={() => setShowDonateModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black">
               <X className="w-6 h-6" />
             </button>
             <div className="p-8 md:p-12">
-              <h2 className="text-fuchsia-600 uppercase tracking-widest text-xs font-bold mb-2">
-                Give
-              </h2>
+              <h2 className="text-fuchsia-600 uppercase tracking-widest text-xs font-bold mb-2">Give</h2>
               <h3 className="text-2xl md:text-3xl font-serif mb-2">
                 {donateEvent.donationLabel ?? `Give Towards ${donateEvent.title}`}
               </h3>
-              <p className="text-gray-500 text-sm mb-6">
-                Your generosity makes this possible. Thank you! 🙏
-              </p>
-              <form
-                onSubmit={e => { e.preventDefault(); initiateDonation('paystack'); }}
-                className="space-y-5"
-              >
+              <p className="text-gray-500 text-sm mb-6">Your generosity makes this possible. Thank you! 🙏</p>
+              <form onSubmit={e => { e.preventDefault(); initiateDonation('paystack'); }} className="space-y-5">
                 <div>
-                  <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">
-                    Your Name
-                  </label>
-                  <input
-                    required
-                    type="text"
-                    value={donationForm.donorName}
+                  <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">Your Name</label>
+                  <input required type="text" value={donationForm.donorName}
                     onChange={e => setDonationForm({ ...donationForm, donorName: e.target.value })}
                     className="w-full border-b border-gray-300 py-2 focus:border-fuchsia-600 outline-none font-light text-lg"
-                    placeholder="John Doe"
-                  />
+                    placeholder="John Doe" />
                 </div>
                 <div>
-                  <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">
-                    Email Address
-                  </label>
-                  <input
-                    required
-                    type="email"
-                    value={donationForm.donorEmail}
+                  <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">Email Address</label>
+                  <input required type="email" value={donationForm.donorEmail}
                     onChange={e => setDonationForm({ ...donationForm, donorEmail: e.target.value })}
                     className="w-full border-b border-gray-300 py-2 focus:border-fuchsia-600 outline-none font-light text-lg"
-                    placeholder="john@example.com"
-                  />
+                    placeholder="john@example.com" />
                 </div>
                 <div className="flex gap-3">
                   <div className="w-1/3">
-                    <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">
-                      Currency
-                    </label>
-                    <select
-                      value={donationForm.currency}
+                    <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">Currency</label>
+                    <select value={donationForm.currency}
                       onChange={e => setDonationForm({ ...donationForm, currency: e.target.value })}
-                      className="w-full border-b border-gray-300 py-2 focus:border-fuchsia-600 outline-none bg-white font-light text-lg"
-                    >
+                      className="w-full border-b border-gray-300 py-2 focus:border-fuchsia-600 outline-none bg-white font-light text-lg">
                       <option value="NGN">NGN ₦</option>
                       <option value="USD">USD $</option>
                       <option value="GBP">GBP £</option>
@@ -525,37 +502,21 @@ const Events: React.FC = () => {
                     </select>
                   </div>
                   <div className="flex-1">
-                    <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">
-                      Amount
-                    </label>
-                    <input
-                      required
-                      type="number"
-                      min="100"
-                      value={donationForm.amount}
+                    <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">Amount</label>
+                    <input required type="number" min="100" value={donationForm.amount}
                       onChange={e => setDonationForm({ ...donationForm, amount: e.target.value })}
                       className="w-full border-b border-gray-300 py-2 focus:border-fuchsia-600 outline-none font-light text-lg"
-                      placeholder="5000"
-                    />
+                      placeholder="5000" />
                   </div>
                 </div>
                 <div className="pt-4 space-y-3">
-                  <p className="text-xs uppercase tracking-widest text-gray-400 font-bold text-center">
-                    Choose Payment Method
-                  </p>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full bg-[#0BA4DB] text-white py-4 font-bold uppercase tracking-widest hover:bg-[#0891C2] disabled:opacity-50 transition-all"
-                  >
+                  <p className="text-xs uppercase tracking-widest text-gray-400 font-bold text-center">Choose Payment Method</p>
+                  <button type="submit" disabled={isSubmitting}
+                    className="w-full bg-[#0BA4DB] text-white py-4 font-bold uppercase tracking-widest hover:bg-[#0891C2] disabled:opacity-50 transition-all">
                     {isSubmitting ? 'Processing...' : '💳 Pay with Paystack'}
                   </button>
-                  <button
-                    type="button"
-                    disabled={isSubmitting}
-                    onClick={() => initiateDonation('flutterwave')}
-                    className="w-full bg-[#F5A623] text-white py-4 font-bold uppercase tracking-widest hover:bg-[#E09410] disabled:opacity-50 transition-all"
-                  >
+                  <button type="button" disabled={isSubmitting} onClick={() => initiateDonation('flutterwave')}
+                    className="w-full bg-[#F5A623] text-white py-4 font-bold uppercase tracking-widest hover:bg-[#E09410] disabled:opacity-50 transition-all">
                     🌍 Pay with Flutterwave (International)
                   </button>
                 </div>

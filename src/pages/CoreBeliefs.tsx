@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ShieldCheck } from 'lucide-react';
 
 const beliefs = [
@@ -40,46 +40,85 @@ const beliefs = [
   },
 ];
 
-const CoreBeliefs: React.FC = () => (
-  <div className="min-h-screen bg-white pt-28 pb-20">
-    <div className="max-w-4xl mx-auto px-6">
+const useReveal = (delay = 0) => {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+          }, delay);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay]);
+  return ref;
+};
 
-      <p className="text-[9px] font-black uppercase tracking-[0.4em] text-fuchsia-500 mb-3">
-        Core Beliefs
-      </p>
-      <h1 className="font-serif text-5xl md:text-6xl text-slate-900 mb-4 leading-tight">
-        WHAT WE <br />
-        <span className="italic text-fuchsia-600">STAND ON.</span>
-      </h1>
-      <p className="text-slate-500 text-lg mb-14 max-w-xl">
-        These foundational beliefs are not negotiable. They are the bedrock on which
-        Global Flame Ministries was built and on which it continues to stand.
-      </p>
+const CoreBeliefs: React.FC = () => {
+  const rHeader = useReveal(0);
+  const fadeStyle: React.CSSProperties = {
+    opacity: 0,
+    transform: 'translateY(32px)',
+    transition: 'opacity 0.7s ease-out, transform 0.7s ease-out',
+  };
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  return (
+    <div className="min-h-screen bg-white pt-28 pb-20">
+      {/* Slightly narrower container so cards don't stretch too wide — adds natural center breathing room */}
+      <div className="max-w-5xl mx-auto px-8">
+
+        <div ref={rHeader} style={fadeStyle}>
+          <p className="text-[9px] font-black uppercase tracking-[0.4em] text-fuchsia-500 mb-3">
+            Core Beliefs
+          </p>
+          <h1 className="font-serif text-5xl md:text-6xl text-slate-900 mb-4 leading-tight">
+            WHAT WE <br />
+            <span className="italic text-fuchsia-600">STAND ON.</span>
+          </h1>
+          <p className="text-slate-500 text-lg mb-14 max-w-xl text-justify">
+            These foundational beliefs are not negotiable. They are the bedrock on which
+            Global Flame Ministries was built and on which it continues to stand.
+          </p>
+        </div>
+
+        {/* Grid — gap-x adds horizontal breathing room between columns */}
+        {/* Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
         {beliefs.map((b, i) => (
-          <div
+            <div
             key={i}
             className="p-6 border border-slate-100 rounded-2xl hover:border-fuchsia-200
-              hover:shadow-md transition-all duration-300 group"
-          >
+                hover:shadow-md transition-all duration-300 group animate-fadeUp"
+            style={{ animationDelay: `${i * 60}ms`, animationFillMode: 'both' }}
+            >
             <div className="flex items-start gap-4">
-              <div className="w-8 h-8 bg-fuchsia-50 rounded-lg flex items-center justify-center
+                <div className="w-8 h-8 bg-fuchsia-50 rounded-lg flex items-center justify-center
                 shrink-0 mt-0.5 group-hover:bg-fuchsia-100 transition-colors">
                 <ShieldCheck className="w-4 h-4 text-fuchsia-500" />
-              </div>
-              <div>
+                </div>
+                <div>
                 <h3 className="font-bold text-slate-900 uppercase tracking-widest text-xs mb-2">
-                  {b.title}
+                    {b.title}
                 </h3>
-                <p className="text-slate-600 text-sm leading-relaxed">{b.body}</p>
-              </div>
+                <p className="text-slate-600 text-sm leading-relaxed text-justify">{b.body}</p>
+                </div>
             </div>
-          </div>
+            </div>
         ))}
+        </div>
+
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default CoreBeliefs;

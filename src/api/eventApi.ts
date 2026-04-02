@@ -9,6 +9,7 @@ export interface CreateEventDto {
   location: string;
   imageUrl?: string;
   module: string;
+  ministryId?: number | null;
   acceptsRegistrations: boolean;
   acceptsDonations: boolean;
   donationLabel?: string;
@@ -22,13 +23,13 @@ export interface UpdateEventDto {
   location: string;
   imageUrl?: string;
   isCancelled: boolean;
+  ministryId?: number | null;
   acceptsRegistrations: boolean;
   acceptsDonations: boolean;
   donationLabel?: string;
 }
 
 export const eventApi = {
-  // Public
   getUpcoming: (params?: { pageNumber?: number; pageSize?: number }) =>
     api.get<ApiResponse<PagedResult<EventDto>>>('/api/ministry/events', {
       params: { ...params, upcomingOnly: true, isCancelled: false }
@@ -56,7 +57,6 @@ export const eventApi = {
   getById: (id: number) =>
     api.get<ApiResponse<EventDto>>(`/api/ministry/events/${id}`),
 
-  // Admin
   adminGetAll: (params?: {
     pageNumber?: number;
     pageSize?: number;

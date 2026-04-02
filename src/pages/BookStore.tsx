@@ -1,77 +1,100 @@
-import React, { useState, useEffect } from "react";
-import {
-  Library, Loader, X, ShoppingBag, ExternalLink
-} from "lucide-react";
-import { bookApi } from "../api/bookApi";
-import type { BookDto } from "../types";
+import React, { useState, useEffect, useRef } from 'react';
+import { Library, Loader, X, ShoppingBag, ExternalLink } from 'lucide-react';
+import { bookApi } from '../api/bookApi';
+import type { BookDto } from '../types';
 
-/* ================= BOOKS INTRO ================= */
+/* ── Scroll animation hook ─────────────────────────────────────────── */
+const useReveal = (delay = 0) => {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    // Set initial state
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(32px)';
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+          }, delay);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.05, rootMargin: '0px 0px -30px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay]);
+  return ref;
+};
 
+const transitionStyle: React.CSSProperties = {
+  transition: 'opacity 0.7s ease-out, transform 0.7s ease-out',
+};
+
+/* ── BooksIntro ────────────────────────────────────────────────────── */
 const BooksIntro: React.FC = () => {
+  const rLabel    = useReveal(0);
+  const rHeading  = useReveal(100);
+  const rBody     = useReveal(200);
+  const rQuote    = useReveal(300);
+
   return (
-    <section className="w-full bg-white border-b border-slate-100 pt-10 pb-8 px-6">
+    <section className="w-full bg-white border-b border-slate-100 pt-14 pb-10 px-6">
       <div className="max-w-7xl mx-auto">
 
-        {/* Eyebrow */}
-        <p className="text-fuchsia-600 text-xs font-bold uppercase tracking-widest mb-3">
-          Global Flame Ministry
-        </p>
+        <div ref={rLabel} style={transitionStyle}>
+          <p className="text-fuchsia-600 text-xs font-bold uppercase tracking-widest mb-3">
+            Global Flame Ministry
+          </p>
+        </div>
 
-        {/* Headline */}
-        <h1 className="text-3xl md:text-4xl font-black text-slate-900 leading-tight mb-4 max-w-2xl">
-          Transform Your Mind,{' '}
-          <span className="text-fuchsia-600">Transform Your Life</span>
-        </h1>
+        <div ref={rHeading} style={transitionStyle}>
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 leading-tight mb-4 max-w-2xl">
+            Transform Your Mind,{' '}
+            <span className="text-fuchsia-600">Transform Your Life</span>
+          </h1>
+        </div>
 
-        {/* Body */}
-        <p className="text-slate-500 text-sm md:text-base leading-relaxed max-w-2xl mb-5">
-          Every book in this collection was handpicked to help you renew your
-          thinking, walk purposefully in your calling, and grow into the person
-          God has destined you to be. Whether you are just beginning or going
-          deeper — there is something here for every season of life.
-        </p>
+        <div ref={rBody} style={transitionStyle}>
+          <p className="text-slate-500 text-sm md:text-base leading-relaxed max-w-2xl mb-5 text-justify">
+            Every book in this collection was handpicked to help you renew your
+            thinking, walk purposefully in your calling, and grow into the person
+            God has destined you to be. Whether you are just beginning or going
+            deeper — there is something here for every season of life.
+          </p>
+        </div>
 
-        {/* Scripture */}
-        <p className="text-slate-400 italic text-sm border-l-2 border-fuchsia-300 pl-4">
-          "Do not conform to the pattern of this world, but be transformed by the
-          renewing of your mind." —{' '}
-          <span className="text-fuchsia-500 font-semibold not-italic">Romans 12:2</span>
-        </p>
+        <div ref={rQuote} style={transitionStyle}>
+          <p className="text-slate-400 italic text-sm border-l-2 border-fuchsia-300 pl-4">
+            "Do not conform to the pattern of this world, but be transformed by the
+            renewing of your mind." —{' '}
+            <span className="text-fuchsia-500 font-semibold not-italic">Romans 12:2</span>
+          </p>
+        </div>
 
       </div>
     </section>
   );
 };
 
-/* ================= BUY MODAL ================= */
-
-const BuyModal: React.FC<{
-  book: BookDto;
-  onClose: () => void;
-}> = ({ book, onClose }) => {
-
+/* ── BuyModal ──────────────────────────────────────────────────────── */
+const BuyModal: React.FC<{ book: BookDto; onClose: () => void }> = ({ book, onClose }) => {
   const hasAmazon = !!book.amazonUrl;
   const hasSelar  = !!book.selarUrl;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
       <div className="absolute inset-0" onClick={onClose} />
-
       <div className="relative bg-white w-full max-w-sm rounded-3xl p-8 shadow-2xl">
-        <button
-          onClick={onClose}
-          className="absolute right-5 top-5 p-1.5 rounded-full hover:bg-slate-100 transition"
-        >
+        <button onClick={onClose} className="absolute right-5 top-5 p-1.5 rounded-full hover:bg-slate-100 transition">
           <X size={18} className="text-slate-500" />
         </button>
-
         <div className="flex gap-4 mb-6">
           {book.coverImageUrl ? (
-            <img
-              src={book.coverImageUrl}
-              alt={book.title}
-              className="w-16 h-24 object-cover rounded-xl shadow-md shrink-0"
-            />
+            <img src={book.coverImageUrl} alt={book.title} className="w-16 h-24 object-cover rounded-xl shadow-md shrink-0" />
           ) : (
             <div className="w-16 h-24 bg-slate-100 rounded-xl flex items-center justify-center shrink-0">
               <Library size={24} className="text-slate-300" />
@@ -87,51 +110,36 @@ const BuyModal: React.FC<{
             )}
           </div>
         </div>
-
         <p className="text-sm text-slate-500 mb-4 font-medium text-center">
           Where would you like to purchase this book?
         </p>
-
         <div className="flex flex-col gap-3">
           {hasAmazon && (
-            
-              <a href={book.amazonUrl!}
-              target="_blank"
-              rel="noopener noreferrer"
+            <a href={book.amazonUrl!} target="_blank" rel="noopener noreferrer"
               className="flex items-center justify-between w-full px-5 py-4 bg-[#FF9900] hover:bg-[#e68a00] text-white rounded-2xl font-bold transition group">
               <span className="flex items-center gap-3">
-                <span className="text-xl">📦</span>
-                Buy on Amazon
+                <span className="text-xl">📦</span>Buy on Amazon
               </span>
               <ExternalLink size={16} className="opacity-70 group-hover:opacity-100 transition" />
             </a>
           )}
-
           {hasSelar && (
-            
-              <a href={book.selarUrl!}
-              target="_blank"
-              rel="noopener noreferrer"
+            <a href={book.selarUrl!} target="_blank" rel="noopener noreferrer"
               className="flex items-center justify-between w-full px-5 py-4 bg-fuchsia-600 hover:bg-fuchsia-500 text-white rounded-2xl font-bold transition group">
               <span className="flex items-center gap-3">
-                <span className="text-xl">🛒</span>
-                Buy on Selar
+                <span className="text-xl">🛒</span>Buy on Selar
               </span>
               <ExternalLink size={16} className="opacity-70 group-hover:opacity-100 transition" />
             </a>
           )}
-
           {!hasAmazon && !hasSelar && (
             <div className="text-center py-4 text-slate-400 text-sm">
               No purchase links available yet. Check back soon.
             </div>
           )}
         </div>
-
-        <button
-          onClick={onClose}
-          className="mt-4 w-full py-3 text-sm text-slate-400 hover:text-slate-600 transition font-medium"
-        >
+        <button onClick={onClose}
+          className="mt-4 w-full py-3 text-sm text-slate-400 hover:text-slate-600 transition font-medium">
           Maybe later
         </button>
       </div>
@@ -139,53 +147,37 @@ const BuyModal: React.FC<{
   );
 };
 
-/* ================= BOOK CARD — compact shelf style ================= */
-
-const BookCard: React.FC<{
-  book: BookDto;
-  onSelect: (book: BookDto) => void;
-}> = ({ book, onSelect }) => {
-
+/* ── BookCard ──────────────────────────────────────────────────────── */
+const BookCard: React.FC<{ book: BookDto; onSelect: (book: BookDto) => void }> = ({ book, onSelect }) => {
   const displayPrice = book.price
     ? `${book.currency} ${book.price.toLocaleString()}`
     : 'Free';
 
   return (
     <div className="flex flex-col w-36 shrink-0">
-
-      {/* Cover */}
       <div
         className="relative w-36 h-52 rounded-lg overflow-hidden bg-slate-100 mb-2 cursor-pointer group shadow-sm hover:shadow-md transition-shadow duration-300"
         onClick={() => onSelect(book)}
       >
         {book.coverImageUrl ? (
-          <img
-            src={book.coverImageUrl}
-            alt={book.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
+          <img src={book.coverImageUrl} alt={book.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <Library size={32} className="text-slate-300" />
           </div>
         )}
-
-        {/* Featured badge */}
         {book.isFeatured && (
           <div className="absolute top-2 left-2 bg-fuchsia-600 text-white text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full">
             Featured
           </div>
         )}
-
-        {/* Hover overlay */}
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
           <div className="bg-white rounded-full p-2">
             <ShoppingBag size={16} className="text-fuchsia-600" />
           </div>
         </div>
       </div>
-
-      {/* Info */}
       <div className="flex flex-col flex-1">
         <h3
           className="text-xs font-bold text-slate-800 leading-snug line-clamp-2 mb-0.5 cursor-pointer hover:text-fuchsia-600 transition-colors"
@@ -193,11 +185,7 @@ const BookCard: React.FC<{
         >
           {book.title}
         </h3>
-        <p className="text-[11px] text-slate-400 mb-2 line-clamp-1">
-          {book.author}
-        </p>
-
-        {/* Platform badges */}
+        <p className="text-[11px] text-slate-400 mb-2 line-clamp-1">{book.author}</p>
         {(book.amazonUrl || book.selarUrl) && (
           <div className="flex gap-1 mb-2 flex-wrap">
             {book.amazonUrl && (
@@ -212,7 +200,6 @@ const BookCard: React.FC<{
             )}
           </div>
         )}
-
         <div className="mt-auto flex items-center justify-between gap-1">
           <span className="text-xs font-black text-slate-900">{displayPrice}</span>
           <button
@@ -227,14 +214,15 @@ const BookCard: React.FC<{
   );
 };
 
-/* ================= MAIN PAGE ================= */
-
+/* ── Main Bookstore Page ───────────────────────────────────────────── */
 const Bookstore: React.FC = () => {
-
   const [books, setBooks]               = useState<BookDto[]>([]);
   const [isLoading, setIsLoading]       = useState(true);
   const [error, setError]               = useState<string | null>(null);
   const [selectedBook, setSelectedBook] = useState<BookDto | null>(null);
+
+  // ✅ NO ref here — we use CSS animation triggered by data availability instead
+  const [booksLoaded, setBooksLoaded] = useState(false);
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -244,6 +232,7 @@ const Bookstore: React.FC = () => {
         const res = await bookApi.getPublished({ pageSize: 50, pageNumber: 1 });
         if (res.data.isSuccess && res.data.data) {
           setBooks(res.data.data.items);
+          setBooksLoaded(true);
         } else {
           setError('Could not load books right now.');
         }
@@ -253,24 +242,22 @@ const Bookstore: React.FC = () => {
         setIsLoading(false);
       }
     };
-
     fetchBooks();
   }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 pt-24 pb-20">
 
-      {/* ── SPIRITUAL INTRO ───────────────────────────────────────────── */}
       <BooksIntro />
 
-      {/* LOADING */}
+      {/* Loading */}
       {isLoading && (
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-center py-24">
           <Loader size={32} className="animate-spin text-fuchsia-600" />
         </div>
       )}
 
-      {/* ERROR */}
+      {/* Error */}
       {error && !isLoading && (
         <div className="max-w-7xl mx-auto px-6 mt-8">
           <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
@@ -279,7 +266,7 @@ const Bookstore: React.FC = () => {
         </div>
       )}
 
-      {/* EMPTY */}
+      {/* Empty */}
       {!isLoading && !error && books.length === 0 && (
         <div className="max-w-7xl mx-auto px-6 flex flex-col items-center justify-center py-24 text-center">
           <Library size={48} className="text-slate-300 mb-4" />
@@ -288,11 +275,14 @@ const Bookstore: React.FC = () => {
         </div>
       )}
 
-      {/* ── BOOK SHELF ───────────────────────────────────────────────── */}
+      {/* ✅ Book shelf — uses CSS class animation, not IntersectionObserver ref */}
       {!isLoading && !error && books.length > 0 && (
-        <div className="mt-10">
-
-          {/* Section label */}
+        <div
+          className={`mt-10 transition-all duration-700 ease-out ${
+            booksLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
+          {/* Divider label */}
           <div className="max-w-7xl mx-auto px-6 mb-6">
             <div className="flex items-center gap-4">
               <div className="flex-1 h-px bg-slate-200" />
@@ -306,25 +296,22 @@ const Bookstore: React.FC = () => {
           {/* Horizontal scrollable shelf */}
           <div className="max-w-7xl mx-auto px-6">
             <div className="flex gap-5 overflow-x-auto pb-6 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-              {books.map(book => (
-                <BookCard
+              {books.map((book, idx) => (
+                <div
                   key={book.id}
-                  book={book}
-                  onSelect={setSelectedBook}
-                />
+                  className="animate-fadeUp"
+                  style={{ animationDelay: `${idx * 60}ms`, animationFillMode: 'both' }}
+                >
+                  <BookCard book={book} onSelect={setSelectedBook} />
+                </div>
               ))}
             </div>
           </div>
-
         </div>
       )}
 
-      {/* BUY MODAL */}
       {selectedBook && (
-        <BuyModal
-          book={selectedBook}
-          onClose={() => setSelectedBook(null)}
-        />
+        <BuyModal book={selectedBook} onClose={() => setSelectedBook(null)} />
       )}
     </div>
   );

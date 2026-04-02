@@ -18,9 +18,8 @@ import Ministries      from './pages/Ministries';
 import Give            from './pages/Give';
 import Announcements   from './pages/AnnouncementsPage';
 import Contact         from './pages/Contact';
-import DaughtersOfHonour from './pages/DaughtersOfHonour';
-import GlobalChoir     from './pages/GlobalChoir';
-import HomeOfLove      from './pages/HomeOfLove';
+import PrayerRequestPage from './pages/PrayerRequestPage';
+import MinistryDetail  from './pages/MinistryDetail';
 
 // ─── ABOUT PAGES ──────────────────────────────────────────────────────────────
 import OurStory        from './pages/OurStory';
@@ -29,8 +28,6 @@ import SeniorPastor    from './pages/SeniorPastor';
 import CoPastor        from './pages/CoPastor';
 import CoreBeliefs     from './pages/CoreBeliefs';
 
-// ─── PRAYER REQUEST PAGE ──────────────────────────────────────────────────────
-import PrayerRequestPage from './pages/PrayerRequestPage';
 
 // ─── AUTH PAGES ───────────────────────────────────────────────────────────────
 import LoginPage           from './pages/auth/LoginPage';
@@ -51,6 +48,7 @@ import AdminUsers          from './pages/Admin/AdminUsers';
 import AdminBooks          from './pages/Admin/AdminBooks';
 import AdminDonations      from './pages/Admin/AdminDonations';
 import AdminBulkEmail      from './pages/Admin/AdminBulkEmail';
+import AdminMinistries from './pages/Admin/AdminMinistries';
 
 // ─── SCROLL TO TOP ────────────────────────────────────────────────────────────
 const ScrollToTop = () => {
@@ -117,10 +115,8 @@ const App: React.FC = () => {
             <Route path="/core-beliefs"
               element={<PublicLayout><CoreBeliefs /></PublicLayout>} />
 
-            {/* Prayer Request */}
             <Route path="/prayer-request"
               element={<PublicLayout><PrayerRequestPage /></PublicLayout>} />
-
             <Route path="/books"
               element={<PublicLayout><BookStore /></PublicLayout>} />
             <Route path="/sermons"
@@ -137,12 +133,8 @@ const App: React.FC = () => {
               element={<PublicLayout><Contact /></PublicLayout>} />
             <Route path="/announcements"
               element={<PublicLayout><Announcements /></PublicLayout>} />
-            <Route path="/ministries/daughters-of-honour"
-              element={<PublicLayout><DaughtersOfHonour /></PublicLayout>} />
-            <Route path="/ministries/global-choir"
-              element={<PublicLayout><GlobalChoir onBack={() => window.history.back()} /></PublicLayout>} />
-            <Route path="/ministries/home-of-love"
-              element={<PublicLayout><HomeOfLove onBack={() => window.history.back()} /></PublicLayout>} />
+            <Route path="/ministries/:slug"
+            element={<PublicLayout><MinistryDetail /></PublicLayout>} />
 
             {/* ── AUTH ROUTES ───────────────────────────────────────── */}
             <Route path="/login"
@@ -183,6 +175,7 @@ const App: React.FC = () => {
               <Route path="donations"      element={<AdminLayout><AdminDonations /></AdminLayout>} />
               <Route path="books"          element={<AdminLayout><AdminBooks /></AdminLayout>} />
               <Route path="bulk-email"     element={<AdminLayout><AdminBulkEmail /></AdminLayout>} />
+              <Route path="ministries" element={<AdminLayout><AdminMinistries /></AdminLayout>} />
             </Route>
 
             {/* ── 404 ───────────────────────────────────────────────── */}
