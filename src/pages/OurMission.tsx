@@ -40,8 +40,8 @@ const OurMission: React.FC = () => {
 
         {/* -------- Mission -------- */}
         <div className="bg-slate-50 rounded-3xl p-10 shadow-sm hover:shadow-md transition">
-          <div className="w-12 h-12 bg-fuchsia-100 rounded-xl flex items-center justify-center mb-6">
-            <Globe className="w-6 h-6 text-fuchsia-600" />
+          <div className="w-10 h-10 bg-fuchsia-100 rounded-xl flex items-center justify-center mb-6">
+            <Globe className="w-5 h-5 text-fuchsia-600" />
           </div>
 
           <h2 className="font-serif text-2xl text-slate-900 mb-4">
@@ -49,18 +49,20 @@ const OurMission: React.FC = () => {
           </h2>
 
           <p className="text-slate-600 leading-relaxed text-sm md:text-base">
-            Our mission is to spread the love of Christ across nations,
+            We envision a people who will be filled with the power of the Holy Ghost,
+            impact lives and make heaven.
+            We also spread the love of Christ across nations,
             raising transformed lives through the Word of God, worship,
-            discipleship, and compassionate outreach. We are committed to
-            building a community where faith grows, hope is restored,
+            discipleship, and compassionate outreach. 
+            We are committed to building a community where faith grows, hope is restored,
             and purpose is discovered.
           </p>
         </div>
 
         {/* -------- Vision -------- */}
         <div className="bg-slate-50 rounded-3xl p-10 shadow-sm hover:shadow-md transition">
-          <div className="w-12 h-12 bg-fuchsia-100 rounded-xl flex items-center justify-center mb-6">
-            <Eye className="w-6 h-6 text-fuchsia-600" />
+          <div className="w-10 h-10 bg-fuchsia-100 rounded-xl flex items-center justify-center mb-6">
+            <Eye className="w-5 h-5 text-fuchsia-600" />
           </div>
 
           <h2 className="font-serif text-2xl text-slate-900 mb-4">
@@ -68,7 +70,9 @@ const OurMission: React.FC = () => {
           </h2>
 
           <p className="text-slate-600 leading-relaxed text-sm md:text-base">
-            Our vision is to see lives empowered spiritually, families
+            To be clothed in the power of the Holy Spirit and taking
+            the gospel to the nations of the world.
+            To see lives empowered spiritually, families
             restored, and communities transformed through the power of
             God's presence. We envision a global movement of believers
             walking in purpose, love, and unwavering faith.

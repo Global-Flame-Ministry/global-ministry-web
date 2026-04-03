@@ -74,10 +74,13 @@ const OurStory: React.FC = () => {
           {/* Intro Paragraphs */}
           <div ref={r3} style={fadeStyle}>
             <p className="mb-8 text-justify">
-              Global Flame Ministries was founded on a burning conviction — that the fire of God
-              should reach every heart, every city, every nation. What began as a small gathering
-              of believers hungry for God's presence has grown into a vibrant, multi-faceted
-              ministry touching lives across continents.
+              Global Flame Ministries can to birth on the 25th December 1999 — via the mandate given 
+              to the president, Pastor Danjuma Musa. 
+                 It was formally registered with the Corporate Affairs Commission (CAC) in 2007, under 
+              the provision of Company & Allied Matters Act (CAMA) with certicate no. of registration
+              NO CAC/IT/NO 263303.
+              What began as a small gathering of believers hungry for God's presence has grown into a vibrant,
+              multi-faceted ministry touching lives across continents.
             </p>
             <p className="mb-10 text-justify">
               Under the apostolic leadership of Apostle Danjuma Musa and Co-Pastor Faith Musa,
@@ -94,11 +97,17 @@ const OurStory: React.FC = () => {
               The ministry was birthed in prayer, and prayer remains its backbone. From the very
               beginning, the founding leadership understood that sustainable impact requires a
               foundation built not on the ingenuity of man but on the unshakeable word of God.
+
+              The ministry is to raise leaders who will manifest the kingdom of God, raise strategic
+              prayers over families,communities,cities, and nations, proclaiming freedom to the captives
+              and opening of the prison gates to them that are bound.
             </p>
             <p className="mb-10 text-justify">
               Services were held in modest settings — borrowed halls, open-air grounds, family
               homes — yet the atmosphere was never modest. The presence of God was tangible, the
               worship was fervent, and the word of God was preached without compromise.
+              To reach out to the hoepless and needy persons, orphans and widows in communities, cities 
+              and nations; to help them become holistically developed as God originally intended for mankind.
             </p>
           </div>
 
@@ -109,7 +118,8 @@ const OurStory: React.FC = () => {
               As the congregation grew, so did the mandate. Ministries were raised up to serve
               distinct needs: daughters were empowered through the <strong>Daughters of Honour</strong> arm,
               the youth found a home in the <strong>House of Opra</strong>, worshippers found their voice in
-              the <strong>Global Choir</strong>, and families found care through the <strong>Home of Love</strong> ministry.
+              the <strong>Global Choir</strong>, families found care through the <strong>Home of Love</strong> ministry.,
+              and sick ones found health through <strong>Mediplex</strong> ministry.
             </p>
             <p className="mb-10 text-justify">
               Today, Global Flame Ministries is not just a local church — it is a movement,

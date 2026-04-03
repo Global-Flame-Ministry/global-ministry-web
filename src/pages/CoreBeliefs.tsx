@@ -31,7 +31,7 @@ const beliefs = [
     body: 'We believe in the resurrection of both the saved and the lost — they that are saved unto the resurrection of life, and they that are lost unto the resurrection of damnation.',
   },
   {
-    title: 'The Spiritual Unity of Believers',
+    title: 'The Spiritual Unity of Believers and partnerships',
     body: 'We believe in the spiritual unity of believers in our Lord Jesus Christ. All who are born again are members of the body of Christ, regardless of denominational affiliation.',
   },
   {
