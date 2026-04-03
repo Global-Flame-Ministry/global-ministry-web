@@ -74,7 +74,7 @@ const OurStory: React.FC = () => {
           {/* Intro Paragraphs */}
           <div ref={r3} style={fadeStyle}>
             <p className="mb-8 text-justify">
-              Global Flame Ministries can to birth on the 25th December 1999 — via the mandate given 
+              Global Flame Ministry can to birth on the 25th December 1999 - via the mandate given 
               to the president, Pastor Danjuma Musa. 
                  It was formally registered with the Corporate Affairs Commission (CAC) in 2007, under 
               the provision of Company & Allied Matters Act (CAMA) with certicate no. of registration
@@ -103,8 +103,8 @@ const OurStory: React.FC = () => {
               and opening of the prison gates to them that are bound.
             </p>
             <p className="mb-10 text-justify">
-              Services were held in modest settings — borrowed halls, open-air grounds, family
-              homes — yet the atmosphere was never modest. The presence of God was tangible, the
+              Services were held in modest settings - borrowed halls, open-air grounds, family
+              homes - yet the atmosphere was never modest. The presence of God was tangible, the
               worship was fervent, and the word of God was preached without compromise.
               To reach out to the hoepless and needy persons, orphans and widows in communities, cities 
               and nations; to help them become holistically developed as God originally intended for mankind.
@@ -122,7 +122,7 @@ const OurStory: React.FC = () => {
               and sick ones found health through <strong>Mediplex</strong> ministry.
             </p>
             <p className="mb-10 text-justify">
-              Today, Global Flame Ministries is not just a local church — it is a movement,
+              Today, Global Flame Ministries is not just a local church - it is a movement,
               a training ground, a place where ordinary people encounter an extraordinary God
               and are sent out to change their world.
             </p>

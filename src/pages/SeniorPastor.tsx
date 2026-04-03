@@ -66,9 +66,9 @@ const SeniorPastor: React.FC = () => {
             {/* Content Column */}
             <div className="lg:col-span-3 prose prose-slate prose-lg max-w-none prose-p:leading-relaxed prose-blockquote:border-fuchsia-500">
               <p className="mb-6 text-justify">
-                Apostle Danjuma Musa is the founding Senior Pastor of Global Flame Ministries.
+                Apostle Danjuma Musa is the founding Senior Pastor of Global Flame Ministry.
                 Called from a young age into the ministry of the word, he carries a rare
-                combination of apostolic boldness and pastoral warmth — a man equally at home
+                combination of apostolic boldness and pastoral warmth - a man equally at home
                 in the place of prayer as he is on the platform.
               </p>
 
@@ -81,19 +81,19 @@ const SeniorPastor: React.FC = () => {
 
               {/* Quote Box */}
               <blockquote className="my-10 p-6 bg-fuchsia-50 rounded-2xl italic font-semibold border-l-4 border-fuchsia-500 not-prose text-fuchsia-900">
-                "Faith activates God — Fear activates the Enemy."
+                "Faith activates God - Fear activates the Enemy."
               </blockquote>
 
               <p className="mb-6 text-justify">
-                Under his leadership, Global Flame Ministries has grown from a small gathering
+                Under his leadership, Global Flame Ministry has grown from a small gathering
                 into a thriving congregation with arms reaching into multiple areas of ministry.
-                His vision extends beyond the walls of the church — he sees a global harvest
+                His vision extends beyond the walls of the church - he sees a global harvest
                 and is relentless in pursuing it.
               </p>
 
               <p className="mb-6 text-justify">
                 He is married to <strong>Co-Pastor Faith Musa</strong>, his faithful partner in ministry and
-                in life, and together they lead Global Flame Ministries with a shared heart
+                in life, and together they lead Global Flame Ministry with a shared heart
                 for people and an uncompromising love for God.
               </p>
             </div>

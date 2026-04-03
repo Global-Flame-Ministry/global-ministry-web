@@ -243,7 +243,7 @@ const YouthPage: React.FC = () => {
               Youth Community
             </h1>
             <p className="text-white/70 text-lg font-light max-w-xl">
-              House of Opra — A community of young people on fire for God.
+              House of Opra - A community of young people on fire for God.
             </p>
           </div>
         </div>
@@ -261,7 +261,7 @@ const YouthPage: React.FC = () => {
                 About This Ministry
               </h2>
               <p className="text-slate-600 leading-relaxed">
-                House of Opra is the youth community of Global Flame Ministries,
+                House of Opra is the youth community of Global Flame Ministry,
                 raising a generation of young people who are passionate about
                 God's kingdom, excellence in their calling, and transformation
                 in their communities.

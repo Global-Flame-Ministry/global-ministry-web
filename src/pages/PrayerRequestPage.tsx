@@ -337,12 +337,12 @@ const PrayerRequestPage: React.FC = () => {
                 <div className="flex justify-between text-[10px] uppercase
                   tracking-wider text-slate-400 font-bold pt-1.5 px-1">
                   <span>
-                    {content.length < 5
-                      ? 'Minimum 5 characters'
+                    {content.length < 10
+                      ? 'Minimum 10 characters'
                       : '✓ Ready to submit'
                     }
                   </span>
-                  <span>{content.length} / 2000</span>
+                  <span>{content.length} / 5000</span>
                 </div>
               </div>
 
