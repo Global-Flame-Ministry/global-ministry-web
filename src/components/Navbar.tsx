@@ -4,10 +4,11 @@ import {
   Menu, X, Heart, ChevronDown, ShieldCheck,
   UserCircle, Play, Calendar, BookOpen, Bell,
   Users, MapPin, HandHeart, Globe, Home,
-  Flame, ArrowRight, Phone
+  Flame, ArrowRight, Phone, MessageCircleHeart,
 } from 'lucide-react';
 import logo from '../assets/flames.jpg';
 import { ministryApi } from '../api/ministryApi';
+import { accountApi } from '../api/accountApi';
 import type { MinistryResponseDto } from '../types';
 import { useAuth } from '../context/AuthContext';
 
@@ -25,6 +26,7 @@ const EXPLORE_CHURCH_LIFE = [
   { label: 'Events',         path: '/events',          icon: <Calendar className="w-4 h-4" /> },
   { label: 'Contact',        path: '/contact',         icon: <Phone className="w-4 h-4" /> },
   { label: 'Prayer Request', path: '/prayer-request',  icon: <HandHeart className="w-4 h-4" /> },
+  { label: 'Counselling',    path: '/counselling',     icon: <MessageCircleHeart className="w-4 h-4" /> },
 ];
 
 const EXPLORE_QUICKLINKS = [
@@ -39,7 +41,7 @@ const MEDIA_LINKS = [
   { label: 'News',    path: '/announcements', icon: <Bell className="w-4 h-4" />,     desc: 'Updates & announcements' },
 ];
 
-// ─── DROPDOWN COMPONENT ───────────────────────────────────────────────────────
+// ─── DROPDOWN ─────────────────────────────────────────────────────────────────
 
 interface DropdownProps {
   label: string;
@@ -52,19 +54,33 @@ const Dropdown: React.FC<DropdownProps> = ({ label, children, isActive }) => {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const handleMouseEnter = () => { clearTimeout(timeoutRef.current); setOpen(true); };
-  const handleMouseLeave = () => { timeoutRef.current = setTimeout(() => setOpen(false), 150); };
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => setOpen(false), 150);
+  };
 
   return (
-    <div className="relative" onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave} onClick={() => setOpen(false)}>
-      <button className={`flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest
-        transition-colors whitespace-nowrap py-2 px-1
-        ${isActive || open ? 'text-fuchsia-600' : 'text-slate-800 hover:text-fuchsia-600'}`}>
+    <div
+      className="relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={() => setOpen(false)}
+    >
+      <button className={`flex items-center gap-1.5 text-[11px] font-black
+        uppercase tracking-widest transition-colors whitespace-nowrap py-2 px-1
+        ${isActive || open
+          ? 'text-fuchsia-600'
+          : 'text-slate-800 hover:text-fuchsia-600'
+        }`}>
         {label}
-        <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-3 h-3 transition-transform duration-200
+          ${open ? 'rotate-180' : ''}`} />
       </button>
-      <div className={`absolute top-full left-0 pt-3 transition-all duration-200 z-50
-        ${open ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'}`}>
+      <div className={`absolute top-full left-0 pt-3 transition-all duration-200
+        z-50 ${
+          open
+            ? 'opacity-100 translate-y-0 pointer-events-auto'
+            : 'opacity-0 -translate-y-2 pointer-events-none'
+        }`}>
         {children}
       </div>
     </div>
@@ -79,10 +95,14 @@ const Navbar: React.FC = () => {
   const [mobileSection, setMobileSection] = useState<string | null>(null);
   const [megaOpen, setMegaOpen]           = useState(false);
   const [navMinistries, setNavMinistries] = useState<MinistryResponseDto[]>([]);
+
+  // ── Profile picture fetched separately from MyProfileDto ──────────────────
+  const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
+
   const megaTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const { isAuthenticated, isAdmin, user, logout } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate  = useNavigate();
+  const location  = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -100,6 +120,21 @@ const Navbar: React.FC = () => {
       .catch(() => {});
   }, []);
 
+  // ── Fetch profile picture when authenticated ───────────────────────────────
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setProfilePicUrl(null);
+      return;
+    }
+    accountApi.getProfile()
+      .then(res => {
+        if (res.data.isSuccess && res.data.data) {
+          setProfilePicUrl(res.data.data.profilePictureUrl ?? null);
+        }
+      })
+      .catch(() => {});
+  }, [isAuthenticated]);
+
   useEffect(() => {
     setMobileOpen(false);
     setMobileSection(null);
@@ -116,22 +151,65 @@ const Navbar: React.FC = () => {
     else navigate('/give');
   };
 
-  const handleMegaEnter = () => { clearTimeout(megaTimeoutRef.current); setMegaOpen(true); };
-  const handleMegaLeave = () => { megaTimeoutRef.current = setTimeout(() => setMegaOpen(false), 150); };
+  const handleYouthClick = (e: React.MouseEvent) => {
+    if (!isAuthenticated) {
+      e.preventDefault();
+      navigate('/login', { state: { from: '/youth' } });
+    }
+  };
 
-  const isAboutActive   = ['/our-story', '/our-mission', '/senior-pastor', '/co-pastor', '/core-beliefs'].includes(location.pathname);
-  const isMediaActive   = ['/sermons', '/books', '/announcements'].includes(location.pathname);
-  const isExploreActive = ['/ministries', '/events', '/contact', '/youth', '/prayer-request'].some(p =>
-    location.pathname.startsWith(p));
+  const handleMegaEnter = () => {
+    clearTimeout(megaTimeoutRef.current);
+    setMegaOpen(true);
+  };
+  const handleMegaLeave = () => {
+    megaTimeoutRef.current = setTimeout(() => setMegaOpen(false), 150);
+  };
 
-  // All mobile explore links — static + dynamic ministries
+  const isAboutActive = [
+    '/our-story', '/our-mission', '/senior-pastor',
+    '/co-pastor', '/core-beliefs'
+  ].includes(location.pathname);
+
+  const isMediaActive = [
+    '/sermons', '/books', '/announcements'
+  ].includes(location.pathname);
+
+  const isExploreActive = [
+    '/ministries', '/events', '/contact', '/youth',
+    '/prayer-request', '/counselling'
+  ].some(p => location.pathname.startsWith(p));
+
   const mobileExploreLinks = [
     { label: 'All Ministries', path: '/ministries' },
     ...navMinistries.map(m => ({ label: m.name, path: `/ministries/${m.slug}` })),
-    { label: 'Youth Community', path: '/youth' },
+    { label: 'Youth Community', path: '/youth', requiresAuth: true },
     ...EXPLORE_CHURCH_LIFE.map(l => ({ label: l.label, path: l.path })),
     ...EXPLORE_QUICKLINKS.map(l => ({ label: l.label, path: l.path })),
   ];
+
+  // ─── USER AVATAR ──────────────────────────────────────────────────────────
+  // Uses profilePicUrl fetched from MyProfileDto — falls back to initials
+  const UserAvatar = ({ size = 'sm' }: { size?: 'sm' | 'md' }) => {
+    const dim  = size === 'sm' ? 'w-6 h-6' : 'w-8 h-8';
+    const text = size === 'sm' ? 'text-[9px]' : 'text-xs';
+
+    if (profilePicUrl) {
+      return (
+        <img
+          src={profilePicUrl}
+          alt={user?.firstName ?? 'User'}
+          className={`${dim} rounded-full object-cover ring-2 ring-fuchsia-300 shrink-0`}
+        />
+      );
+    }
+    return (
+      <div className={`${dim} rounded-full bg-fuchsia-100 text-fuchsia-700
+        flex items-center justify-center ${text} font-black shrink-0`}>
+        {user?.firstName?.[0]}{user?.lastName?.[0]}
+      </div>
+    );
+  };
 
   return (
     <>
@@ -145,15 +223,19 @@ const Navbar: React.FC = () => {
 
             {/* LOGO */}
             <Link to="/" className="flex items-center gap-3 shrink-0 group">
-              <img src={logo} alt="GFM"
-                className={`rounded-full object-cover transition-all duration-300 ring-2 ring-fuchsia-100
-                  ${scrolled ? 'h-9 w-9' : 'h-11 w-11'}`}
+              <img
+                src={logo}
+                alt="GFM"
+                className={`rounded-full object-cover transition-all duration-300
+                  ring-2 ring-fuchsia-100 ${scrolled ? 'h-9 w-9' : 'h-11 w-11'}`}
               />
               <div className="hidden lg:block">
-                <span className="font-serif text-base font-bold text-slate-900 tracking-tight block leading-none">
+                <span className="font-serif text-base font-bold text-slate-900
+                  tracking-tight block leading-none">
                   Global Flame
                 </span>
-                <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-fuchsia-500 block mt-0.5">
+                <span className="text-[9px] font-bold uppercase
+                  tracking-[0.3em] text-fuchsia-500 block mt-0.5">
                   Ministries
                 </span>
               </div>
@@ -163,25 +245,35 @@ const Navbar: React.FC = () => {
             <div className="hidden lg:flex items-center gap-8">
 
               <NavLink to="/" className={({ isActive }) =>
-                `text-[11px] font-black uppercase tracking-widest transition-colors py-2 px-1
-                ${isActive ? 'text-fuchsia-600' : 'text-slate-800 hover:text-fuchsia-600'}`}>
+                `text-[11px] font-black uppercase tracking-widest
+                transition-colors py-2 px-1 ${
+                  isActive
+                    ? 'text-fuchsia-600'
+                    : 'text-slate-800 hover:text-fuchsia-600'
+                }`}>
                 Home
               </NavLink>
 
               <Dropdown label="About" isActive={isAboutActive}>
-                <div className="bg-white border border-slate-100 shadow-xl rounded-xl w-64 overflow-hidden">
+                <div className="bg-white border border-slate-100 shadow-xl
+                  rounded-xl w-64 overflow-hidden">
                   <div className="p-2">
                     {ABOUT_LINKS.map(item => (
                       <Link key={item.label} to={item.path}
-                        className="flex items-start gap-3 p-3 rounded-lg hover:bg-fuchsia-50 group transition-colors">
-                        <span className="mt-0.5 text-fuchsia-400 group-hover:text-fuchsia-600 transition-colors shrink-0">
+                        className="flex items-start gap-3 p-3 rounded-lg
+                          hover:bg-fuchsia-50 group transition-colors">
+                        <span className="mt-0.5 text-fuchsia-400
+                          group-hover:text-fuchsia-600 transition-colors shrink-0">
                           {item.icon}
                         </span>
                         <div>
-                          <p className="text-xs font-bold text-slate-900 uppercase tracking-widest">
+                          <p className="text-xs font-bold text-slate-900
+                            uppercase tracking-widest">
                             {item.label}
                           </p>
-                          <p className="text-[11px] text-slate-400 mt-0.5">{item.desc}</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">
+                            {item.desc}
+                          </p>
                         </div>
                       </Link>
                     ))}
@@ -190,29 +282,44 @@ const Navbar: React.FC = () => {
               </Dropdown>
 
               {/* Explore trigger */}
-              <div className="relative" onMouseEnter={handleMegaEnter} onMouseLeave={handleMegaLeave}>
-                <button className={`flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest
-                  transition-colors whitespace-nowrap py-2 px-1
-                  ${isExploreActive || megaOpen ? 'text-fuchsia-600' : 'text-slate-800 hover:text-fuchsia-600'}`}>
+              <div
+                className="relative"
+                onMouseEnter={handleMegaEnter}
+                onMouseLeave={handleMegaLeave}
+              >
+                <button className={`flex items-center gap-1.5 text-[11px]
+                  font-black uppercase tracking-widest transition-colors
+                  whitespace-nowrap py-2 px-1 ${
+                    isExploreActive || megaOpen
+                      ? 'text-fuchsia-600'
+                      : 'text-slate-800 hover:text-fuchsia-600'
+                  }`}>
                   Explore
-                  <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${megaOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-3 h-3 transition-transform
+                    duration-200 ${megaOpen ? 'rotate-180' : ''}`} />
                 </button>
               </div>
 
               <Dropdown label="Media" isActive={isMediaActive}>
-                <div className="bg-white border border-slate-100 shadow-xl rounded-xl w-56 overflow-hidden">
+                <div className="bg-white border border-slate-100 shadow-xl
+                  rounded-xl w-56 overflow-hidden">
                   <div className="p-2">
                     {MEDIA_LINKS.map(item => (
                       <Link key={item.label} to={item.path}
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-fuchsia-50 group transition-colors">
-                        <span className="text-fuchsia-400 group-hover:text-fuchsia-600 transition-colors">
+                        className="flex items-center gap-3 p-3 rounded-lg
+                          hover:bg-fuchsia-50 group transition-colors">
+                        <span className="text-fuchsia-400
+                          group-hover:text-fuchsia-600 transition-colors">
                           {item.icon}
                         </span>
                         <div>
-                          <p className="text-xs font-bold text-slate-900 uppercase tracking-widest">
+                          <p className="text-xs font-bold text-slate-900
+                            uppercase tracking-widest">
                             {item.label}
                           </p>
-                          <p className="text-[11px] text-slate-400">{item.desc}</p>
+                          <p className="text-[11px] text-slate-400">
+                            {item.desc}
+                          </p>
                         </div>
                       </Link>
                     ))}
@@ -220,44 +327,59 @@ const Navbar: React.FC = () => {
                 </div>
               </Dropdown>
 
-              <button onClick={handleGiveClick}
-                className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest
-                  text-fuchsia-600 hover:text-white hover:bg-fuchsia-600 transition-all
-                  border border-fuchsia-200 hover:border-fuchsia-600 px-4 py-2 rounded-full whitespace-nowrap">
+              <button
+                onClick={handleGiveClick}
+                className="flex items-center gap-1.5 text-[11px] font-black
+                  uppercase tracking-widest text-fuchsia-600
+                  hover:text-white hover:bg-fuchsia-600 transition-all
+                  border border-fuchsia-200 hover:border-fuchsia-600
+                  px-4 py-2 rounded-full whitespace-nowrap"
+              >
                 <Heart className="w-3 h-3 fill-current" /> Give
               </button>
             </div>
 
             {/* AUTH desktop */}
-            <div className="hidden lg:flex items-center gap-2 border-l border-slate-200 pl-5 ml-2">
+            <div className="hidden lg:flex items-center gap-2 border-l
+              border-slate-200 pl-5 ml-2">
               {isAuthenticated ? (
                 <>
                   {isAdmin && (
                     <Link to="/admin"
-                      className="flex items-center gap-1.5 text-[10px] font-black uppercase
-                        tracking-widest text-fuchsia-600 hover:text-fuchsia-800 transition-colors">
+                      className="flex items-center gap-1.5 text-[10px]
+                        font-black uppercase tracking-widest text-fuchsia-600
+                        hover:text-fuchsia-800 transition-colors">
                       <ShieldCheck size={13} /> Dashboard
                     </Link>
                   )}
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    Hi, {user?.firstName}
-                  </span>
+
+                  <Link to="/dashboard"
+                    className="flex items-center gap-1.5 text-[10px]
+                      font-black uppercase tracking-widest text-slate-600
+                      hover:text-fuchsia-600 transition-colors">
+                    <UserAvatar size="sm" />
+                    <span>Hi, {user?.firstName}</span>
+                  </Link>
+
                   <button onClick={logout}
-                    className="bg-slate-900 text-white px-3 py-1.5 text-[10px] font-black
-                      uppercase tracking-widest hover:bg-red-600 transition-all rounded-sm">
+                    className="bg-slate-900 text-white px-3 py-1.5 text-[10px]
+                      font-black uppercase tracking-widest hover:bg-red-600
+                      transition-all rounded-sm">
                     Logout
                   </button>
                 </>
               ) : (
                 <div className="flex items-center gap-2">
                   <Link to="/login"
-                    className="text-[10px] font-black uppercase tracking-widest text-slate-700
-                      hover:text-fuchsia-600 transition-colors px-3 py-1.5">
+                    className="text-[10px] font-black uppercase tracking-widest
+                      text-slate-700 hover:text-fuchsia-600 transition-colors
+                      px-3 py-1.5">
                     Login
                   </Link>
                   <Link to="/register"
-                    className="bg-slate-900 text-white px-4 py-1.5 text-[10px] font-black
-                      uppercase tracking-widest hover:bg-fuchsia-600 transition-all rounded-sm">
+                    className="bg-slate-900 text-white px-4 py-1.5 text-[10px]
+                      font-black uppercase tracking-widest
+                      hover:bg-fuchsia-600 transition-all rounded-sm">
                     Register
                   </Link>
                 </div>
@@ -265,73 +387,104 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* Mobile hamburger */}
-            <button onClick={() => setMobileOpen(true)}
-              className="lg:hidden p-2 text-slate-900 hover:bg-slate-100 rounded-lg transition-colors">
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="lg:hidden p-2 text-slate-900 hover:bg-slate-100
+                rounded-lg transition-colors"
+            >
               <Menu size={22} />
             </button>
           </div>
         </div>
 
-        {/* ── MEGA MENU ─────────────────────────────────────────────────────── */}
-        {/* Different background from navbar — warm cream tone */}
+        {/* ── MEGA MENU ──────────────────────────────────────────────────── */}
         <div
-          className={`absolute top-full left-0 w-full z-50 transition-all duration-300
-            ${megaOpen
-              ? 'opacity-100 translate-y-0 pointer-events-auto'
-              : 'opacity-0 -translate-y-3 pointer-events-none'}`}
+          className={`absolute top-full left-0 w-full z-50 transition-all
+            duration-300 ${
+              megaOpen
+                ? 'opacity-100 translate-y-0 pointer-events-auto'
+                : 'opacity-0 -translate-y-3 pointer-events-none'
+            }`}
           onMouseEnter={handleMegaEnter}
           onMouseLeave={handleMegaLeave}
           onClick={() => setMegaOpen(false)}
         >
-          {/* bg-stone-50 — warm off-white, clearly different from bg-white navbar */}
-          <div className="bg-stone-50 border-t-2 border-b border-t-fuchsia-500 border-b-stone-200 shadow-2xl">
+          <div className="bg-stone-50 border-t-2 border-b border-t-fuchsia-500
+            border-b-stone-200 shadow-2xl">
             <div className="max-w-7xl mx-auto px-8 py-10">
               <div className="grid grid-cols-3 gap-12">
 
-                {/* Column 1 — Ministries (FIXED — no nested .map) */}
+                {/* Column 1 — Ministries */}
                 <div>
-                  <p className="text-[9px] font-black uppercase tracking-[0.4em] text-fuchsia-500 mb-5">
+                  <p className="text-[9px] font-black uppercase
+                    tracking-[0.4em] text-fuchsia-500 mb-5">
                     Ministries
                   </p>
                   <ul className="space-y-1">
-                    {/* All Ministries — always first */}
                     <li>
                       <Link to="/ministries"
-                        className="group flex items-start gap-3 p-2.5 rounded-lg hover:bg-fuchsia-50 transition-colors">
-                        <ArrowRight className="w-3 h-3 text-fuchsia-300 group-hover:text-fuchsia-500 mt-1 shrink-0 transition-colors" />
+                        className="group flex items-start gap-3 p-2.5
+                          rounded-lg hover:bg-fuchsia-50 transition-colors">
+                        <ArrowRight className="w-3 h-3 text-fuchsia-300
+                          group-hover:text-fuchsia-500 mt-1 shrink-0
+                          transition-colors" />
                         <div>
-                          <p className="text-sm font-bold text-slate-800 group-hover:text-fuchsia-700 transition-colors">
+                          <p className="text-sm font-bold text-slate-800
+                            group-hover:text-fuchsia-700 transition-colors">
                             All Ministries
                           </p>
-                          <p className="text-[11px] text-slate-400 mt-0.5">Overview of all arms</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">
+                            Overview of all arms
+                          </p>
                         </div>
                       </Link>
                     </li>
-                    {/* Dynamic ministries from API */}
                     {navMinistries.map(ministry => (
                       <li key={ministry.id}>
                         <Link to={`/ministries/${ministry.slug}`}
-                          className="group flex items-start gap-3 p-2.5 rounded-lg hover:bg-fuchsia-50 transition-colors">
-                          <ArrowRight className="w-3 h-3 text-fuchsia-300 group-hover:text-fuchsia-500 mt-1 shrink-0 transition-colors" />
+                          className="group flex items-start gap-3 p-2.5
+                            rounded-lg hover:bg-fuchsia-50 transition-colors">
+                          <ArrowRight className="w-3 h-3 text-fuchsia-300
+                            group-hover:text-fuchsia-500 mt-1 shrink-0
+                            transition-colors" />
                           <div>
-                            <p className="text-sm font-bold text-slate-800 group-hover:text-fuchsia-700 transition-colors">
+                            <p className="text-sm font-bold text-slate-800
+                              group-hover:text-fuchsia-700 transition-colors">
                               {ministry.name}
                             </p>
-                            <p className="text-[11px] text-slate-400 mt-0.5">{ministry.shortDescription}</p>
+                            <p className="text-[11px] text-slate-400 mt-0.5">
+                              {ministry.shortDescription}
+                            </p>
                           </div>
                         </Link>
                       </li>
                     ))}
-                    {/* Youth — always last (protected route, stays hardcoded) */}
                     <li>
-                      <Link to="/youth"
-                        className="group flex items-start gap-3 p-2.5 rounded-lg hover:bg-fuchsia-50 transition-colors">
-                        <ArrowRight className="w-3 h-3 text-fuchsia-300 group-hover:text-fuchsia-500 mt-1 shrink-0 transition-colors" />
+                      <Link
+                        to="/youth"
+                        onClick={handleYouthClick}
+                        className="group flex items-start gap-3 p-2.5
+                          rounded-lg hover:bg-fuchsia-50 transition-colors"
+                      >
+                        <ArrowRight className="w-3 h-3 text-fuchsia-300
+                          group-hover:text-fuchsia-500 mt-1 shrink-0
+                          transition-colors" />
                         <div>
-                          <p className="text-sm font-bold text-slate-800 group-hover:text-fuchsia-700 transition-colors">
+                          <p className="text-sm font-bold text-slate-800
+                            group-hover:text-fuchsia-700 transition-colors
+                            flex items-center gap-2">
                             Youth Community
+                            {!isAuthenticated && (
+                              <span className="text-[9px] font-black
+                                uppercase tracking-widest px-1.5 py-0.5
+                                bg-fuchsia-100 text-fuchsia-600 rounded">
+                                Login required
+                              </span>
+                            )}
                           </p>
-                          <p className="text-[11px] text-slate-400 mt-0.5">House of Opra</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">
+                            House of Opra
+                          </p>
                         </div>
                       </Link>
                     </li>
@@ -340,18 +493,22 @@ const Navbar: React.FC = () => {
 
                 {/* Column 2 — Church Life */}
                 <div>
-                  <p className="text-[9px] font-black uppercase tracking-[0.4em] text-fuchsia-500 mb-5">
+                  <p className="text-[9px] font-black uppercase
+                    tracking-[0.4em] text-fuchsia-500 mb-5">
                     Church Life
                   </p>
                   <ul className="space-y-1">
                     {EXPLORE_CHURCH_LIFE.map(item => (
                       <li key={item.label}>
                         <Link to={item.path}
-                          className="group flex items-center gap-3 p-2.5 rounded-lg hover:bg-fuchsia-50 transition-colors">
-                          <span className="text-fuchsia-300 group-hover:text-fuchsia-500 transition-colors">
+                          className="group flex items-center gap-3 p-2.5
+                            rounded-lg hover:bg-fuchsia-50 transition-colors">
+                          <span className="text-fuchsia-300
+                            group-hover:text-fuchsia-500 transition-colors">
                             {item.icon}
                           </span>
-                          <p className="text-sm font-bold text-slate-800 group-hover:text-fuchsia-700 transition-colors">
+                          <p className="text-sm font-bold text-slate-800
+                            group-hover:text-fuchsia-700 transition-colors">
                             {item.label}
                           </p>
                         </Link>
@@ -359,36 +516,48 @@ const Navbar: React.FC = () => {
                     ))}
                   </ul>
 
-                  <div className="mt-6 border border-fuchsia-100 bg-fuchsia-50 rounded-xl p-4">
-                    <p className="text-[9px] font-black uppercase tracking-[0.3em] text-fuchsia-400 mb-1.5">
+                  <div className="mt-6 border border-fuchsia-100 bg-fuchsia-50
+                    rounded-xl p-4">
+                    <p className="text-[9px] font-black uppercase
+                      tracking-[0.3em] text-fuchsia-400 mb-1.5">
                       Join Us
                     </p>
-                    <p className="font-serif text-slate-800 text-base leading-snug mb-3">
-                      Experience the <span className="italic text-fuchsia-600">Divine Presence</span>
+                    <p className="font-serif text-slate-800 text-base
+                      leading-snug mb-3">
+                      Experience the{' '}
+                      <span className="italic text-fuchsia-600">
+                        Divine Presence
+                      </span>
                     </p>
                     <Link to="/events"
-                      className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase
-                        tracking-widest text-fuchsia-600 hover:text-fuchsia-800 transition-colors group">
+                      className="inline-flex items-center gap-1.5 text-[10px]
+                        font-black uppercase tracking-widest text-fuchsia-600
+                        hover:text-fuchsia-800 transition-colors group">
                       See Events
-                      <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                      <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5
+                        transition-transform" />
                     </Link>
                   </div>
                 </div>
 
                 {/* Column 3 — Quick Links + Service Times */}
                 <div>
-                  <p className="text-[9px] font-black uppercase tracking-[0.4em] text-fuchsia-500 mb-5">
+                  <p className="text-[9px] font-black uppercase
+                    tracking-[0.4em] text-fuchsia-500 mb-5">
                     Quick Links
                   </p>
                   <ul className="space-y-1">
                     {EXPLORE_QUICKLINKS.map(item => (
                       <li key={item.label}>
                         <Link to={item.path}
-                          className="group flex items-center gap-3 p-2.5 rounded-lg hover:bg-fuchsia-50 transition-colors">
-                          <span className="text-fuchsia-300 group-hover:text-fuchsia-500 transition-colors">
+                          className="group flex items-center gap-3 p-2.5
+                            rounded-lg hover:bg-fuchsia-50 transition-colors">
+                          <span className="text-fuchsia-300
+                            group-hover:text-fuchsia-500 transition-colors">
                             {item.icon}
                           </span>
-                          <p className="text-sm font-bold text-slate-800 group-hover:text-fuchsia-700 transition-colors">
+                          <p className="text-sm font-bold text-slate-800
+                            group-hover:text-fuchsia-700 transition-colors">
                             {item.label}
                           </p>
                         </Link>
@@ -396,8 +565,10 @@ const Navbar: React.FC = () => {
                     ))}
                   </ul>
 
-                  <div className="mt-6 border border-stone-200 bg-white rounded-xl p-4">
-                    <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 mb-3">
+                  <div className="mt-6 border border-stone-200 bg-white
+                    rounded-xl p-4">
+                    <p className="text-[9px] font-black uppercase
+                      tracking-[0.3em] text-slate-400 mb-3">
                       Service Times
                     </p>
                     <div className="space-y-2">
@@ -405,48 +576,61 @@ const Navbar: React.FC = () => {
                         { day: 'Tuesday',  time: 'Power Service' },
                         { day: 'Saturday', time: 'Morning Glory' },
                       ].map(s => (
-                        <div key={s.day} className="flex justify-between items-center">
-                          <span className="text-xs font-bold text-slate-700">{s.day}</span>
-                          <span className="text-[10px] text-fuchsia-500 font-semibold">{s.time}</span>
+                        <div key={s.day}
+                          className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-slate-700">
+                            {s.day}
+                          </span>
+                          <span className="text-[10px] text-fuchsia-500
+                            font-semibold">
+                            {s.time}
+                          </span>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* ── MOBILE DRAWER ─────────────────────────────────────────────────── */}
-      <div className={`fixed inset-0 z-[60] transition-all duration-300 ${mobileOpen ? 'visible' : 'invisible'}`}>
+      {/* ── MOBILE DRAWER ──────────────────────────────────────────────── */}
+      <div className={`fixed inset-0 z-[60] transition-all duration-300
+        ${mobileOpen ? 'visible' : 'invisible'}`}>
         <div
-          className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300
+          className={`absolute inset-0 bg-black/60 backdrop-blur-sm
+            transition-opacity duration-300
             ${mobileOpen ? 'opacity-100' : 'opacity-0'}`}
           onClick={() => setMobileOpen(false)}
         />
 
-        <div className={`absolute right-0 top-0 h-full w-[85%] max-w-sm bg-white shadow-2xl
-          flex flex-col transition-transform duration-500
+        <div className={`absolute right-0 top-0 h-full w-[85%] max-w-sm
+          bg-white shadow-2xl flex flex-col transition-transform duration-500
           ${mobileOpen ? 'translate-x-0' : 'translate-x-full'}`}>
 
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+          <div className="flex items-center justify-between px-6 py-5
+            border-b border-slate-100">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="GFM" className="h-9 w-9 rounded-full object-cover" />
+              <img src={logo} alt="GFM"
+                className="h-9 w-9 rounded-full object-cover" />
               <div>
-                <span className="font-serif text-sm font-bold text-slate-900 block leading-none">
+                <span className="font-serif text-sm font-bold text-slate-900
+                  block leading-none">
                   Global Flame
                 </span>
-                <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-fuchsia-500">
+                <span className="text-[9px] font-bold uppercase
+                  tracking-[0.3em] text-fuchsia-500">
                   Ministries
                 </span>
               </div>
             </div>
-            <button onClick={() => setMobileOpen(false)}
-              className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+            >
               <X size={20} className="text-slate-600" />
             </button>
           </div>
@@ -455,33 +639,43 @@ const Navbar: React.FC = () => {
           <div className="px-6 py-4 bg-slate-50 border-b border-slate-100">
             {isAuthenticated ? (
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   {isAdmin && (
                     <Link to="/admin" onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-fuchsia-600">
-                      <ShieldCheck size={12} /> Dashboard
+                      className="flex items-center gap-1 text-[10px]
+                        font-black uppercase tracking-widest text-fuchsia-600">
+                      <ShieldCheck size={12} /> Admin
                     </Link>
                   )}
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                  <Link to="/dashboard" onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2 text-[10px]
+                      font-black uppercase tracking-widest text-slate-600
+                      hover:text-fuchsia-600 transition-colors">
+                    <UserAvatar size="md" />
                     Hi, {user?.firstName}
-                  </span>
+                  </Link>
                 </div>
-                <button onClick={() => { logout(); setMobileOpen(false); }}
-                  className="text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-700 transition-colors">
+                <button
+                  onClick={() => { logout(); setMobileOpen(false); }}
+                  className="text-[10px] font-black uppercase tracking-widest
+                    text-red-500 hover:text-red-700 transition-colors"
+                >
                   Logout
                 </button>
               </div>
             ) : (
               <div className="flex items-center gap-3">
                 <Link to="/login" onClick={() => setMobileOpen(false)}
-                  className="flex-1 text-center py-2.5 text-[10px] font-black uppercase
-                    tracking-widest text-slate-700 border border-slate-200 rounded-lg
-                    hover:border-fuchsia-300 hover:text-fuchsia-600 transition-colors">
+                  className="flex-1 text-center py-2.5 text-[10px] font-black
+                    uppercase tracking-widest text-slate-700 border
+                    border-slate-200 rounded-lg hover:border-fuchsia-300
+                    hover:text-fuchsia-600 transition-colors">
                   Login
                 </Link>
                 <Link to="/register" onClick={() => setMobileOpen(false)}
-                  className="flex-1 text-center py-2.5 text-[10px] font-black uppercase
-                    tracking-widest text-white bg-slate-900 rounded-lg hover:bg-fuchsia-600 transition-colors">
+                  className="flex-1 text-center py-2.5 text-[10px] font-black
+                    uppercase tracking-widest text-white bg-slate-900
+                    rounded-lg hover:bg-fuchsia-600 transition-colors">
                   Register
                 </Link>
               </div>
@@ -489,10 +683,12 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Give CTA */}
-          <button onClick={() => { setMobileOpen(false); handleGiveClick(); }}
-            className="flex items-center justify-center gap-2 mx-6 mt-4 py-3 bg-fuchsia-600
-              text-white rounded-xl text-[10px] font-black uppercase tracking-widest
-              hover:bg-fuchsia-700 transition-colors">
+          <button
+            onClick={() => { setMobileOpen(false); handleGiveClick(); }}
+            className="flex items-center justify-center gap-2 mx-6 mt-4 py-3
+              bg-fuchsia-600 text-white rounded-xl text-[10px] font-black
+              uppercase tracking-widest hover:bg-fuchsia-700 transition-colors"
+          >
             <Heart className="w-3.5 h-3.5 fill-white" /> Give / Donate
           </button>
 
@@ -504,26 +700,43 @@ const Navbar: React.FC = () => {
               { label: 'Contact', path: '/contact' },
               { label: 'Events',  path: '/events' },
             ].map(link => (
-              <Link key={link.path} to={link.path} onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-between px-3 py-3.5 rounded-xl
-                  hover:bg-slate-50 transition-colors group">
-                <span className="text-xs font-black uppercase tracking-widest text-slate-700
-                  group-hover:text-fuchsia-600 transition-colors">
+              <Link key={link.path} to={link.path}
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-between px-3 py-3.5
+                  rounded-xl hover:bg-slate-50 transition-colors group">
+                <span className="text-xs font-black uppercase tracking-widest
+                  text-slate-700 group-hover:text-fuchsia-600 transition-colors">
                   {link.label}
                 </span>
-                <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-fuchsia-400 transition-colors" />
+                <ArrowRight className="w-3.5 h-3.5 text-slate-300
+                  group-hover:text-fuchsia-400 transition-colors" />
               </Link>
             ))}
 
             <Link to="/prayer-request" onClick={() => setMobileOpen(false)}
-              className="flex items-center justify-between w-full px-3 py-3.5 rounded-xl
-                hover:bg-fuchsia-50 transition-colors group">
-              <span className="text-xs font-black uppercase tracking-widest text-slate-700
-                group-hover:text-fuchsia-600 transition-colors flex items-center gap-2">
+              className="flex items-center justify-between w-full px-3 py-3.5
+                rounded-xl hover:bg-fuchsia-50 transition-colors group">
+              <span className="text-xs font-black uppercase tracking-widest
+                text-slate-700 group-hover:text-fuchsia-600 transition-colors
+                flex items-center gap-2">
                 <HandHeart className="w-4 h-4 text-fuchsia-400" />
                 Prayer Request
               </span>
-              <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-fuchsia-400 transition-colors" />
+              <ArrowRight className="w-3.5 h-3.5 text-slate-300
+                group-hover:text-fuchsia-400 transition-colors" />
+            </Link>
+
+            <Link to="/counselling" onClick={() => setMobileOpen(false)}
+              className="flex items-center justify-between w-full px-3 py-3.5
+                rounded-xl hover:bg-fuchsia-50 transition-colors group">
+              <span className="text-xs font-black uppercase tracking-widest
+                text-slate-700 group-hover:text-fuchsia-600 transition-colors
+                flex items-center gap-2">
+                <MessageCircleHeart className="w-4 h-4 text-fuchsia-400" />
+                Counselling
+              </span>
+              <ArrowRight className="w-3.5 h-3.5 text-slate-300
+                group-hover:text-fuchsia-400 transition-colors" />
             </Link>
 
             {/* Collapsible sections */}
@@ -546,32 +759,62 @@ const Navbar: React.FC = () => {
             ].map(section => (
               <div key={section.id}>
                 <button
-                  onClick={() => setMobileSection(mobileSection === section.id ? null : section.id)}
-                  className="flex items-center justify-between w-full px-3 py-3.5 rounded-xl hover:bg-slate-50 transition-colors"
+                  onClick={() => setMobileSection(
+                    mobileSection === section.id ? null : section.id
+                  )}
+                  className="flex items-center justify-between w-full px-3
+                    py-3.5 rounded-xl hover:bg-slate-50 transition-colors"
                 >
-                  <span className="text-xs font-black uppercase tracking-widest text-slate-700">
+                  <span className="text-xs font-black uppercase tracking-widest
+                    text-slate-700">
                     {section.label}
                   </span>
-                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300
-                    ${mobileSection === section.id ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 text-slate-400
+                    transition-transform duration-300 ${
+                      mobileSection === section.id ? 'rotate-180' : ''
+                    }`} />
                 </button>
 
                 <div className={`overflow-hidden transition-all duration-300
                   ${mobileSection === section.id ? 'max-h-[600px]' : 'max-h-0'}`}>
                   <div className="pl-4 pb-2 space-y-0.5">
-                    {section.links.map(link => (
-                      <Link
-                        key={`${section.id}-${link.label}`}
-                        to={link.path}
-                        onClick={() => { setMobileOpen(false); setMobileSection(null); }}
-                        className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-fuchsia-50 group transition-colors"
-                      >
-                        <div className="w-1 h-1 rounded-full bg-fuchsia-300 group-hover:bg-fuchsia-500 transition-colors shrink-0" />
-                        <span className="text-[11px] font-bold uppercase tracking-widest text-slate-600 group-hover:text-fuchsia-600 transition-colors">
-                          {link.label}
-                        </span>
-                      </Link>
-                    ))}
+                    {section.links.map(link => {
+                      const requiresAuth =
+                        (link as { requiresAuth?: boolean }).requiresAuth;
+                      return (
+                        <Link
+                          key={`${section.id}-${link.label}`}
+                          to={link.path}
+                          onClick={e => {
+                            if (requiresAuth && !isAuthenticated) {
+                              e.preventDefault();
+                              setMobileOpen(false);
+                              navigate('/login', { state: { from: link.path } });
+                              return;
+                            }
+                            setMobileOpen(false);
+                            setMobileSection(null);
+                          }}
+                          className="flex items-center gap-2 px-3 py-2.5
+                            rounded-lg hover:bg-fuchsia-50 group transition-colors"
+                        >
+                          <div className="w-1 h-1 rounded-full bg-fuchsia-300
+                            group-hover:bg-fuchsia-500 transition-colors shrink-0" />
+                          <span className="text-[11px] font-bold uppercase
+                            tracking-widest text-slate-600
+                            group-hover:text-fuchsia-600 transition-colors">
+                            {link.label}
+                          </span>
+                          {requiresAuth && !isAuthenticated && (
+                            <span className="text-[9px] font-black uppercase
+                              tracking-widest px-1 py-0.5 bg-fuchsia-100
+                              text-fuchsia-500 rounded ml-auto">
+                              Login
+                            </span>
+                          )}
+                        </Link>
+                      );
+                    })}
                   </div>
                 </div>
               </div>

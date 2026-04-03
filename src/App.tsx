@@ -10,31 +10,36 @@ import Footer from './components/Footer';
 import BookStore from './pages/BookStore';
 
 // ─── MINISTRY PAGES ───────────────────────────────────────────────────────────
-import Home            from './pages/Home';
-import Sermons         from './pages/Sermons';
-import SermonDetail    from './pages/SermonDetail';
-import Events          from './pages/Events';
-import Ministries      from './pages/Ministries';
-import Give            from './pages/Give';
-import Announcements   from './pages/AnnouncementsPage';
-import Contact         from './pages/Contact';
+import Home              from './pages/Home';
+import Sermons           from './pages/Sermons';
+import SermonDetail      from './pages/SermonDetail';
+import Events            from './pages/Events';
+import Ministries        from './pages/Ministries';
+import Give              from './pages/Give';
+import Announcements     from './pages/AnnouncementsPage';
+import Contact           from './pages/Contact';
 import PrayerRequestPage from './pages/PrayerRequestPage';
-import MinistryDetail  from './pages/MinistryDetail';
+import MinistryDetail    from './pages/MinistryDetail';
+import CounsellingPage   from './pages/CounsellingPage';
 
 // ─── ABOUT PAGES ──────────────────────────────────────────────────────────────
-import OurStory        from './pages/OurStory';
-import OurMission      from './pages/OurMission';
-import SeniorPastor    from './pages/SeniorPastor';
-import CoPastor        from './pages/CoPastor';
-import CoreBeliefs     from './pages/CoreBeliefs';
-
+import OurStory    from './pages/OurStory';
+import OurMission  from './pages/OurMission';
+import SeniorPastor from './pages/SeniorPastor';
+import CoPastor    from './pages/CoPastor';
+import CoreBeliefs from './pages/CoreBeliefs';
 
 // ─── AUTH PAGES ───────────────────────────────────────────────────────────────
-import LoginPage           from './pages/auth/LoginPage';
-import RegisterPage        from './pages/auth/RegisterPage';
-import ForgotPasswordPage  from './pages/auth/ForgotPasswordPage';
-import ResetPasswordPage   from './pages/auth/ResetPasswordPage';
-import ResendConfirmPage   from './pages/auth/ResendConfirmPage';
+import LoginPage          from './pages/auth/LoginPage';
+import RegisterPage       from './pages/auth/RegisterPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import ResetPasswordPage  from './pages/auth/ResetPasswordPage';
+import ResendConfirmPage  from './pages/auth/ResendConfirmPage';
+
+// ─── PROTECTED PAGES ──────────────────────────────────────────────────────────
+import UserDashboard from './pages/UserDashboard';
+import YouthPage     from './pages/Youth/YouthPage';
+import YouthAnnouncements from './pages/Youth/YouthAnnouncement';
 
 // ─── ADMIN PAGES ──────────────────────────────────────────────────────────────
 import Admin               from './pages/Admin/Admin';
@@ -48,7 +53,8 @@ import AdminUsers          from './pages/Admin/AdminUsers';
 import AdminBooks          from './pages/Admin/AdminBooks';
 import AdminDonations      from './pages/Admin/AdminDonations';
 import AdminBulkEmail      from './pages/Admin/AdminBulkEmail';
-import AdminMinistries from './pages/Admin/AdminMinistries';
+import AdminMinistries     from './pages/Admin/AdminMinistries';
+import AdminCounselling    from './pages/Admin/AdminCounselling';
 
 // ─── SCROLL TO TOP ────────────────────────────────────────────────────────────
 const ScrollToTop = () => {
@@ -76,7 +82,9 @@ function NotFoundPage() {
     <div className="flex flex-col items-center justify-center h-screen text-center">
       <h1 className="text-5xl font-bold text-purple-700 mb-4">404</h1>
       <p className="text-gray-600 mb-6">Page not found.</p>
-      <a href="/" className="px-6 py-2 bg-purple-700 text-white rounded-lg">Go Back Home</a>
+      <a href="/" className="px-6 py-2 bg-purple-700 text-white rounded-lg">
+        Go Back Home
+      </a>
     </div>
   );
 }
@@ -99,11 +107,10 @@ const App: React.FC = () => {
         <div className="flex flex-col min-h-screen">
           <Routes>
 
-            {/* ── PUBLIC ROUTES ─────────────────────────────────────── */}
+            {/* ── PUBLIC ROUTES ───────────────────────────────────────── */}
             <Route path="/"
               element={<PublicLayout><Home /></PublicLayout>} />
 
-            {/* About — individual pages, no generic /about */}
             <Route path="/our-story"
               element={<PublicLayout><OurStory /></PublicLayout>} />
             <Route path="/our-mission"
@@ -127,16 +134,18 @@ const App: React.FC = () => {
               element={<PublicLayout><Events /></PublicLayout>} />
             <Route path="/ministries"
               element={<PublicLayout><Ministries /></PublicLayout>} />
+            <Route path="/ministries/:slug"
+              element={<PublicLayout><MinistryDetail /></PublicLayout>} />
             <Route path="/give"
               element={<PublicLayout><Give /></PublicLayout>} />
             <Route path="/contact"
               element={<PublicLayout><Contact /></PublicLayout>} />
             <Route path="/announcements"
               element={<PublicLayout><Announcements /></PublicLayout>} />
-            <Route path="/ministries/:slug"
-            element={<PublicLayout><MinistryDetail /></PublicLayout>} />
+            <Route path="/counselling"
+              element={<PublicLayout><CounsellingPage /></PublicLayout>} />
 
-            {/* ── AUTH ROUTES ───────────────────────────────────────── */}
+            {/* ── AUTH ROUTES ─────────────────────────────────────────── */}
             <Route path="/login"
               element={<AuthLayout><LoginPage /></AuthLayout>} />
             <Route path="/register"
@@ -148,37 +157,46 @@ const App: React.FC = () => {
             <Route path="/resend-confirmation"
               element={<AuthLayout><ResendConfirmPage /></AuthLayout>} />
 
-            {/* ── PROTECTED ROUTES ──────────────────────────────────── */}
+            {/* ── PROTECTED ROUTES ────────────────────────────────────── */}
             <Route element={<ProtectedRoute />}>
-              <Route
-                path="/youth"
-                element={
-                  <PublicLayout>
-                    <div className="pt-24 p-8 text-2xl font-bold text-fuchsia-700">
-                      House of Opra — Coming Soon
-                    </div>
-                  </PublicLayout>
-                }
-              />
+              <Route path="/dashboard"
+                element={<PublicLayout><UserDashboard /></PublicLayout>} />
+              <Route path="/youth"
+                element={<PublicLayout><YouthPage /></PublicLayout>} />
+              <Route path="/youth/announcements"
+                element={<PublicLayout><YouthAnnouncements /></PublicLayout>} />
             </Route>
 
-            {/* ── ADMIN ROUTES ──────────────────────────────────────── */}
+            {/* ── ADMIN ROUTES ────────────────────────────────────────── */}
             <Route path="/admin" element={<AdminRoute />}>
               <Route index element={<AdminLayout><Admin /></AdminLayout>} />
-              <Route path="contacts"       element={<AdminLayout><AdminContacts /></AdminLayout>} />
-              <Route path="announcements"  element={<AdminLayout><AdminAnnouncements /></AdminLayout>} />
-              <Route path="events"         element={<AdminLayout><AdminEvents /></AdminLayout>} />
-              <Route path="sermons"        element={<AdminLayout><AdminSermons /></AdminLayout>} />
-              <Route path="prayer-requests" element={<AdminLayout><AdminPrayerRequests /></AdminLayout>} />
-              <Route path="testimonies"    element={<AdminLayout><AdminTestimonies /></AdminLayout>} />
-              <Route path="users"          element={<AdminLayout><AdminUsers /></AdminLayout>} />
-              <Route path="donations"      element={<AdminLayout><AdminDonations /></AdminLayout>} />
-              <Route path="books"          element={<AdminLayout><AdminBooks /></AdminLayout>} />
-              <Route path="bulk-email"     element={<AdminLayout><AdminBulkEmail /></AdminLayout>} />
-              <Route path="ministries" element={<AdminLayout><AdminMinistries /></AdminLayout>} />
+              <Route path="contacts"
+                element={<AdminLayout><AdminContacts /></AdminLayout>} />
+              <Route path="announcements"
+                element={<AdminLayout><AdminAnnouncements /></AdminLayout>} />
+              <Route path="events"
+                element={<AdminLayout><AdminEvents /></AdminLayout>} />
+              <Route path="sermons"
+                element={<AdminLayout><AdminSermons /></AdminLayout>} />
+              <Route path="prayer-requests"
+                element={<AdminLayout><AdminPrayerRequests /></AdminLayout>} />
+              <Route path="testimonies"
+                element={<AdminLayout><AdminTestimonies /></AdminLayout>} />
+              <Route path="users"
+                element={<AdminLayout><AdminUsers /></AdminLayout>} />
+              <Route path="donations"
+                element={<AdminLayout><AdminDonations /></AdminLayout>} />
+              <Route path="books"
+                element={<AdminLayout><AdminBooks /></AdminLayout>} />
+              <Route path="bulk-email"
+                element={<AdminLayout><AdminBulkEmail /></AdminLayout>} />
+              <Route path="ministries"
+                element={<AdminLayout><AdminMinistries /></AdminLayout>} />
+              <Route path="counselling"
+                element={<AdminLayout><AdminCounselling /></AdminLayout>} />
             </Route>
 
-            {/* ── 404 ───────────────────────────────────────────────── */}
+            {/* ── 404 ─────────────────────────────────────────────────── */}
             <Route path="*" element={<NotFoundPage />} />
 
           </Routes>

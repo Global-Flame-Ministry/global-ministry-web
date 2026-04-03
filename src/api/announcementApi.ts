@@ -17,7 +17,7 @@ export interface UpdateAnnouncementDto {
 }
 
 export const announcementApi = {
-  // Public
+  // ── PUBLIC MINISTRY ───────────────────────────────────────────────────────
   getAll: (params?: {
     pageNumber?: number;
     pageSize?: number;
@@ -34,7 +34,23 @@ export const announcementApi = {
       `/api/ministry/announcements/${id}`
     ),
 
-  // Admin
+  // ── PUBLIC YOUTH ──────────────────────────────────────────────────────────
+  getYouthAll: (params?: {
+    pageNumber?: number;
+    pageSize?: number;
+    title?: string;
+    category?: string;
+  }) =>
+    api.get<ApiResponse<PagedResult<AnnouncementDto>>>(
+      '/api/youth/announcements', { params }
+    ),
+
+  getYouthById: (id: number) =>
+    api.get<ApiResponse<AnnouncementDto>>(
+      `/api/youth/announcements/${id}`
+    ),
+
+  // ── ADMIN ─────────────────────────────────────────────────────────────────
   adminGetAll: (params?: {
     pageNumber?: number;
     pageSize?: number;
@@ -51,7 +67,9 @@ export const announcementApi = {
     api.post<ApiResponse<AnnouncementDto>>('/api/admin/announcements', dto),
 
   update: (id: number, dto: UpdateAnnouncementDto) =>
-    api.put<ApiResponse<AnnouncementDto>>(`/api/admin/announcements/${id}`, dto),
+    api.put<ApiResponse<AnnouncementDto>>(
+      `/api/admin/announcements/${id}`, dto
+    ),
 
   delete: (id: number) =>
     api.delete<ApiResponse<null>>(`/api/admin/announcements/${id}`),

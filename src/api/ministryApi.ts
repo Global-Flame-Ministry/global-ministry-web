@@ -1,11 +1,5 @@
 import api from './axios';
-import type {
-  ApiResponse,
-  PagedResult,
-  MinistryResponseDto,
-  CreateMinistryDto,
-  UpdateMinistryDto,
-  EventDto,
+import type {ApiResponse, PagedResult, MinistryResponseDto, CreateMinistryDto, UpdateMinistryDto, EventDto,
 } from '../types';
 
 export const ministryApi = {

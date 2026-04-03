@@ -21,11 +21,18 @@ export const prayerApi = {
     pageNumber?: number;
     pageSize?: number;
   }) =>
-    api.get<ApiResponse<{ items: PrayerRequestDto[]; totalCount: number }>>('/api/admin/prayer-requests', { params }),
+    api.get<ApiResponse<{ items: PrayerRequestDto[]; totalCount: number }>>(
+      '/api/admin/prayer-requests', { params }
+    ),
 
   getById: (id: number) =>
     api.get<ApiResponse<PrayerRequestDto>>(`/api/admin/prayer-requests/${id}`),
 
   markAsAttended: (id: number, isAttendedTo: boolean) =>
-    api.patch<ApiResponse<PrayerRequestDto>>(`/api/admin/prayer-requests/${id}/attend`, { isAttendedTo }),
+    api.patch<ApiResponse<PrayerRequestDto>>(
+      `/api/admin/prayer-requests/${id}/attend`, { isAttendedTo }
+    ),
+
+  hardDelete: (id: number) =>
+  api.delete<ApiResponse<null>>(`/api/admin/prayer-requests/${id}/permanent`),
 };

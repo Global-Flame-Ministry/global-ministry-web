@@ -1,4 +1,4 @@
-// ORIGINAL TYPES
+// ─── ORIGINAL TYPES ──────────────────────────────────────────────────────────
 export interface Sermon {
   id: string;
   title: string;
@@ -220,7 +220,6 @@ export interface PrayerRequestDto {
 }
 
 // DONATION 
-
 export interface CreateDonationDto {
   donorName: string;
   donorEmail: string;
@@ -328,7 +327,7 @@ export interface MinistryDepartmentDto {
   isPublished: boolean;
 }
 
-// ACTIVITY 
+//  ACTIVITY 
 export interface ActivityDto {
   id: number;
   title: string;
@@ -340,50 +339,41 @@ export interface ActivityDto {
   isPublished: boolean;
 }
 
-// DASHBOARD STATS
+// DASHBOARD STATS 
 export interface DashboardStatsDto {
-  // Users
   totalUsers: number;
   totalAdmins: number;
   totalMembers: number;
   totalYouthMembers: number;
-  // Announcements
   totalAnnouncements: number;
   publishedAnnouncements: number;
   draftAnnouncements: number;
   ministryAnnouncements: number;
   youthAnnouncements: number;
-  // Events
   totalEvents: number;
   upcomingEvents: number;
   cancelledEvents: number;
   ministryEvents: number;
   youthEvents: number;
-  // Prayer Requests
   totalPrayerRequests: number;
   pendingPrayerRequests: number;
   attendedPrayerRequests: number;
-  // Testimonies
   totalTestimonies: number;
   pendingTestimonies: number;
   approvedTestimonies: number;
   rejectedTestimonies: number;
-  // Contacts
   totalContacts: number;
   newContacts: number;
   readContacts: number;
   respondedContacts: number;
   closedContacts: number;
-  // Registrations & Sermons
   totalEventRegistrations: number;
   totalSermons: number;
   publishedSermons: number;
   draftSermons: number;
-  // Donations
   totalAmountReceived: number;
   completedDonations: number;
   pendingDonations: number;
-  // Books
   totalBooks: number;
   publishedBooks: number;
   draftBooks: number;
@@ -422,8 +412,7 @@ export interface BulkEmailStatsDto {
   successRate: number;
 }
 
-// MINISTRY DEPARTMENT 
-
+// MINISTRY RESPONSE 
 export interface MinistryResponseDto {
   id: number;
   name: string;
@@ -474,4 +463,69 @@ export interface MinistryQueryObject {
   pageSize?: number;
   sortBy?: string;
   isDescending?: boolean;
+}
+
+// ACCOUNT / MY PROFILE 
+export interface MyProfileDto {
+  id: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  userName: string;
+  email: string;
+  profilePictureUrl: string | null;
+  module: string | null;
+  emailConfirmed: boolean;
+  createdOn: string;
+  roles: string[];
+}
+
+export interface MyPrayerRequestDto {
+  id: number;
+  content: string;
+  isAttendedTo: boolean;
+  createdAt: string;
+}
+
+export interface MyRegistrationDto {
+  id: number;
+  eventId: number;
+  eventTitle: string;
+  eventLocation: string;
+  eventStartDate: string;
+  eventEndDate: string;
+  eventImageUrl: string | null;
+  eventModule: string;
+  eventIsCancelled: boolean;
+  registeredAt: string;
+}
+
+export interface MyDonationDto {
+  id: number;
+  amount: number;
+  currency: string;
+  donationType: string;
+  paymentMethod: string;
+  status: string;
+  transactionReference: string;
+  eventId: number | null;
+  eventTitle: string | null;
+  createdAt: string;
+}
+
+// COUNSELLING 
+export interface CounsellingResponseDto {
+  id: number;
+  fullName: string;
+  email: string;
+  phoneNumber: string | null;
+  topic: string;
+  message: string;
+  preferredContact: string;
+  assignedTo: string | null;
+  assignedToEmail: string | null;
+  status: string;
+  appUserId: string | null;
+  createdAt: string;
+  updatedAt: string | null;
 }
