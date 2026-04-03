@@ -71,6 +71,7 @@ export interface NewUserDto {
   roles: string[];
   token: string;
   refreshToken: string;
+  profilePictureUrl: string | null;
 }
 
 export interface RegisterDto {

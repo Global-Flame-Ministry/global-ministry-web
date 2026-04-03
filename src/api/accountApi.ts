@@ -38,4 +38,18 @@ export const accountApi = {
     api.get<ApiResponse<MyDonationDto[]>>(
       '/api/account/me/donations'
     ),
+
+  // Step 1 — request email change, sends confirmation to new email
+  requestEmailChange: (newEmail: string) =>
+    api.post<ApiResponse<{ message: string }>>(
+      '/api/account/me/request-email-change',
+      { newEmail }
+    ),
+
+  // Step 2 — confirm with token from email link
+  confirmEmailChange: (newEmail: string, token: string) =>
+    api.post<ApiResponse<{ message: string }>>(
+      '/api/account/me/confirm-email-change',
+      { newEmail, token }
+    ),
 };

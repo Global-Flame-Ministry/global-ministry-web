@@ -8,6 +8,7 @@ import AdminLayout from './components/AdminLayout';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import BookStore from './pages/BookStore';
+import ConfirmEmailChange from './pages//auth/ConfirmEmailChange';
 
 // ─── MINISTRY PAGES ───────────────────────────────────────────────────────────
 import Home              from './pages/Home';
@@ -142,6 +143,9 @@ const App: React.FC = () => {
               element={<PublicLayout><Contact /></PublicLayout>} />
             <Route path="/announcements"
               element={<PublicLayout><Announcements /></PublicLayout>} />
+              <Route path="/confirm-email-change"
+              element={<PublicLayout><ConfirmEmailChange/></PublicLayout>}
+            />
             <Route path="/counselling"
               element={<PublicLayout><CounsellingPage /></PublicLayout>} />
 
