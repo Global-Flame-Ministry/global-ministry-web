@@ -29,7 +29,6 @@ const useReveal = (delay = 0) => {
 const SeniorPastor: React.FC = () => {
   const r0 = useReveal(0);
   const r1 = useReveal(100);
-  const r2 = useReveal(200);
   const r3 = useReveal(300);
 
   const fadeStyle: React.CSSProperties = {

@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import Hero from '../components/Hero';
 import { Link, useNavigate } from 'react-router-dom';
 import { announcementApi } from '../api/announcementApi';
-import { Calendar, Play, ArrowRight, Globe, MapPin, Heart, HandHeart, Star } from 'lucide-react';
+import { Calendar, Play, ArrowRight, Globe, MapPin, Heart, HandHeart, Star, Library } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
 import { eventApi } from '../api/eventApi';
-import type { SermonDto, EventDto, AnnouncementDto } from '../types';
+import { bookApi } from '../api/bookApi';
+import type { SermonDto, EventDto, AnnouncementDto, BookDto } from '../types';
 import daddy from '../assets/daddy.jpg';
 import dadandmum from '../assets/dadandmum.jpg';
 import { useScrollAnimation } from '../context/hooks/useScrollAnimation';
@@ -76,6 +77,7 @@ const Home: React.FC = () => {
   const [latestSermons, setLatestSermons]             = useState<SermonDto[]>([]);
   const [upcomingEvents, setUpcomingEvents]           = useState<EventDto[]>([]);
   const [latestAnnouncements, setLatestAnnouncements] = useState<AnnouncementDto[]>([]);
+  const [featuredBooks, setFeaturedBooks]             = useState<BookDto[]>([]);
   const [showTestimonyModal, setShowTestimonyModal]   = useState(false);
 
   useEffect(() => {
@@ -87,6 +89,9 @@ const Home: React.FC = () => {
     });
     announcementApi.getAll({ pageSize: 3, module: 'Ministry' }).then(res => {
       if (res.data.isSuccess && res.data.data) setLatestAnnouncements(res.data.data.items);
+    });
+    bookApi.getPublished({ pageSize: 10, pageNumber: 1 }).then(res => {
+      if (res.data.isSuccess && res.data.data) setFeaturedBooks(res.data.data.items);
     });
   }, []);
 
@@ -253,6 +258,105 @@ const Home: React.FC = () => {
         </div>
       </div>
 
+      {/* ── Books Section ─────────────────────────────────────────────── */}
+      {featuredBooks.length > 0 && (
+        <div className="py-20 bg-white border-t border-slate-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {/* Header */}
+            <AnimatedDiv className="flex flex-col md:flex-row justify-between items-end mb-10">
+              <div className="max-w-xl">
+                <h2 className="text-xs font-bold text-fuchsia-600 uppercase tracking-[0.3em] mb-4">
+                  Kingdom Literature
+                </h2>
+                <h3 className="text-4xl md:text-5xl font-serif font-medium text-slate-900 leading-tight">
+                  Transform Your Mind,{' '}
+                  <span className="italic text-fuchsia-600">Transform Your Life</span>
+                </h3>
+                <p className="text-slate-400 italic text-sm border-l-2 border-fuchsia-300 pl-4 mt-4">
+                  "Do not conform to the pattern of this world, but be transformed by the
+                  renewing of your mind." —{' '}
+                  <span className="text-fuchsia-500 font-semibold not-italic">Romans 12:2</span>
+                </p>
+              </div>
+              <Link
+                to="/books"
+                className="mt-6 md:mt-0 flex items-center gap-2 px-6 py-3 border-2
+                  border-fuchsia-600 text-fuchsia-600 font-bold uppercase tracking-widest
+                  text-xs hover:bg-fuchsia-600 hover:text-white transition-all rounded-sm
+                  shrink-0"
+              >
+                Explore More Books <ArrowRight className="w-3 h-3" />
+              </Link>
+            </AnimatedDiv>
+
+            {/* Divider */}
+            <div className="flex items-center gap-4 mb-8">
+              <div className="flex-1 h-px bg-slate-200" />
+              <span className="text-slate-400 font-bold uppercase tracking-widest text-[11px] whitespace-nowrap">
+                Recommended Reads for Transformation
+              </span>
+              <div className="flex-1 h-px bg-slate-200" />
+            </div>
+
+            {/* Horizontal scrollable shelf — covers only, no prices */}
+            <div className="flex gap-5 overflow-x-auto pb-6
+              scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+              {featuredBooks.map((book, idx) => (
+                <AnimatedDiv
+                  key={book.id}
+                  delay={idx * 60}
+                  direction="up"
+                  className="shrink-0"
+                >
+                  <Link to="/books" className="group block w-32">
+                    {/* Cover only */}
+                    <div className="relative w-32 h-48 rounded-lg overflow-hidden
+                      bg-slate-100 shadow-sm hover:shadow-lg transition-shadow duration-300 mb-2">
+                      {book.coverImageUrl ? (
+                        <img
+                          src={book.coverImageUrl}
+                          alt={book.title}
+                          className="w-full h-full object-cover group-hover:scale-105
+                            transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Library className="w-8 h-8 text-slate-300" />
+                        </div>
+                      )}
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-fuchsia-600/0 group-hover:bg-fuchsia-600/20
+                        transition-all duration-300 flex items-end justify-center pb-3">
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity
+                          duration-300 text-[9px] font-black uppercase tracking-widest
+                          text-white bg-fuchsia-600 px-2 py-1 rounded-full">
+                          View Book
+                        </span>
+                      </div>
+                      {book.isFeatured && (
+                        <div className="absolute top-2 left-2 bg-fuchsia-600 text-white
+                          text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full">
+                          Featured
+                        </div>
+                      )}
+                    </div>
+                    {/* Title only — no price */}
+                    <h4 className="text-xs font-bold text-slate-800 leading-snug line-clamp-2
+                      group-hover:text-fuchsia-600 transition-colors">
+                      {book.title}
+                    </h4>
+                    <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
+                      {book.author}
+                    </p>
+                  </Link>
+                </AnimatedDiv>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Divine Presence Section ───────────────────────────────────── */}
       <AnimatedSection direction="fade" className="relative h-[70vh] flex items-center overflow-hidden bg-slate-900">
         <div className="absolute inset-0 z-0">
@@ -269,7 +373,6 @@ const Home: React.FC = () => {
               <p className="text-slate-300 text-lg mb-8 max-w-md">
                 Join us every Tuesday for an atmosphere of worship that transcends the ordinary.
               </p>
-              {/* All 3 buttons on same row — flex-nowrap on desktop, wraps on mobile */}
               <div className="flex flex-wrap lg:flex-nowrap items-center gap-3">
                 <Link
                   to="/sermons"

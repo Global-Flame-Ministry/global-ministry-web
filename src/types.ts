@@ -1,4 +1,4 @@
-// ─── ORIGINAL TYPES ──────────────────────────────────────────────────────────
+// ORIGINAL TYPES 
 export interface Sermon {
   id: string;
   title: string;
