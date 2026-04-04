@@ -25,8 +25,8 @@ const AdminDonations = () => {
     border:    isDark ? 'border-white/5'               : 'border-slate-200',
     subtext:   isDark ? 'text-zinc-400'                : 'text-slate-500',
     mutedtext: isDark ? 'text-zinc-600'                : 'text-slate-400',
-    input:     isDark
-      ? 'bg-white/5 border-white/8 text-white placeholder-zinc-600 focus:border-fuchsia-500/50'
+    input: isDark
+      ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-500 focus:border-fuchsia-500'
       : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-fuchsia-500',
     row:       isDark ? 'bg-white/3 hover:bg-white/5 border-white/5' : 'bg-white hover:bg-slate-50 border-slate-200',
     btnGhost:  isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-100 hover:bg-slate-200',

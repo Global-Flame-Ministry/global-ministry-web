@@ -16,8 +16,8 @@ const AdminPrayerRequests = () => {
     border:    isDark ? 'border-white/5'               : 'border-slate-200',
     subtext:   isDark ? 'text-zinc-400'                : 'text-slate-500',
     mutedtext: isDark ? 'text-zinc-600'                : 'text-slate-400',
-    input:     isDark
-      ? 'bg-white/5 border-white/8 text-white placeholder-zinc-600 focus:border-fuchsia-500/50'
+    input: isDark
+      ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-500 focus:border-fuchsia-500'
       : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-fuchsia-500',
     rowActive: isDark ? 'bg-fuchsia-500/10 border-fuchsia-500/20' : 'bg-fuchsia-50 border-fuchsia-300',
     rowIdle:   isDark ? 'border-transparent hover:bg-white/4'     : 'border-transparent hover:bg-white',

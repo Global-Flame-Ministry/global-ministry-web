@@ -23,20 +23,22 @@ const AdminAnnouncements = () => {
   const { isDark } = useAdminTheme();
 
   const t = {
-    bg:       isDark ? 'bg-[#0d0d0d] text-white'     : 'bg-slate-50 text-slate-900',
-    border:   isDark ? 'border-white/5'               : 'border-slate-200',
-    subtext:  isDark ? 'text-zinc-400'                : 'text-slate-500',
-    mutedtext:isDark ? 'text-zinc-600'                : 'text-slate-400',
-    input:    isDark ? 'bg-white/5 border-white/8 text-white placeholder-zinc-600 focus:border-fuchsia-500/50'
-                     : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-fuchsia-500',
-    row:      isDark ? 'bg-white/3 hover:bg-white/5 border-white/5' : 'bg-white hover:bg-slate-50 border-slate-200',
-    btnGhost: isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-100 hover:bg-slate-200',
-    modal:    isDark ? 'bg-[#161616] border-white/10 text-white' : 'bg-white border-slate-200 shadow-xl text-slate-900',
-    modalInput: isDark ? 'bg-white/5 border-white/10 text-white placeholder:text-zinc-600 focus:border-fuchsia-500/50'
-                       : 'bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-fuchsia-500',
-    label:    isDark ? 'text-zinc-400' : 'text-slate-600',
-    toggle:   isDark ? 'bg-white/10'  : 'bg-slate-200',
-    skeleton: isDark ? 'bg-white/3'   : 'bg-slate-200',
+    bg:         isDark ? 'bg-[#0d0d0d] text-white'     : 'bg-slate-50 text-slate-900',
+    border:     isDark ? 'border-white/5'               : 'border-slate-200',
+    subtext:    isDark ? 'text-zinc-400'                : 'text-slate-500',
+    mutedtext:  isDark ? 'text-zinc-600'                : 'text-slate-400',
+    input:      isDark
+      ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-500 focus:border-fuchsia-500'
+      : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-fuchsia-500',
+    row:        isDark ? 'bg-white/3 hover:bg-white/5 border-white/5' : 'bg-white hover:bg-slate-50 border-slate-200',
+    btnGhost:   isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-100 hover:bg-slate-200',
+    modal:      isDark ? 'bg-[#161616] border-white/10 text-white' : 'bg-white border-slate-200 shadow-xl text-slate-900',
+    modalInput: isDark
+      ? 'bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-fuchsia-500'
+      : 'bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-fuchsia-500',
+    label:      isDark ? 'text-zinc-400' : 'text-slate-600',
+    toggle:     isDark ? 'bg-white/10'  : 'bg-slate-200',
+    skeleton:   isDark ? 'bg-white/3'   : 'bg-slate-200',
   };
 
   const [announcements, setAnnouncements] = useState<AnnouncementDto[]>([]);
@@ -74,7 +76,7 @@ const AdminAnnouncements = () => {
   useEffect(() => { setPageNumber(1); }, [search, filterModule, filterPublished]);
 
   const openCreate = () => { setEditing(null); setForm(emptyForm()); setShowForm(true); };
-  const openEdit   = (a: AnnouncementDto) => {
+  const openEdit = (a: AnnouncementDto) => {
     setEditing(a);
     setForm({ title: a.title, content: a.content, module: a.module, category: a.category, isPublished: a.isPublished });
     setShowForm(true);
@@ -129,7 +131,6 @@ const AdminAnnouncements = () => {
   return (
     <div className={`min-h-screen font-sans ${t.bg}`}>
 
-      {/* Header */}
       <div className={`px-8 pt-8 pb-6 border-b ${t.border} flex items-center justify-between`}>
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-fuchsia-500 mb-1">Admin</p>
@@ -147,7 +148,6 @@ const AdminAnnouncements = () => {
         </div>
       </div>
 
-      {/* Filters */}
       <div className={`px-8 py-4 border-b ${t.border} flex flex-wrap gap-3`}>
         <div className="relative flex-1 min-w-48">
           <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${t.subtext}`} />
@@ -156,7 +156,7 @@ const AdminAnnouncements = () => {
             className={`w-full pl-9 pr-4 py-2.5 border rounded-lg text-sm outline-none transition-all ${t.input}`} />
         </div>
         <div className="relative">
-          <Filter className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${t.subtext}`} />
+          <Filter className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${t.subtext} pointer-events-none`} />
           <select value={filterModule} onChange={e => setFilterModule(e.target.value)}
             className={`pl-9 pr-8 py-2.5 border rounded-lg text-sm outline-none appearance-none cursor-pointer ${t.input}`}>
             <option value="">All Modules</option>
@@ -171,7 +171,6 @@ const AdminAnnouncements = () => {
         </select>
       </div>
 
-      {/* List */}
       <div className="px-8 py-6">
         {isLoading ? (
           <div className="space-y-3">
@@ -207,8 +206,7 @@ const AdminAnnouncements = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <button onClick={() => handleTogglePublish(a)} className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}
-                    title={a.isPublished ? 'Unpublish' : 'Publish'}>
+                  <button onClick={() => handleTogglePublish(a)} className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}>
                     {a.isPublished ? <EyeOff className={`w-4 h-4 ${t.subtext}`} /> : <Eye className={`w-4 h-4 ${t.subtext}`} />}
                   </button>
                   <button onClick={() => openEdit(a)} className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}>
@@ -236,7 +234,6 @@ const AdminAnnouncements = () => {
         )}
       </div>
 
-      {/* Form Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowForm(false)} />
@@ -299,7 +296,6 @@ const AdminAnnouncements = () => {
         </div>
       )}
 
-      {/* Delete Confirm */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setDeleteTarget(null)} />

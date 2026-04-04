@@ -266,7 +266,7 @@ const MinistryDetail: React.FC = () => {
                   About This Ministry
                 </h2>
                 <div className="prose prose-slate max-w-none">
-                  <p className="text-slate-600 text-lg leading-relaxed whitespace-pre-line">
+                  <p className="text-slate-600 text-lg leading-relaxed whitespace-pre-line text-justify">
                     {ministry.description}
                   </p>
                 </div>
