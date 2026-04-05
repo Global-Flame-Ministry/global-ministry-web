@@ -48,7 +48,7 @@ const OurMission: React.FC = () => {
             Our Mission
           </h2>
 
-          <p className="text-slate-600 leading-relaxed text-sm md:text-base">
+          <p className="text-slate-600 leading-relaxed text-sm md:text-base justify-center">
             We envision a people who will be filled with the power of the Holy Ghost,
             impact lives and make heaven.
             We also spread the love of Christ across nations,
@@ -69,7 +69,7 @@ const OurMission: React.FC = () => {
             Our Vision
           </h2>
 
-          <p className="text-slate-600 leading-relaxed text-sm md:text-base">
+          <p className="text-slate-600 leading-relaxed text-sm md:text-base justify-center">
             To be clothed in the power of the Holy Spirit and taking
             the gospel to the nations of the world.
             To see lives empowered spiritually, families

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Loader, Users, Lock } from 'lucide-react';
+import { ArrowRight, Loader, Users, Lock, Flame } from 'lucide-react';
 import { ministryApi } from '../api/ministryApi';
 import type { MinistryResponseDto } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -34,7 +34,7 @@ const fadeStyle: React.CSSProperties = {
   transition: 'opacity 0.7s ease-out, transform 0.7s ease-out',
 };
 
-// ─── REGULAR MINISTRY ROW ────────────────────────────────────────────────────
+// ─── REGULAR MINISTRY ROW ─────────────────────────────────────────────────────
 
 const MinistryRow: React.FC<{
   ministry: MinistryResponseDto;
@@ -130,7 +130,7 @@ const MinistryRow: React.FC<{
   );
 };
 
-// ─── YOUTH COMMUNITY ROW — special hardcoded card with auth gate ─────────────
+// ─── YOUTH COMMUNITY ROW ──────────────────────────────────────────────────────
 
 const YouthRow: React.FC<{ index: number }> = ({ index }) => {
   const ref = useReveal(index * 100);
@@ -157,14 +157,11 @@ const YouthRow: React.FC<{ index: number }> = ({ index }) => {
         <div className="relative aspect-video overflow-hidden bg-gradient-to-br
           from-fuchsia-900 to-purple-900 rounded-sm shadow-2xl">
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-fuchsia-300 text-6xl font-serif italic
-                font-bold opacity-30">
-                House of Opra
-              </p>
-            </div>
+            <p className="text-fuchsia-300 text-6xl font-serif italic
+              font-bold opacity-30">
+              House of Opra
+            </p>
           </div>
-          {/* Auth badge overlay */}
           {!isAuthenticated && (
             <div className="absolute top-4 left-4 flex items-center gap-2
               bg-black/60 backdrop-blur-sm text-white text-[10px] font-black
@@ -194,7 +191,6 @@ const YouthRow: React.FC<{ index: number }> = ({ index }) => {
           transformation in their communities.
         </p>
 
-        {/* Auth notice */}
         {!isAuthenticated && (
           <div className="flex items-start gap-3 p-4 bg-fuchsia-50
             border border-fuchsia-200 rounded-xl mb-6">
@@ -246,12 +242,60 @@ const YouthRow: React.FC<{ index: number }> = ({ index }) => {
   );
 };
 
+// ─── EMPTY / COMING SOON STATE ────────────────────────────────────────────────
+// Shown when either the server is unreachable OR there are genuinely no
+// ministries in the database yet. The user never sees a technical error.
+
+const MinistriesComingSoon: React.FC = () => (
+  <div className="flex flex-col items-center justify-center py-32 px-6
+    text-center max-w-lg mx-auto">
+    <div className="w-24 h-24 bg-fuchsia-50 rounded-full flex items-center
+      justify-center mx-auto mb-8">
+      <Flame className="w-12 h-12 text-fuchsia-300" />
+    </div>
+    <p className="text-[10px] font-black uppercase tracking-[0.4em]
+      text-fuchsia-500 mb-4">
+      Global Flame Ministries
+    </p>
+    <h2 className="font-serif text-4xl text-slate-900 mb-4 leading-tight">
+      Something great is <span className="italic text-fuchsia-600">
+        coming.
+      </span>
+    </h2>
+    <p className="text-slate-400 text-base leading-relaxed mb-10">
+      Our ministry departments are being set up. Each arm is a vital part
+      of our mission - check back soon to discover where you belong in the
+      Global Flame family.
+    </p>
+    <div className="flex flex-col sm:flex-row items-center gap-3">
+      <Link
+        to="/contact"
+        className="px-8 py-3.5 bg-slate-900 hover:bg-fuchsia-600
+          text-white text-[10px] font-black uppercase tracking-widest
+          rounded-xl transition-all"
+      >
+        Get in Touch
+      </Link>
+      <Link
+        to="/events"
+        className="px-8 py-3.5 border-2 border-slate-200
+          hover:border-fuchsia-300 text-slate-700 hover:text-fuchsia-600
+          text-[10px] font-black uppercase tracking-widest rounded-xl
+          transition-all"
+      >
+        View Events
+      </Link>
+    </div>
+  </div>
+);
+
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 
 const Ministries: React.FC = () => {
   const [ministries, setMinistries] = useState<MinistryResponseDto[]>([]);
   const [isLoading, setIsLoading]   = useState(true);
-  const [error, setError]           = useState<string | null>(null);
+  // NOTE: no error state — we treat all failure modes as "empty"
+  // so the user never sees a technical error message
 
   const rHero = useReveal(0);
 
@@ -262,11 +306,11 @@ const Ministries: React.FC = () => {
         const res = await ministryApi.getAll({ pageSize: 50 });
         if (res.data.isSuccess && res.data.data) {
           setMinistries(res.data.data.items);
-        } else {
-          setError('Could not load ministries.');
         }
+        // If isSuccess is false we just leave ministries as [] — shows empty state
       } catch {
-        setError('Could not reach the server.');
+        // Server unreachable — silently fall through to empty state
+        // The user sees "Something great is coming" instead of a server error
       } finally {
         setIsLoading(false);
       }
@@ -277,7 +321,7 @@ const Ministries: React.FC = () => {
   return (
     <div className="bg-white relative animate-in fade-in duration-700">
 
-      {/* HERO */}
+      {/* ── HERO ──────────────────────────────────────────────────────── */}
       <section className="bg-[#0a0a0a] pt-32 pb-20 px-6">
         <div ref={rHero} style={fadeStyle}
           className="max-w-7xl mx-auto border-l border-white/20 pl-8">
@@ -297,35 +341,22 @@ const Ministries: React.FC = () => {
         </div>
       </section>
 
+      {/* ── LOADING ───────────────────────────────────────────────────── */}
       {isLoading && (
-        <div className="flex items-center justify-center py-32">
+        <div className="flex items-center justify-center py-40">
           <Loader className="animate-spin text-fuchsia-600 w-8 h-8" />
         </div>
       )}
 
-      {error && !isLoading && (
-        <div className="max-w-7xl mx-auto px-6 py-16">
-          <div className="p-4 bg-red-50 border border-red-200 rounded-xl
-            text-red-600 text-sm">
-            ⚠️ {error}
-          </div>
-        </div>
+      {/* ── EMPTY / SERVER DOWN — graceful state ──────────────────────── */}
+      {!isLoading && ministries.length === 0 && (
+        <MinistriesComingSoon />
       )}
 
-      {!isLoading && !error && ministries.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-32
-          text-center">
-          <Users className="w-12 h-12 text-slate-300 mb-4" />
-          <p className="text-slate-500 font-serif italic text-lg">
-            No ministries available yet. Check back soon.
-          </p>
-        </div>
-      )}
-
-      {!isLoading && !error && (
+      {/* ── MINISTRY LIST ─────────────────────────────────────────────── */}
+      {!isLoading && ministries.length > 0 && (
         <section className="max-w-7xl mx-auto px-6 py-24">
           <div className="flex flex-col gap-32">
-            {/* Dynamic ministries from DB */}
             {ministries.map((ministry, index) => (
               <MinistryRow
                 key={ministry.id}

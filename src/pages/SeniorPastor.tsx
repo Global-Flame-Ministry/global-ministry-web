@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import dad from '../assets/dad.jpg';
+import dad from '../assets/daddy.jpg';
 
 const useReveal = (delay = 0) => {
   const ref = useRef<HTMLDivElement>(null);
