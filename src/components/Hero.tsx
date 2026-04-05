@@ -36,13 +36,14 @@ const Hero: React.FC = () => {
         {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="space-y-8">
-            <span className="inline-block py-1 px-3 rounded-full bg-brand-500/20 border border-brand-400/30 text-brand-200 text-sm font-semibold tracking-wider uppercase backdrop-blur-sm">
+            <span className="inline-block py-1 px-3 rounded-full bg-fuchsia-500/20 border border-fuchsia-400/40 text-fuchsia-300 text-sm font-semibold tracking-wider uppercase backdrop-blur-sm">
               Welcome Home
             </span>
 
-            <h1 className="text-5xl md:text-5xl font-serif font-bold text-white tracking-tight leading-tight">
-              Raising a people of power who will manifest the kingdom<br />
-              <span className="text-transparent bg-clip-text bg-linear-to-r from-brand-300 to-white">
+
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-white tracking-tight leading-snug max-w-4xl mx-auto">
+              Raising a people of power who will manifest the kingdom{' '}
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-fuchsia-300 via-white to-white">
                 and the realities of the fullness of Christ through the Spirit.
               </span>
             </h1>

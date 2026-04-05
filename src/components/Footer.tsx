@@ -1,10 +1,12 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Facebook, Instagram, Youtube, Mail, MapPin,
   Phone, Heart, ArrowRight
 } from 'lucide-react';
 import { CHURCH_NAME } from '../constants';
+import { ministryApi } from '../api/ministryApi';
+import type { MinistryResponseDto } from '../types';
 
 // ─── SCROLL REVEAL HOOK ───────────────────────────────────────────────────────
 
@@ -32,7 +34,7 @@ const useReveal = (delay = 0) => {
   return ref;
 };
 
-// ─── BIG TEXT SCROLL REVEAL — slides in from left ────────────────────────────
+// ─── BIG TEXT SCROLL REVEAL ───────────────────────────────────────────────────
 
 const useBigTextReveal = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -63,6 +65,21 @@ const useBigTextReveal = () => {
 const Footer: React.FC = () => {
   const year = new Date().getFullYear();
 
+  // Fetch published ministries dynamically — same pattern as the Navbar
+  const [ministries, setMinistries] = useState<MinistryResponseDto[]>([]);
+
+  useEffect(() => {
+    ministryApi.getAll({ pageSize: 20 })
+      .then(res => {
+        if (res.data.isSuccess && res.data.data) {
+          setMinistries(res.data.data.items);
+        }
+      })
+      .catch(() => {
+        // Silent fail — footer links just won't show if server is down
+      });
+  }, []);
+
   const rCta        = useReveal(0);
   const rBrand      = useReveal(100);
   const rMinistries = useReveal(150);
@@ -74,7 +91,7 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-[#09090b] text-slate-400 overflow-hidden">
 
-      {/* ── TOP CTA BAND ── */}
+      {/* ── TOP CTA BAND ─────────────────────────────────────────────── */}
       <div className="border-b border-white/5">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
           <div ref={rCta} className="flex flex-col md:flex-row items-center
@@ -113,14 +130,12 @@ const Footer: React.FC = () => {
         </div>
       </div>
 
-      {/* ── MAIN FOOTER GRID ── */}
+      {/* ── MAIN FOOTER GRID ─────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
 
-          {/* Brand column — logo/name removed, only social + contact */}
-          <div ref={rBrand} className="space-y-5">
-
-            {/* Social */}
+          {/* Brand / Social / Contact — full width on mobile */}
+          <div ref={rBrand} className="col-span-2 lg:col-span-1 space-y-5">
             <div>
               <p className="text-[9px] font-black uppercase tracking-[0.4em]
                 text-fuchsia-500 mb-4">
@@ -144,7 +159,7 @@ const Footer: React.FC = () => {
                     label: 'YouTube'
                   },
                 ].map(social => (
-                  <a 
+                  <a
                     key={social.label}
                     href={social.href}
                     aria-label={social.label}
@@ -160,7 +175,6 @@ const Footer: React.FC = () => {
               </div>
             </div>
 
-            {/* Contact info */}
             <div className="space-y-3 pt-2">
               {[
                 {
@@ -185,38 +199,63 @@ const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* Ministries */}
-          <div ref={rMinistries}>
+          {/* ── MINISTRIES — dynamic from API ─────────────────────── */}
+          <div ref={rMinistries} className="col-span-1">
             <h4 className="text-[9px] font-black uppercase tracking-[0.4em]
               text-fuchsia-500 mb-5">
               Ministries
             </h4>
             <ul className="space-y-3">
-              {[
-                { label: 'All Ministries',      path: '/ministries' },
-                { label: 'Daughters of Honour', path: '/ministries/daughters-of-honour' },
-                { label: 'Global Choir',        path: '/ministries/global-choir' },
-                { label: 'Home of Love',        path: '/ministries/home-of-love' },
-                { label: 'Youth Community',     path: '/youth' },
-              ].map(link => (
-                <li key={link.label}>
+
+              {/* "All Ministries" is always the first link */}
+              <li>
+                <Link
+                  to="/ministries"
+                  className="text-sm text-slate-500 hover:text-fuchsia-400
+                    transition-colors flex items-center gap-2 group"
+                >
+                  <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100
+                    -translate-x-2 group-hover:translate-x-0 transition-all
+                    duration-200 text-fuchsia-500 shrink-0" />
+                  All Ministries
+                </Link>
+              </li>
+
+              {/* Dynamic ministry links from the backend */}
+              {ministries.map(ministry => (
+                <li key={ministry.id}>
                   <Link
-                    to={link.path}
+                    to={`/ministries/${ministry.slug}`}
                     className="text-sm text-slate-500 hover:text-fuchsia-400
                       transition-colors flex items-center gap-2 group"
                   >
                     <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100
                       -translate-x-2 group-hover:translate-x-0 transition-all
                       duration-200 text-fuchsia-500 shrink-0" />
-                    {link.label}
+                    {ministry.name}
                   </Link>
                 </li>
               ))}
+
+              {/* Youth Community is always the last link — hardcoded
+                  because it lives at /youth not /ministries/:slug */}
+              <li>
+                <Link
+                  to="/youth"
+                  className="text-sm text-slate-500 hover:text-fuchsia-400
+                    transition-colors flex items-center gap-2 group"
+                >
+                  <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100
+                    -translate-x-2 group-hover:translate-x-0 transition-all
+                    duration-200 text-fuchsia-500 shrink-0" />
+                  Youth Community
+                </Link>
+              </li>
             </ul>
           </div>
 
           {/* Discover */}
-          <div ref={rDiscover}>
+          <div ref={rDiscover} className="col-span-1">
             <h4 className="text-[9px] font-black uppercase tracking-[0.4em]
               text-fuchsia-500 mb-5">
               Discover
@@ -247,8 +286,8 @@ const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Newsletter */}
-          <div ref={rNewsletter}>
+          {/* Newsletter — full width on mobile */}
+          <div ref={rNewsletter} className="col-span-2 lg:col-span-1">
             <h4 className="text-[9px] font-black uppercase tracking-[0.4em]
               text-fuchsia-500 mb-5">
               Stay Inspired
@@ -275,7 +314,6 @@ const Footer: React.FC = () => {
               </button>
             </form>
 
-            {/* Service times */}
             <div className="mt-8 border-t border-white/5 pt-6">
               <p className="text-[9px] font-black uppercase tracking-[0.4em]
                 text-slate-600 mb-4">
@@ -302,11 +340,9 @@ const Footer: React.FC = () => {
         </div>
       </div>
 
-      {/* ── OVERSIZED BRAND NAME + TAGLINE ── */}
+      {/* ── OVERSIZED BRAND NAME ─────────────────────────────────────── */}
       <div className="border-t border-white/5 overflow-hidden">
         <div ref={rBigText}>
-
-          {/* Tagline sitting above the big text */}
           <p className="text-center text-slate-500 text-sm leading-relaxed
             pt-10 pb-4 px-6">
             Raising a people who will manifest the Kingdom.{' '}
@@ -314,8 +350,6 @@ const Footer: React.FC = () => {
               A global movement ignited by the Holy Spirit since 1999.
             </span>
           </p>
-
-          {/* Big watermark text */}
           <p
             className="font-black select-none leading-none whitespace-nowrap
               text-center"
@@ -335,7 +369,7 @@ const Footer: React.FC = () => {
         </div>
       </div>
 
-      {/* ── BOTTOM BAR ── */}
+      {/* ── BOTTOM BAR ───────────────────────────────────────────────── */}
       <div ref={rBottom} className="border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row items-center

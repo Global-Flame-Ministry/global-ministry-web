@@ -47,7 +47,7 @@ const CoPastor: React.FC = () => {
             Co-Pastor
           </p>
           <h1 className="font-serif text-5xl md:text-6xl text-slate-900 mb-8 leading-tight">
-            APOSTLE <br />
+            PASTOR <br />
             <span className="italic text-fuchsia-600">FAITH MUSA.</span>
           </h1>
         </div>
@@ -65,7 +65,7 @@ const CoPastor: React.FC = () => {
             {/* Content Column */}
             <div className="lg:col-span-3 prose prose-slate prose-lg max-w-none prose-p:leading-relaxed prose-headings:text-gray-900">
               <p className="mb-6 text-justify">
-                Apostle Faith Musa serves as the Co-Pastor of Global Flame Ministry alongside
+                Pastor Faith Musa serves as the Co-Pastor of Global Flame Ministry alongside
                 her husband, Apostle Danjuma Musa. Her name is not incidental - Faith is both
                 her identity and her ministry. She moves in a remarkable grace for strengthening
                 believers and calling out the potential God has placed in every person she encounters.
