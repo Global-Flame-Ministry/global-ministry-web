@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom';
 import { Play, Search, Filter, Music, Video } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
 import type { SermonDto } from '../types';
-import dad from '../assets/dad.jpg';
-import mummy from '../assets/mummy.jpg';
 import auditorium from '../assets/auditorium.jpg';
 
 const useReveal = (delay = 0) => {
@@ -66,13 +64,6 @@ const Sermons: React.FC = () => {
     s.speaker.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.series.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const getSpeakerImage = (speakerName: string) => {
-    const name = speakerName.toLowerCase();
-    if (name.includes('danjuma') || name.includes('gasuk')) return dad;
-    if (name.includes('faith')) return mummy;
-    return null;
-  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -154,6 +145,7 @@ const Sermons: React.FC = () => {
                   className="group cursor-pointer block animate-fadeUp"
                   style={{ animationDelay: `${idx * 80}ms`, animationFillMode: 'both' }}
                 >
+                  {/* Sermon cover image */}
                   <div className="relative aspect-[16/10] rounded-xl overflow-hidden shadow-lg border border-slate-100 bg-white">
                     {sermon.imageUrl ? (
                       <img
@@ -176,6 +168,8 @@ const Sermons: React.FC = () => {
                       </div>
                     </div>
                   </div>
+
+                  {/* Card info */}
                   <div className="mt-6 space-y-2 px-1">
                     <div className="flex items-center gap-2 text-[10px] text-amber-600 font-bold uppercase tracking-widest">
                       <Video size={12} /> HD Broadcast
@@ -186,19 +180,32 @@ const Sermons: React.FC = () => {
                     <p className="text-sm text-slate-500 line-clamp-2 font-light text-justify">
                       {sermon.description}
                     </p>
+
+                    {/* Speaker row — avatar + name + date side by side */}
                     <div className="flex items-center gap-3 pt-4">
-                      <div className="w-8 h-8 rounded-full bg-slate-100 overflow-hidden">
-                        <img
-                          src={getSpeakerImage(sermon.speaker) || dad}
-                          alt={sermon.speaker}
-                          className="w-full h-full object-cover"
-                        />
+                      {/* Avatar */}
+                      <div className="w-9 h-9 rounded-full bg-slate-100 overflow-hidden flex items-center justify-center shrink-0 border border-slate-200">
+                        {sermon.speakerImageUrl ? (
+                          <img
+                            src={sermon.speakerImageUrl}
+                            alt={sermon.speaker}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-[11px] font-black text-fuchsia-700 uppercase select-none">
+                            {sermon.speaker.charAt(0)}
+                          </span>
+                        )}
                       </div>
+
+                      {/* Name + date */}
                       <div>
-                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest block">
+                        <span className="text-[11px] font-bold text-slate-600 uppercase tracking-widest block leading-tight">
                           {sermon.speaker}
                         </span>
-                        <span className="text-[10px] text-slate-400">{formatDate(sermon.sermonDate)}</span>
+                        <span className="text-[10px] text-slate-400">
+                          {formatDate(sermon.sermonDate)}
+                        </span>
                       </div>
                     </div>
                   </div>

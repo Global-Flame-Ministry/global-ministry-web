@@ -31,6 +31,14 @@ const useReveal = (delay = 0) => {
   return ref;
 };
 
+/* ── Helper: days remaining until event starts (negative if already started) ── */
+const daysUntilStart = (startDate: string): number => {
+  const now = new Date();
+  const start = new Date(startDate);
+  const diffMs = start.getTime() - now.getTime();
+  return diffMs / (1000 * 60 * 60 * 24);
+};
+
 /* ── Event Card ────────────────────────────────────────────────────── */
 const EventCard: React.FC<{
   event: EventDto;
@@ -39,8 +47,20 @@ const EventCard: React.FC<{
   onRegister: (e: EventDto) => void;
   onDonate: (e: EventDto) => void;
   formatDate: (d: string) => string;
-}> = ({ event, badge, index = 0, onRegister, onDonate, formatDate }) => {
+  isOngoing?: boolean; // 👈 NEW: controls button visibility rules
+}> = ({ event, badge, index = 0, onRegister, onDonate, formatDate, isOngoing = false }) => {
   const ref = useReveal(index * 80);
+
+  // For ongoing events: registration disappears if <= 5 days to start (already started = negative days)
+  // For ongoing events: give disappears if <= 1 day to start
+  // For upcoming events: both buttons always show normally
+  const showRegister = isOngoing
+    ? daysUntilStart(event.startDate) > 5
+    : true;
+
+  const showDonate = isOngoing
+    ? daysUntilStart(event.startDate) > 1
+    : true;
 
   return (
     <div
@@ -102,7 +122,8 @@ const EventCard: React.FC<{
 
         {!event.isCancelled && (
           <div className="flex flex-wrap gap-3">
-            {event.acceptsRegistrations && (
+            {/* Register button: hidden for ongoing events (already started = days < 0, always < 5) */}
+            {event.acceptsRegistrations && showRegister && (
               <button
                 onClick={() => onRegister(event)}
                 className="group/btn inline-flex items-center gap-3
@@ -115,7 +136,8 @@ const EventCard: React.FC<{
                   group-hover/btn:translate-x-1" />
               </button>
             )}
-            {event.acceptsDonations && (
+            {/* Give button: hidden for ongoing events (already started = days < 0, always < 1) */}
+            {event.acceptsDonations && showDonate && (
               <button
                 onClick={() => onDonate(event)}
                 className="inline-flex items-center gap-2 border-2
@@ -308,6 +330,7 @@ const Events: React.FC = () => {
                   onRegister={setSelectedEvent}
                   onDonate={handleDonate}
                   formatDate={formatDate}
+                  isOngoing={true} // 👈 THIS is what hides the buttons
                 />
               ))}
             </div>
@@ -364,6 +387,7 @@ const Events: React.FC = () => {
                 onRegister={setSelectedEvent}
                 onDonate={handleDonate}
                 formatDate={formatDate}
+                isOngoing={false} // 👈 upcoming events show buttons normally
               />
             ))}
           </div>

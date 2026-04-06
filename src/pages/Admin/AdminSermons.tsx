@@ -13,6 +13,7 @@ import ImageUpload from '../../components/ImageUpload';
 
 const emptyForm = (): CreateSermonDto => ({
   title: '', speaker: '', series: '', description: '',
+  speakerImageUrl: '',
   imageUrl: '', videoUrl: '', audioUrl: '', sermonDate: '', isPublished: false,
 });
 
@@ -72,12 +73,20 @@ const AdminSermons = () => {
   useEffect(() => { setPageNumber(1); }, [search, filterPublished]);
 
   const openCreate = () => { setEditing(null); setForm(emptyForm()); setShowForm(true); };
+
   const openEdit = (s: SermonDto) => {
     setEditing(s);
     setForm({
-      title: s.title, speaker: s.speaker, series: s.series, description: s.description,
-      imageUrl: s.imageUrl ?? '', videoUrl: s.videoUrl ?? '', audioUrl: s.audioUrl ?? '',
-      sermonDate: s.sermonDate.slice(0, 10), isPublished: s.isPublished,
+      title:           s.title,
+      speaker:         s.speaker,
+      series:          s.series,
+      description:     s.description,
+      speakerImageUrl: s.speakerImageUrl ?? '',
+      imageUrl:        s.imageUrl ?? '',
+      videoUrl:        s.videoUrl ?? '',
+      audioUrl:        s.audioUrl ?? '',
+      sermonDate:      s.sermonDate.slice(0, 10),
+      isPublished:     s.isPublished,
     });
     setShowForm(true);
   };
@@ -115,14 +124,22 @@ const AdminSermons = () => {
   const togglePublish = async (sermon: SermonDto) => {
     try {
       const dto: UpdateSermonDto = {
-        title: sermon.title, speaker: sermon.speaker, series: sermon.series,
-        description: sermon.description, imageUrl: sermon.imageUrl ?? '',
-        videoUrl: sermon.videoUrl ?? '', audioUrl: sermon.audioUrl ?? '',
-        sermonDate: sermon.sermonDate.slice(0, 10), isPublished: !sermon.isPublished,
+        title:           sermon.title,
+        speaker:         sermon.speaker,
+        series:          sermon.series,
+        description:     sermon.description,
+        speakerImageUrl: sermon.speakerImageUrl ?? '',
+        imageUrl:        sermon.imageUrl ?? '',
+        videoUrl:        sermon.videoUrl ?? '',
+        audioUrl:        sermon.audioUrl ?? '',
+        sermonDate:      sermon.sermonDate.slice(0, 10),
+        isPublished:     !sermon.isPublished,
       };
       const res = await sermonApi.update(sermon.id, dto);
       if (res.data.isSuccess) {
-        setSermons(prev => prev.map(s => s.id === sermon.id ? { ...s, isPublished: !s.isPublished } : s));
+        setSermons(prev => prev.map(s =>
+          s.id === sermon.id ? { ...s, isPublished: !s.isPublished } : s
+        ));
         toast.success(sermon.isPublished ? 'Sermon unpublished' : 'Sermon published');
       }
     } catch { toast.error('Failed to update sermon'); }
@@ -188,6 +205,8 @@ const AdminSermons = () => {
           <div className="space-y-2">
             {sermons.map(sermon => (
               <div key={sermon.id} className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${t.row}`}>
+
+                {/* Sermon thumbnail */}
                 <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-200 shrink-0">
                   {sermon.imageUrl ? (
                     <img src={sermon.imageUrl} alt={sermon.title} className="w-full h-full object-cover" />
@@ -197,6 +216,14 @@ const AdminSermons = () => {
                     </div>
                   )}
                 </div>
+
+                {/* Speaker avatar — shown if speakerImageUrl is set */}
+                {sermon.speakerImageUrl && (
+                  <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-fuchsia-500/30 shrink-0">
+                    <img src={sermon.speakerImageUrl} alt={sermon.speaker} className="w-full h-full object-cover" />
+                  </div>
+                )}
+
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <p className="font-bold text-sm truncate">{sermon.title}</p>
@@ -218,6 +245,7 @@ const AdminSermons = () => {
                     {sermon.audioUrl && <span className={`flex items-center gap-1 text-[10px] font-bold ${t.mutedtext}`}><Music className="w-3 h-3" /> Audio</span>}
                   </div>
                 </div>
+
                 <div className="flex items-center gap-2 shrink-0">
                   <button onClick={() => togglePublish(sermon)} className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}>
                     {sermon.isPublished ? <EyeOff className={`w-4 h-4 ${t.subtext}`} /> : <Eye className={`w-4 h-4 ${t.subtext}`} />}
@@ -247,10 +275,12 @@ const AdminSermons = () => {
         )}
       </div>
 
+      {/* ── CREATE / EDIT MODAL ── */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowForm(false)} />
           <div className={`relative rounded-2xl w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto border ${t.modal}`}>
+
             <div className={`flex items-center justify-between px-6 py-4 border-b ${t.border} sticky top-0 z-10`}
               style={{ background: isDark ? '#161616' : 'white' }}>
               <h3 className="font-bold text-lg">{editing ? 'Edit Sermon' : 'New Sermon'}</h3>
@@ -260,6 +290,8 @@ const AdminSermons = () => {
             </div>
 
             <div className="px-6 py-5 space-y-5">
+
+              {/* Title */}
               <div>
                 <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Title *</label>
                 <input type="text" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
@@ -267,6 +299,7 @@ const AdminSermons = () => {
                   className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`} />
               </div>
 
+              {/* Speaker + Series */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Speaker *</label>
@@ -282,6 +315,7 @@ const AdminSermons = () => {
                 </div>
               </div>
 
+              {/* Date + Published toggle */}
               <div className="grid grid-cols-2 gap-3 items-end">
                 <div>
                   <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Sermon Date *</label>
@@ -299,6 +333,7 @@ const AdminSermons = () => {
                 </div>
               </div>
 
+              {/* Description */}
               <div>
                 <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Description</label>
                 <textarea rows={3} value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
@@ -306,8 +341,21 @@ const AdminSermons = () => {
                   className={`w-full px-4 py-3 border rounded-xl text-sm outline-none resize-none ${t.modalInput}`} />
               </div>
 
-              <ImageUpload value={form.imageUrl || ''} onChange={url => setForm(p => ({ ...p, imageUrl: url ?? undefined }))} label="Sermon Image" />
+              {/* Sermon cover image */}
+              <ImageUpload
+                value={form.imageUrl || ''}
+                onChange={url => setForm(p => ({ ...p, imageUrl: url ?? undefined }))}
+                label="Sermon Cover Image"
+              />
 
+              {/* Speaker image — key addition */}
+              <ImageUpload
+                value={form.speakerImageUrl || ''}
+                onChange={url => setForm(p => ({ ...p, speakerImageUrl: url ?? undefined }))}
+                label="Speaker Photo (shown on sermon detail page)"
+              />
+
+              {/* Video URL */}
               <div>
                 <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
                   <Play className="w-3.5 h-3.5 inline mr-1" /> Video URL
@@ -318,7 +366,12 @@ const AdminSermons = () => {
                 <p className={`text-xs mt-1 ${t.mutedtext}`}>Use YouTube embed URL: youtube.com/embed/VIDEO_ID</p>
               </div>
 
-              <AudioUpload value={form.audioUrl || ''} onChange={url => setForm(p => ({ ...p, audioUrl: url ?? undefined }))} label="Sermon Audio" />
+              {/* Audio */}
+              <AudioUpload
+                value={form.audioUrl || ''}
+                onChange={url => setForm(p => ({ ...p, audioUrl: url ?? undefined }))}
+                label="Sermon Audio"
+              />
 
               {form.audioUrl && (
                 <div className={`p-4 rounded-xl border ${t.border} space-y-3`}>
@@ -347,6 +400,7 @@ const AdminSermons = () => {
         </div>
       )}
 
+      {/* ── DELETE CONFIRM ── */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setDeleteTarget(null)} />

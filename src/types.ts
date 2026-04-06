@@ -1,15 +1,4 @@
 // ORIGINAL TYPES 
-export interface Sermon {
-  id: string;
-  title: string;
-  speaker: string;
-  date: string;
-  imageUrl: string;
-  videoUrl?: string;
-  description: string;
-  series: string;
-}
-
 export interface Event {
   id: string;
   title: string;
@@ -125,6 +114,7 @@ export interface SermonDto {
   speaker: string;
   series: string;
   description: string;
+  speakerImageUrl: string | null;
   imageUrl: string | null;
   videoUrl: string | null;
   audioUrl: string | null;

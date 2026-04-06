@@ -518,7 +518,7 @@ const Home: React.FC = () => {
             >
               <p className="text-brand-600 font-black tracking-[0.4em] uppercase
                 text-[10px] mb-5">
-                Our Mission & Vision
+                Our History
               </p>
               <h2 className="text-3xl md:text-5xl font-serif font-medium
                 text-slate-900 mb-8 leading-snug">

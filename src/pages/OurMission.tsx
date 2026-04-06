@@ -1,5 +1,6 @@
 import React from 'react';
 import { Globe, Eye } from 'lucide-react';
+import auditorimImg from '../assets/auditorium.jpg';
 
 const OurMission: React.FC = () => {
   return (
@@ -28,7 +29,7 @@ const OurMission: React.FC = () => {
       <div className="max-w-6xl mx-auto px-6 mb-20">
         <div className="rounded-3xl overflow-hidden shadow-xl">
           <img
-            src="/mission.jpg"  // 👉 replace with your image path
+            src={auditorimImg}
             alt="Our Mission"
             className="w-full h-[350px] md:h-[450px] object-cover"
           />
