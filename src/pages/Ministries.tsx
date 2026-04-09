@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Loader, Users, Lock, Flame } from 'lucide-react';
+import { Link} from 'react-router-dom';
+import { ArrowRight, Loader, Users, Flame } from 'lucide-react';
 import { ministryApi } from '../api/ministryApi';
 import type { MinistryResponseDto } from '../types';
-import { useAuth } from '../context/AuthContext';
 
 const useReveal = (delay = 0) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -51,13 +50,13 @@ const MinistryRow: React.FC<{
     >
       {/* Image */}
       <div className="w-full lg:w-3/5 group overflow-hidden">
-        <div className="relative aspect-video overflow-hidden bg-gray-100
-          rounded-sm shadow-2xl">
+        <div className="relative overflow-hidden bg-gray-100 rounded-sm shadow-2xl"
+          style={{ aspectRatio: '4/3' }}>
           {ministry.coverImageUrl ? (
             <img
               src={ministry.coverImageUrl}
               alt={ministry.name}
-              className="w-full h-full object-cover transition-transform
+              className="w-full h-full object-cover object-center transition-transform
                 duration-1000 group-hover:scale-105"
             />
           ) : (
@@ -132,115 +131,6 @@ const MinistryRow: React.FC<{
 
 // ─── YOUTH COMMUNITY ROW ──────────────────────────────────────────────────────
 
-const YouthRow: React.FC<{ index: number }> = ({ index }) => {
-  const ref = useReveal(index * 100);
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-
-  const handleViewDetails = (e: React.MouseEvent) => {
-    if (!isAuthenticated) {
-      e.preventDefault();
-      navigate('/login', { state: { from: '/youth' } });
-    }
-  };
-
-  return (
-    <div
-      ref={ref}
-      style={fadeStyle}
-      className={`flex flex-col lg:items-center gap-12 md:gap-20 ${
-        index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'
-      }`}
-    >
-      {/* Image */}
-      <div className="w-full lg:w-3/5 group overflow-hidden">
-        <div className="relative aspect-video overflow-hidden bg-gradient-to-br
-          from-fuchsia-900 to-purple-900 rounded-sm shadow-2xl">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-fuchsia-300 text-6xl font-serif italic
-              font-bold opacity-30">
-              House of Opra
-            </p>
-          </div>
-          {!isAuthenticated && (
-            <div className="absolute top-4 left-4 flex items-center gap-2
-              bg-black/60 backdrop-blur-sm text-white text-[10px] font-black
-              uppercase tracking-widest px-3 py-1.5 rounded-full">
-              <Lock className="w-3 h-3" />
-              Login required to access
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="w-full lg:w-2/5">
-        <span className="text-xs font-black uppercase tracking-[0.3em]
-          text-brand-600 mb-6 block">
-          {index < 9 ? `0${index + 1}` : index + 1} — Department
-        </span>
-        <h3 className="text-4xl md:text-5xl font-serif text-gray-900 mb-6
-          leading-tight">
-          Youth Community
-        </h3>
-        <div className="h-px w-16 bg-black mb-8" />
-        <p className="text-gray-600 text-lg font-light leading-relaxed mb-4
-          text-justify">
-          House of Opra — A vibrant community of young people raising a
-          generation passionate about God's kingdom, excellence, and
-          transformation in their communities.
-        </p>
-
-        {!isAuthenticated && (
-          <div className="flex items-start gap-3 p-4 bg-fuchsia-50
-            border border-fuchsia-200 rounded-xl mb-6">
-            <Lock className="w-4 h-4 text-fuchsia-500 shrink-0 mt-0.5" />
-            <p className="text-xs text-fuchsia-700 leading-relaxed">
-              Please{' '}
-              <button
-                onClick={() => navigate('/login', { state: { from: '/youth' } })}
-                className="font-bold underline hover:no-underline"
-              >
-                sign in
-              </button>
-              {' '}or{' '}
-              <button
-                onClick={() => navigate('/register')}
-                className="font-bold underline hover:no-underline"
-              >
-                create an account
-              </button>
-              {' '}to access the Youth Community.
-            </p>
-          </div>
-        )}
-
-        <Link
-          to="/youth"
-          onClick={handleViewDetails}
-          className="group/link inline-flex items-center gap-4 text-sm
-            font-bold uppercase tracking-widest text-gray-900 transition-all
-            outline-none"
-        >
-          <span className="border-b-2 border-black pb-1
-            group-hover/link:border-brand-600
-            group-hover/link:text-brand-600 transition-all">
-            {isAuthenticated ? 'View Details & Gallery' : 'Sign In to View'}
-          </span>
-          <div className="w-10 h-10 rounded-full border border-gray-200
-            flex items-center justify-center
-            group-hover/link:bg-black group-hover/link:text-white
-            transition-all">
-            {isAuthenticated
-              ? <ArrowRight className="w-4 h-4" />
-              : <Lock className="w-4 h-4" />
-            }
-          </div>
-        </Link>
-      </div>
-    </div>
-  );
-};
 
 // ─── EMPTY / COMING SOON STATE ────────────────────────────────────────────────
 // Shown when either the server is unreachable OR there are genuinely no
@@ -255,7 +145,7 @@ const MinistriesComingSoon: React.FC = () => (
     </div>
     <p className="text-[10px] font-black uppercase tracking-[0.4em]
       text-fuchsia-500 mb-4">
-      Global Flame Ministries
+      Global Flame Ministry
     </p>
     <h2 className="font-serif text-4xl text-slate-900 mb-4 leading-tight">
       Something great is <span className="italic text-fuchsia-600">
@@ -331,7 +221,7 @@ const Ministries: React.FC = () => {
           </span>
           <h1 className="text-5xl md:text-7xl font-serif text-white
             tracking-tight mb-6">
-            Our Ministries
+            Our Departments
           </h1>
           <p className="text-gray-400 max-w-2xl text-lg font-light
             leading-relaxed text-justify">
@@ -364,8 +254,6 @@ const Ministries: React.FC = () => {
                 index={index}
               />
             ))}
-            {/* Youth Community — always last, hardcoded with auth gate */}
-            <YouthRow index={ministries.length} />
           </div>
         </section>
       )}

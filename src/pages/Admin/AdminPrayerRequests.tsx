@@ -106,36 +106,29 @@ const AdminPrayerRequests = () => {
     <div className={`min-h-screen font-sans ${t.bg}`}>
 
       {/* Header */}
-      <div className={`px-8 pt-8 pb-6 border-b ${t.border}
-        flex items-center justify-between`}>
+      <div className={`px-4 sm:px-8 pt-8 pb-6 border-b ${t.border} flex items-center justify-between`}>
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.3em]
-            text-fuchsia-500 mb-1">Admin</p>
+          <p className="text-xs font-bold uppercase tracking-[0.3em] text-fuchsia-500 mb-1">Admin</p>
           <h1 className="text-2xl font-bold">Prayer Requests</h1>
         </div>
         <div className="flex items-center gap-3">
           <span className={`text-sm ${t.subtext}`}>{totalCount} total</span>
-          <button
-            onClick={fetchRequests}
-            className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}
-          >
+          <button onClick={fetchRequests} className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}>
             <RefreshCw className={`w-4 h-4 ${t.subtext}`} />
           </button>
         </div>
       </div>
 
       {/* Filters */}
-      <div className={`px-8 py-4 border-b ${t.border} flex gap-3 flex-wrap`}>
+      <div className={`px-4 sm:px-8 py-4 border-b ${t.border} flex gap-3 flex-wrap`}>
         <div className="relative flex-1 max-w-sm">
-          <Search className={`absolute left-3 top-1/2 -translate-y-1/2
-            w-4 h-4 ${t.subtext}`} />
+          <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${t.subtext}`} />
           <input
             type="text"
             placeholder="Search by name..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className={`w-full pl-9 pr-4 py-2.5 border rounded-lg text-sm
-              outline-none transition-all ${t.input}`}
+            className={`w-full pl-9 pr-4 py-2.5 border rounded-lg text-sm outline-none transition-all ${t.input}`}
           />
         </div>
         <div className="flex gap-2">
@@ -143,12 +136,11 @@ const AdminPrayerRequests = () => {
             <button
               key={f}
               onClick={() => setFilterAttended(f)}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase
-                tracking-widest transition-colors ${
-                  filterAttended === f
-                    ? 'bg-fuchsia-600 text-white'
-                    : `${t.btnGhost} ${t.subtext}`
-                }`}
+              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors ${
+                filterAttended === f
+                  ? 'bg-fuchsia-600 text-white'
+                  : `${t.btnGhost} ${t.subtext}`
+              }`}
             >
               {f}
             </button>
@@ -157,26 +149,23 @@ const AdminPrayerRequests = () => {
       </div>
 
       {/* Split view */}
-      <div className="flex h-[calc(100vh-180px)]">
+      <div className="flex h-[calc(100vh-180px)] relative">
 
-        {/* List */}
-        <div className={`flex flex-col border-r ${t.border} transition-all
-          duration-300 ${selected ? 'w-2/5' : 'w-full'}`}>
+        {/* List — full width on mobile, 2/5 on sm+ when detail is open */}
+        <div className={`flex flex-col border-r ${t.border} transition-all duration-300 w-full
+          ${selected ? 'sm:w-2/5' : 'sm:w-full'}
+          ${selected ? 'hidden sm:flex' : 'flex'}`}>
           <div className="flex-1 overflow-y-auto p-4">
             {isLoading ? (
               <div className="space-y-2">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className={`animate-pulse h-20 rounded-xl
-                    ${t.skeleton}`} />
+                  <div key={i} className={`animate-pulse h-20 rounded-xl ${t.skeleton}`} />
                 ))}
               </div>
             ) : requests.length === 0 ? (
-              <div className="flex flex-col items-center justify-center
-                h-full text-center">
+              <div className="flex flex-col items-center justify-center h-full text-center">
                 <HandHeart className={`w-10 h-10 mb-4 ${t.mutedtext}`} />
-                <p className={`text-sm ${t.subtext}`}>
-                  No prayer requests found
-                </p>
+                <p className={`text-sm ${t.subtext}`}>No prayer requests found</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -184,32 +173,24 @@ const AdminPrayerRequests = () => {
                   <button
                     key={r.id}
                     onClick={() => setSelected(r)}
-                    className={`w-full text-left p-4 rounded-xl border
-                      transition-all duration-150 ${
-                        selected?.id === r.id ? t.rowActive : t.rowIdle
-                      }`}
+                    className={`w-full text-left p-4 rounded-xl border transition-all duration-150 ${
+                      selected?.id === r.id ? t.rowActive : t.rowIdle
+                    }`}
                   >
-                    <div className="flex items-start justify-between
-                      gap-2 mb-1">
-                      <span className={`font-bold text-sm ${
-                        !r.isAttendedTo ? 'text-slate-900' : t.subtext
-                      }`}>
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <span className={`font-bold text-sm ${!r.isAttendedTo ? 'text-slate-900' : t.subtext}`}>
                         {r.name}
                       </span>
-                      <span className={`text-[10px] font-bold uppercase
-                        px-2 py-0.5 rounded-full flex-shrink-0 ${
-                          r.isAttendedTo
-                            ? 'bg-emerald-500/20 text-emerald-600'
-                            : 'bg-amber-500/20 text-amber-600'
-                        }`}>
+                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full flex-shrink-0 ${
+                        r.isAttendedTo
+                          ? 'bg-emerald-500/20 text-emerald-600'
+                          : 'bg-amber-500/20 text-amber-600'
+                      }`}>
                         {r.isAttendedTo ? 'Attended' : 'Pending'}
                       </span>
                     </div>
-                    <p className={`text-xs truncate mb-2 ${t.subtext}`}>
-                      {r.content}
-                    </p>
-                    <span className={`text-[10px] flex items-center gap-1
-                      ${t.mutedtext}`}>
+                    <p className={`text-xs truncate mb-2 ${t.subtext}`}>{r.content}</p>
+                    <span className={`text-[10px] flex items-center gap-1 ${t.mutedtext}`}>
                       <Clock className="w-3 h-3" />
                       {new Date(r.createdAt).toLocaleDateString('en-US', {
                         month: 'short', day: 'numeric', year: 'numeric'
@@ -222,25 +203,20 @@ const AdminPrayerRequests = () => {
           </div>
 
           {totalPages > 1 && (
-            <div className={`px-4 py-3 border-t ${t.border} flex items-center
-              justify-between`}>
-              <span className={`text-xs ${t.mutedtext}`}>
-                Page {pageNumber} of {totalPages}
-              </span>
+            <div className={`px-4 py-3 border-t ${t.border} flex items-center justify-between`}>
+              <span className={`text-xs ${t.mutedtext}`}>Page {pageNumber} of {totalPages}</span>
               <div className="flex gap-2">
                 <button
                   onClick={() => setPageNumber(p => Math.max(1, p - 1))}
                   disabled={pageNumber === 1}
-                  className={`p-1.5 rounded transition-colors
-                    disabled:opacity-30 ${t.btnGhost}`}
+                  className={`p-1.5 rounded transition-colors disabled:opacity-30 ${t.btnGhost}`}
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setPageNumber(p => Math.min(totalPages, p + 1))}
                   disabled={pageNumber === totalPages}
-                  className={`p-1.5 rounded transition-colors
-                    disabled:opacity-30 ${t.btnGhost}`}
+                  className={`p-1.5 rounded transition-colors disabled:opacity-30 ${t.btnGhost}`}
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -249,17 +225,18 @@ const AdminPrayerRequests = () => {
           )}
         </div>
 
-        {/* Detail Panel */}
+        {/* Detail Panel — overlays full screen on mobile, side panel on sm+ */}
         {selected && (
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <div className={`px-8 py-5 border-b ${t.border} flex items-center
-              justify-between`}>
+          <div
+            className="flex-1 flex flex-col overflow-hidden absolute inset-0 sm:static z-10"
+            style={{ background: isDark ? '#0d0d0d' : '#f8fafc' }}
+          >
+            <div className={`px-4 sm:px-8 py-5 border-b ${t.border} flex items-center justify-between`}>
               <div>
                 <h2 className="font-bold text-lg">{selected.name}</h2>
                 <p className={`text-xs ${t.subtext}`}>
                   {new Date(selected.createdAt).toLocaleDateString('en-US', {
-                    weekday: 'long', month: 'long',
-                    day: 'numeric', year: 'numeric'
+                    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
                   })}
                 </p>
               </div>
@@ -271,68 +248,45 @@ const AdminPrayerRequests = () => {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-8 py-6 space-y-4">
+            <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 space-y-4">
               <div className={`rounded-xl p-5 border ${t.card}`}>
-                <p className={`text-xs uppercase tracking-widest mb-3
-                  ${t.subtext}`}>
-                  Prayer Request
-                </p>
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                  {selected.content}
-                </p>
+                <p className={`text-xs uppercase tracking-widest mb-3 ${t.subtext}`}>Prayer Request</p>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">{selected.content}</p>
               </div>
               <div className={`rounded-xl p-4 border ${t.card}`}>
-                <p className={`text-xs uppercase tracking-widest mb-2
-                  ${t.subtext}`}>
-                  Status
-                </p>
-                <span className={`text-sm font-bold ${
-                  selected.isAttendedTo
-                    ? 'text-emerald-500'
-                    : 'text-amber-500'
-                }`}>
+                <p className={`text-xs uppercase tracking-widest mb-2 ${t.subtext}`}>Status</p>
+                <span className={`text-sm font-bold ${selected.isAttendedTo ? 'text-emerald-500' : 'text-amber-500'}`}>
                   {selected.isAttendedTo ? '✓ Attended to' : '⏳ Pending'}
                 </span>
               </div>
             </div>
 
-            <div className={`px-8 py-5 border-t ${t.border} flex
-              items-center gap-3`}>
+            <div className={`px-4 sm:px-8 py-5 border-t ${t.border} flex items-center gap-3`}>
               {selected.isAttendedTo ? (
                 <>
                   <button
                     onClick={() => markAttended(selected.id, false)}
                     disabled={isUpdating}
-                    className={`px-5 py-2.5 rounded-lg text-sm font-bold
-                      uppercase tracking-widest transition-colors
-                      disabled:opacity-50 ${t.btnGhost}`}
+                    className={`px-5 py-2.5 rounded-lg text-sm font-bold uppercase tracking-widest transition-colors disabled:opacity-50 ${t.btnGhost}`}
                   >
                     Mark as Pending
                   </button>
-                  {/* Hard delete — only shown for attended requests */}
                   <button
                     onClick={() => setDeleteTarget(selected)}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg
-                      text-sm font-bold uppercase tracking-widest text-red-500
-                      hover:bg-red-500/10 transition-colors"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold uppercase tracking-widest text-red-500 hover:bg-red-500/10 transition-colors"
                   >
-                    <Trash2 className="w-4 h-4" />
-                    Delete Permanently
+                    <Trash2 className="w-4 h-4" /> Delete Permanently
                   </button>
                 </>
               ) : (
                 <button
                   onClick={() => markAttended(selected.id, true)}
                   disabled={isUpdating}
-                  className="flex items-center gap-2 px-5 py-2.5
-                    bg-emerald-600 hover:bg-emerald-500 rounded-lg text-sm
-                    font-bold uppercase tracking-widest transition-colors
-                    disabled:opacity-50 text-white"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-sm font-bold uppercase tracking-widest transition-colors disabled:opacity-50 text-white"
                 >
                   {isUpdating
                     ? <RefreshCw className="w-4 h-4 animate-spin" />
-                    : <Check className="w-4 h-4" />
-                  }
+                    : <Check className="w-4 h-4" />}
                   Mark as Attended
                 </button>
               )}
@@ -344,42 +298,29 @@ const AdminPrayerRequests = () => {
       {/* Hard Delete Confirm Modal */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => setDeleteTarget(null)}
-          />
-          <div className={`relative rounded-2xl p-8 w-full max-w-sm text-center
-            border ${t.modal}`}>
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setDeleteTarget(null)} />
+          <div className={`relative rounded-2xl p-8 w-full max-w-sm text-center border ${t.modal}`}>
             <Trash2 className="w-8 h-8 text-red-500 mx-auto mb-4" />
             <h3 className="font-bold text-lg mb-2">Permanently Delete?</h3>
             <p className={`text-sm mb-2 ${t.subtext}`}>
-              This prayer request from{' '}
-              <strong>{deleteTarget.name}</strong> will be permanently removed
-              from the database. This action cannot be undone.
+              This prayer request from <strong>{deleteTarget.name}</strong> will be permanently removed. This action cannot be undone.
             </p>
-            <p className="text-xs text-amber-600 bg-amber-50 border
-              border-amber-200 rounded-xl p-3 mb-6">
+            <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl p-3 mb-6">
               Only attended prayer requests can be permanently deleted.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteTarget(null)}
-                className={`flex-1 py-2.5 rounded-lg text-sm
-                  transition-colors ${t.btnGhost}`}
+                className={`flex-1 py-2.5 rounded-lg text-sm transition-colors ${t.btnGhost}`}
               >
                 Cancel
               </button>
               <button
                 onClick={handleHardDelete}
                 disabled={isDeleting}
-                className="flex-1 py-2.5 rounded-lg bg-red-500
-                  hover:bg-red-600 disabled:opacity-50 text-sm font-bold
-                  text-white flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-50 text-sm font-bold text-white flex items-center justify-center gap-2"
               >
-                {isDeleting
-                  ? <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  : null
-                }
+                {isDeleting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : null}
                 {isDeleting ? 'Deleting...' : 'Delete Forever'}
               </button>
             </div>

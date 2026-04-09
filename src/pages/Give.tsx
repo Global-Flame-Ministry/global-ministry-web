@@ -23,14 +23,14 @@ const CATEGORIES = [
     desc: "Expanding God's house"
   },
   {
-    label: 'Children Ministry',
+    label: 'Children & Youth',
     icon: <Sprout className="text-green-500" />,
     desc: 'Planting seeds in young hearts'
   },
   {
-    label: 'Community Outreach',
+    label: 'Home of Love',
     icon: <Globe className="text-red-500" />,
-    desc: 'Serving our neighbours'
+    desc: 'Serving our Society through love'
   },
 ];
 

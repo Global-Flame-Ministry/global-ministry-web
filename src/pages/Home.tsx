@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Hero from '../components/Hero';
 import { Link, useNavigate } from 'react-router-dom';
 import { announcementApi } from '../api/announcementApi';
-import { Calendar, Play, ArrowRight, Globe, MapPin, Heart, HandHeart, Star, Library } from 'lucide-react';
+import { Calendar, Play, ArrowRight, Globe, MapPin, Heart, HandHeart, Star, Library, ShieldCheck } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
 import { eventApi } from '../api/eventApi';
 import { bookApi } from '../api/bookApi';
@@ -66,6 +66,69 @@ const AnimatedDiv: React.FC<AnimatedProps> = ({
       style={{ transitionDelay: `${delay}ms` }}
     >
       {children}
+    </div>
+  );
+};
+
+// ─── CORE BELIEFS TEASER DATA (first 4 only) ─────────────────────────────────
+
+const featuredBeliefs = [
+  {
+    title: 'The Holy Scripture',
+    body: 'We believe the Bible is the inspired, infallible, and authoritative Word of God — the supreme standard by which all human conduct, creeds, and opinions shall be tried.',
+  },
+  {
+    title: 'The Trinity',
+    body: 'We believe in one God, eternally existent in three persons — Father, Son, and Holy Spirit. Each person is fully God, yet there is one God.',
+  },
+  {
+    title: 'The Person of Jesus Christ',
+    body: 'We believe in the deity of our Lord Jesus Christ — His virgin birth, sinless life, miracles, atoning death, bodily resurrection, and His personal return to power and glory.',
+  },
+  {
+    title: 'Salvation by Grace',
+    body: 'We believe that for the salvation of lost and sinful people, regeneration by the Holy Spirit is absolutely essential. Salvation is by grace alone, through faith alone, in Christ alone.',
+  },
+];
+
+// ─── INDIVIDUAL BELIEF CARD WITH OWN SCROLL TRIGGER ─────────────────────────
+
+interface BeliefCardProps {
+  title: string;
+  body: string;
+  delay: number;
+  direction: 'up' | 'left' | 'right';
+}
+
+const BeliefCard: React.FC<BeliefCardProps> = ({ title, body, delay, direction }) => {
+  const { ref, isVisible } = useScrollAnimation({ threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  const getSlide = () => {
+    if (direction === 'left')  return isVisible ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0';
+    if (direction === 'right') return isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0';
+    return isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0';
+  };
+
+  return (
+    <div
+      ref={ref as React.RefObject<HTMLDivElement>}
+      className={`transition-all duration-700 ease-out ${getSlide()}
+        p-6 border border-slate-100 rounded-2xl hover:border-fuchsia-200
+        hover:shadow-md bg-white group`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      <div className="flex items-start gap-4">
+        <div className="w-9 h-9 bg-fuchsia-50 rounded-xl flex items-center justify-center
+          shrink-0 mt-0.5 group-hover:bg-fuchsia-100 transition-colors">
+          <ShieldCheck className="w-4 h-4 text-fuchsia-500" />
+        </div>
+        <div>
+          <h3 className="font-bold text-slate-900 uppercase tracking-widest text-xs mb-2">
+            {title}
+          </h3>
+          <p className="text-slate-500 text-sm leading-relaxed">{body}</p>
+        </div>
+      </div>
     </div>
   );
 };
@@ -553,6 +616,92 @@ const Home: React.FC = () => {
           </div>
         </div>
       </AnimatedSection>
+
+      {/* ── Core Beliefs Teaser ───────────────────────────────────────── */}
+      <section className="py-24 bg-white border-t border-slate-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+
+          {/* Section header */}
+          <AnimatedDiv className="mb-14" direction="up">
+            <div className="flex flex-col md:flex-row justify-between items-end">
+              <div className="max-w-xl">
+                <p className="text-[9px] font-black uppercase tracking-[0.4em] text-fuchsia-500 mb-3">
+                  What We Believe
+                </p>
+                <h2 className="font-serif text-3xl md:text-4xl text-slate-900 leading-tight mb-3">
+                  BUILT ON AN{' '}
+                  <span className="italic text-fuchsia-600">UNSHAKEABLE</span>{' '}
+                  FOUNDATION.
+                </h2>
+                <p className="text-slate-400 text-sm leading-relaxed max-w-lg">
+                  These are not opinions — they are the bedrock convictions on which
+                  Global Flame Ministries was founded and continues to stand.
+                </p>
+              </div>
+              <Link
+                to="/core-beliefs"
+                className="mt-6 md:mt-0 flex items-center gap-2 text-slate-700
+                  font-bold border-b-2 border-fuchsia-200 hover:border-fuchsia-600
+                  transition-all pb-1 uppercase text-[11px] tracking-[0.2em] shrink-0"
+              >
+                View All Beliefs <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+          </AnimatedDiv>
+
+          {/* 4 belief cards — alternating slide directions */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
+            {featuredBeliefs.map((belief, i) => {
+              // Left column slides from left, right column from right, bottom row from up
+              const directions: Array<'left' | 'right' | 'up'> = ['left', 'right', 'left', 'right'];
+              return (
+                <BeliefCard
+                  key={i}
+                  title={belief.title}
+                  body={belief.body}
+                  delay={i * 100}
+                  direction={directions[i]}
+                />
+              );
+            })}
+          </div>
+
+          {/* "Explore More" CTA strip */}
+          <AnimatedDiv direction="up" delay={400}>
+            <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r
+              from-fuchsia-600 to-fuchsia-800 p-8 flex flex-col sm:flex-row
+              items-center justify-between gap-6">
+              {/* Decorative background text */}
+              <span className="absolute right-6 top-1/2 -translate-y-1/2 text-white/5
+                font-serif font-black text-8xl select-none pointer-events-none
+                hidden lg:block">
+                BELIEVE
+              </span>
+              <div className="relative z-10">
+                <p className="text-fuchsia-200 text-[10px] font-black uppercase
+                  tracking-[0.4em] mb-1">
+                  There's More
+                </p>
+                <h3 className="text-white font-serif text-xl md:text-2xl font-medium">
+                  We hold{' '}
+                  <span className="italic">9 core convictions.</span>{' '}
+                  Discover all of them.
+                </h3>
+              </div>
+              <Link
+                to="/core-beliefs"
+                className="relative z-10 shrink-0 flex items-center gap-2.5
+                  px-7 py-3.5 bg-white text-fuchsia-700 font-bold uppercase
+                  tracking-widest text-[11px] rounded-full hover:bg-fuchsia-50
+                  transition-all shadow-lg whitespace-nowrap"
+              >
+                Explore All Beliefs <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </AnimatedDiv>
+
+        </div>
+      </section>
 
       {/* ── Event Section ─────────────────────────────────────────────── */}
       <AnimatedSection

@@ -45,7 +45,6 @@ const AdminDonations = () => {
   const [pageNumber, setPageNumber]   = useState(1);
   const pageSize = 10;
 
-  // Summary stats from the list endpoint
   const [summary, setSummary] = useState({
     totalAmountReceived: 0,
     completedDonations: 0,
@@ -65,8 +64,6 @@ const AdminDonations = () => {
         pageSize,
       });
       if (res.data.isSuccess && res.data.data) {
-        // The backend returns { data: PagedResult, summary: {...} }
-        // Your axios response wraps it in data.data
         const payload = res.data.data as unknown as {
           items: DonationResponseDto[];
           totalCount: number;
@@ -77,17 +74,10 @@ const AdminDonations = () => {
         setDonations(payload.items ?? []);
         setTotalCount(payload.totalCount ?? 0);
       }
-
-      // Fetch summary stats separately from the stats endpoint
-      const statsRes = await adminApi.getDonationStats();
-      if (statsRes.data.isSuccess && statsRes.data.data) {
-        // grandTotal and counts come from stats — we derive summary from dashboard
-      }
     } catch { toast.error('Failed to load donations'); }
     finally { setIsLoading(false); }
   }, [search, filterStatus, filterMethod, filterCurrency, filterType, pageNumber]);
 
-  // Fetch dashboard stats once for the summary cards
   useEffect(() => {
     const fetchSummary = async () => {
       try {
@@ -127,7 +117,7 @@ const AdminDonations = () => {
     <div className={`min-h-screen font-sans ${t.bg}`}>
 
       {/* Header */}
-      <div className={`px-8 pt-8 pb-6 border-b ${t.border} flex items-center justify-between`}>
+      <div className={`px-4 sm:px-8 pt-8 pb-6 border-b ${t.border} flex items-center justify-between`}>
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-fuchsia-500 mb-1">Admin</p>
           <h1 className="text-2xl font-bold">Donations</h1>
@@ -141,28 +131,22 @@ const AdminDonations = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="px-8 pt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 mb-2">
+      <div className="px-4 sm:px-8 pt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 mb-2">
         <div className={`border rounded-2xl p-5 ${t.card}`}>
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-emerald-500/10 rounded-lg">
               <TrendingUp className="w-4 h-4 text-emerald-600" />
             </div>
-            <span className={`text-xs font-bold uppercase tracking-widest ${t.subtext}`}>
-              Total Received
-            </span>
+            <span className={`text-xs font-bold uppercase tracking-widest ${t.subtext}`}>Total Received</span>
           </div>
-          <p className="text-2xl font-black">
-            ₦{summary.totalAmountReceived.toLocaleString()}
-          </p>
+          <p className="text-2xl font-black">₦{summary.totalAmountReceived.toLocaleString()}</p>
         </div>
         <div className={`border rounded-2xl p-5 ${t.card}`}>
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-fuchsia-500/10 rounded-lg">
               <DollarSign className="w-4 h-4 text-fuchsia-600" />
             </div>
-            <span className={`text-xs font-bold uppercase tracking-widest ${t.subtext}`}>
-              Completed
-            </span>
+            <span className={`text-xs font-bold uppercase tracking-widest ${t.subtext}`}>Completed</span>
           </div>
           <p className="text-2xl font-black">{summary.completedDonations}</p>
         </div>
@@ -171,16 +155,14 @@ const AdminDonations = () => {
             <div className="p-2 bg-amber-500/10 rounded-lg">
               <Clock className="w-4 h-4 text-amber-600" />
             </div>
-            <span className={`text-xs font-bold uppercase tracking-widest ${t.subtext}`}>
-              Pending
-            </span>
+            <span className={`text-xs font-bold uppercase tracking-widest ${t.subtext}`}>Pending</span>
           </div>
           <p className="text-2xl font-black">{summary.pendingDonations}</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className={`px-8 py-4 border-b ${t.border} flex flex-wrap gap-3`}>
+      <div className={`px-4 sm:px-8 py-4 border-b ${t.border} flex flex-wrap gap-3`}>
         <div className="relative flex-1 min-w-48">
           <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${t.subtext}`} />
           <input
@@ -233,7 +215,7 @@ const AdminDonations = () => {
       </div>
 
       {/* List */}
-      <div className="px-8 py-6">
+      <div className="px-4 sm:px-8 py-6">
         {isLoading ? (
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
@@ -250,50 +232,47 @@ const AdminDonations = () => {
             {donations.map(d => (
               <div
                 key={d.id}
-                className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${t.row}`}
+                className={`p-3 sm:p-4 rounded-xl border transition-all ${t.row}`}
               >
-                {/* Avatar */}
-                <div className="w-10 h-10 rounded-full bg-fuchsia-100 text-fuchsia-700 flex items-center justify-center text-sm font-bold shrink-0">
-                  {d.donorName.charAt(0).toUpperCase()}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <p className="font-bold text-sm">{d.donorName}</p>
-                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${statusBadge(d.status)}`}>
-                      {d.status}
-                    </span>
-                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">
-                      {d.paymentMethod}
-                    </span>
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-fuchsia-100 text-fuchsia-700 flex items-center justify-center text-sm font-bold shrink-0">
+                    {d.donorName.charAt(0).toUpperCase()}
                   </div>
-                  <div className={`flex items-center gap-4 text-xs ${t.subtext} flex-wrap`}>
-                    <span>{d.donorEmail}</span>
-                    <span className={t.mutedtext}>·</span>
-                    <span>{d.donationType}</span>
-                    <span className={t.mutedtext}>·</span>
-                    <span>{formatDate(d.createdAt)}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                          <p className="font-bold text-sm">{d.donorName}</p>
+                          <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${statusBadge(d.status)}`}>
+                            {d.status}
+                          </span>
+                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">
+                            {d.paymentMethod}
+                          </span>
+                        </div>
+                        <p className={`text-xs truncate ${t.subtext}`}>{d.donorEmail}</p>
+                      </div>
+                      <p className={`font-black text-base sm:text-lg shrink-0 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        {d.currency} {d.amount.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className={`flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs mt-1.5 ${t.mutedtext}`}>
+                      <span>{d.donationType}</span>
+                      <span>·</span>
+                      <span>{formatDate(d.createdAt)}</span>
+                    </div>
+                    {d.transactionReference && (
+                      <p className={`text-[10px] mt-1 font-mono truncate ${t.mutedtext}`}>
+                        {d.transactionReference}
+                      </p>
+                    )}
                   </div>
-                  {d.transactionReference && (
-                    <p className={`text-[10px] mt-1 font-mono truncate max-w-xs ${t.mutedtext}`}>
-                      {d.transactionReference}
-                    </p>
-                  )}
-                </div>
-
-                {/* Amount */}
-                <div className="text-right shrink-0">
-                  <p className="font-black text-lg">
-                    {d.currency} {d.amount.toLocaleString()}
-                  </p>
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-6">
             <span className={`text-xs ${t.mutedtext}`}>Page {pageNumber} of {totalPages}</span>

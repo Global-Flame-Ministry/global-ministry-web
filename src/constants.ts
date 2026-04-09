@@ -8,7 +8,7 @@ import encounter from './assets/encounter.jpg';
 //import mummy     from './assets/mummy.jpg';
 import preach    from './assets/preach.jpg';
 
-export const CHURCH_NAME = "Global Flame Ministries";
+export const CHURCH_NAME = "Global Flame Ministry";
 
 export const NAV_LINKS = [
   { name: 'Home',       path: '/' },

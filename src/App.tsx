@@ -39,8 +39,6 @@ import ResendConfirmPage  from './pages/auth/ResendConfirmPage';
 
 // PROTECTED PAGES 
 import UserDashboard from './pages/UserDashboard';
-import YouthPage     from './pages/Youth/YouthPage';
-import YouthAnnouncements from './pages/Youth/YouthAnnouncement';
 
 // ADMIN PAGES 
 import Admin               from './pages/Admin/Admin';
@@ -56,6 +54,20 @@ import AdminDonations      from './pages/Admin/AdminDonations';
 import AdminBulkEmail      from './pages/Admin/AdminBulkEmail';
 import AdminMinistries     from './pages/Admin/AdminMinistries';
 import AdminCounselling    from './pages/Admin/AdminCounselling';
+
+// Add these imports at the top of your existing App.tsx
+import YouthLayout            from './components/Youth/YouthLayout';
+import YouthHomePage          from './pages/Youth/YouthHomePage';
+import YouthAboutPage         from './pages/Youth/YouthAboutPage';
+import YouthServicesPage      from './pages/Youth/YouthServicesPage';
+import YouthActivitiesPage    from './pages/Youth/YouthActivitiesPage';
+import YouthTeamPage          from './pages/Youth/YouthTeamPage';
+import YouthBlogPage          from './pages/Youth/YouthBlogPage';
+import YouthReviewPage        from './pages/Youth/YouthReviewPage';
+import YouthContactPage       from './pages/Youth/YouthContactPage';
+import YouthEventsPage        from './pages/Youth/YouthEventsPage';
+import YouthAnnouncementsPage from './pages/Youth/YouthAnnouncementsPage';
+import JoinYouthPage          from './pages/Youth/JoinYouthPage';
 
 //  SCROLL TO TOP 
 const ScrollToTop = () => {
@@ -107,6 +119,25 @@ const App: React.FC = () => {
 
         <div className="flex flex-col min-h-screen">
           <Routes>
+
+            {/* ── YOUTH COMMUNITY ROUTES ────────────────────────────────── */}
+          <Route path="/youth" element={<YouthLayout />}>
+            <Route index element={<YouthHomePage />} />
+            <Route path="about"         element={<YouthAboutPage />} />
+            <Route path="services"      element={<YouthServicesPage />} />
+            <Route path="activities"    element={<YouthActivitiesPage />} />
+            <Route path="team"          element={<YouthTeamPage />} />
+            <Route path="blog"          element={<YouthBlogPage />} />
+            <Route path="reviews"       element={<YouthReviewPage />} />
+            <Route path="contact"       element={<YouthContactPage />} />
+            <Route path="events"        element={<YouthEventsPage />} />
+            <Route path="announcements" element={<YouthAnnouncementsPage />} />
+
+            {/* Join Youth — only for logged-in Ministry members */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="join" element={<JoinYouthPage />} />
+            </Route>
+          </Route>
 
             {/* PUBLIC ROUTES */}
             <Route path="/"
@@ -165,11 +196,8 @@ const App: React.FC = () => {
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard"
                 element={<PublicLayout><UserDashboard /></PublicLayout>} />
-              <Route path="/youth"
-                element={<PublicLayout><YouthPage /></PublicLayout>} />
-              <Route path="/youth/announcements"
-                element={<PublicLayout><YouthAnnouncements /></PublicLayout>} />
             </Route>
+
 
             {/* ADMIN ROUTES */}
             <Route path="/admin" element={<AdminRoute />}>

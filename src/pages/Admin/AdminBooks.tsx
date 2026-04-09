@@ -140,7 +140,7 @@ const AdminBooks = () => {
   return (
     <div className={`min-h-screen font-sans ${t.bg}`}>
 
-      <div className={`px-8 pt-8 pb-6 border-b ${t.border} flex items-center justify-between`}>
+      <div className={`px-4 sm:px-8 pt-8 pb-6 border-b ${t.border} flex items-center justify-between`}>
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-fuchsia-500 mb-1">Admin</p>
           <h1 className="text-2xl font-bold">Books</h1>
@@ -157,7 +157,7 @@ const AdminBooks = () => {
         </div>
       </div>
 
-      <div className={`px-8 py-4 border-b ${t.border} flex flex-wrap gap-3`}>
+      <div className={`px-4 sm:px-8 py-4 border-b ${t.border} flex flex-wrap gap-3`}>
         <div className="relative flex-1 min-w-48">
           <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${t.subtext}`} />
           <input type="text" placeholder="Search by title or author..." value={search}
@@ -181,7 +181,7 @@ const AdminBooks = () => {
         </select>
       </div>
 
-      <div className="px-8 py-6">
+      <div className="px-4 sm:px-8 py-6">
         {isLoading ? (
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => <div key={i} className={`animate-pulse h-24 rounded-xl ${t.skeleton}`} />)}
@@ -197,8 +197,8 @@ const AdminBooks = () => {
         ) : (
           <div className="space-y-2">
             {books.map(book => (
-              <div key={book.id} className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${t.row}`}>
-                <div className="w-14 h-20 rounded-lg overflow-hidden bg-slate-200 shrink-0">
+              <div key={book.id} className={`flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border transition-all ${t.row}`}>
+                <div className="w-12 h-16 sm:w-14 sm:h-20 rounded-lg overflow-hidden bg-slate-200 shrink-0">
                   {book.coverImageUrl ? (
                     <img src={book.coverImageUrl} alt={book.title} className="w-full h-full object-cover" />
                   ) : (
@@ -207,9 +207,26 @@ const AdminBooks = () => {
                     </div>
                   )}
                 </div>
+
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <p className="font-bold text-sm truncate">{book.title}</p>
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <p className="font-bold text-sm leading-tight">{book.title}</p>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button onClick={() => togglePublish(book)} className={`p-1.5 rounded-lg transition-colors ${t.btnGhost}`}>
+                        {book.isPublished
+                          ? <EyeOff className={`w-3.5 h-3.5 ${t.subtext}`} />
+                          : <Eye className={`w-3.5 h-3.5 ${t.subtext}`} />}
+                      </button>
+                      <button onClick={() => openEdit(book)} className={`p-1.5 rounded-lg transition-colors ${t.btnGhost}`}>
+                        <Pencil className={`w-3.5 h-3.5 ${t.subtext}`} />
+                      </button>
+                      <button onClick={() => setDeleteTarget(book)} className={`p-1.5 rounded-lg transition-colors ${t.btnGhost} hover:bg-red-500/20`}>
+                        <Trash2 className={`w-3.5 h-3.5 ${t.subtext}`} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5 mb-1.5">
                     <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
                       book.isPublished ? 'bg-emerald-500/20 text-emerald-600' : 'bg-amber-500/20 text-amber-600'
                     }`}>
@@ -221,27 +238,16 @@ const AdminBooks = () => {
                       </span>
                     )}
                   </div>
-                  <div className={`flex items-center gap-4 text-xs ${t.subtext} flex-wrap`}>
-                    <span>By {book.author}</span>
-                    <span className={t.mutedtext}>·</span>
+
+                  <div className={`flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs ${t.subtext}`}>
+                    <span className="truncate max-w-[120px]">By {book.author}</span>
                     <span className="font-semibold">{formatPrice(book.price, book.currency)}</span>
-                    <span className={t.mutedtext}>·</span>
-                    <span>{formatDate(book.createdOn)}</span>
+                    <span className={`text-[10px] ${t.mutedtext}`}>{formatDate(book.createdOn)}</span>
                   </div>
+
                   {book.description && (
-                    <p className={`text-xs mt-1 truncate max-w-md ${t.mutedtext}`}>{book.description}</p>
+                    <p className={`text-xs mt-1 line-clamp-1 ${t.mutedtext}`}>{book.description}</p>
                   )}
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <button onClick={() => togglePublish(book)} className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}>
-                    {book.isPublished ? <EyeOff className={`w-4 h-4 ${t.subtext}`} /> : <Eye className={`w-4 h-4 ${t.subtext}`} />}
-                  </button>
-                  <button onClick={() => openEdit(book)} className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}>
-                    <Pencil className={`w-4 h-4 ${t.subtext}`} />
-                  </button>
-                  <button onClick={() => setDeleteTarget(book)} className={`p-2 rounded-lg transition-colors ${t.btnGhost} hover:bg-red-500/20`}>
-                    <Trash2 className={`w-4 h-4 ${t.subtext}`} />
-                  </button>
                 </div>
               </div>
             ))}

@@ -66,9 +66,9 @@ const AdminContacts: React.FC = () => {
     subtext:    isDark ? 'text-zinc-400'                : 'text-slate-500',
     mutedtext:  isDark ? 'text-zinc-600'                : 'text-slate-400',
     input: isDark
-    ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-500 focus:border-fuchsia-500'
-    : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-fuchsia-500',
-    row:        isDark ? 'hover:bg-white/4 border-transparent'  : 'hover:bg-white border-transparent',
+      ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-500 focus:border-fuchsia-500'
+      : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-fuchsia-500',
+    row:        isDark ? 'hover:bg-white/4 border-transparent'     : 'hover:bg-white border-transparent',
     rowActive:  isDark ? 'bg-fuchsia-500/10 border-fuchsia-500/20' : 'bg-fuchsia-50 border-fuchsia-300',
     card:       isDark ? 'bg-white/4 border-white/5'    : 'bg-white border-slate-200',
     btnGhost:   isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-100 hover:bg-slate-200',
@@ -91,30 +91,29 @@ const AdminContacts: React.FC = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const fetchContacts = useCallback(async () => {
-  setIsLoading(true);
-  try {
-    const res = await contactApi.getAll({
-      fullName: search || undefined,
-      status: filterStatus ? Number(filterStatus) : undefined,
-      type: filterType ? Number(filterType) : undefined,
-      pageNumber,
-      pageSize,
-      sortBy: 'createdat',
-      isDescending: true,
-    });
+    setIsLoading(true);
+    try {
+      const res = await contactApi.getAll({
+        fullName: search || undefined,
+        status: filterStatus ? Number(filterStatus) : undefined,
+        type: filterType ? Number(filterType) : undefined,
+        pageNumber,
+        pageSize,
+        sortBy: 'createdat',
+        isDescending: true,
+      });
 
-    if (res.data.isSuccess && res.data.data) {
-      // Hide closed messages unless admin explicitly filters for them
-      const items = filterStatus === '4'
-        ? res.data.data.items
-        : res.data.data.items.filter(c => c.status !== 'Closed');
+      if (res.data.isSuccess && res.data.data) {
+        const items = filterStatus === '4'
+          ? res.data.data.items
+          : res.data.data.items.filter(c => c.status !== 'Closed');
 
-      setContacts(items);
-      setTotalCount(res.data.data.totalCount);
-    }
-  } catch { toast.error('Failed to load messages'); }
-  finally { setIsLoading(false); }
-}, [search, filterStatus, filterType, pageNumber]);
+        setContacts(items);
+        setTotalCount(res.data.data.totalCount);
+      }
+    } catch { toast.error('Failed to load messages'); }
+    finally { setIsLoading(false); }
+  }, [search, filterStatus, filterType, pageNumber]);
 
   useEffect(() => { fetchContacts(); }, [fetchContacts]);
   useEffect(() => { setPageNumber(1); }, [search, filterStatus, filterType]);
@@ -170,36 +169,35 @@ const AdminContacts: React.FC = () => {
     <div className={`min-h-screen font-sans ${t.bg}`}>
 
       {/* Header */}
-      <div className={`px-8 pt-8 pb-6 border-b ${t.border}`}>
+      <div className={`px-4 sm:px-8 pt-8 pb-6 border-b ${t.border}`}>
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.3em] text-fuchsia-500 mb-1">Inbox</p>
             <h1 className="text-2xl font-bold tracking-tight">Contact Messages</h1>
           </div>
           <div className="flex items-center gap-3">
-          <span className={`text-sm ${t.subtext}`}>
-            {totalCount} total message{totalCount !== 1 ? 's' : ''}
-          </span>
-          {/* Show archive hint when not filtering closed */}
-          {filterStatus !== '4' && (
-            <button
-              onClick={() => setFilterStatus('4')}
-              className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg transition-colors ${t.btnGhost}`}
-            >
-              📦 View Archive
+            <span className={`text-sm ${t.subtext}`}>
+              {totalCount} total message{totalCount !== 1 ? 's' : ''}
+            </span>
+            {filterStatus !== '4' && (
+              <button
+                onClick={() => setFilterStatus('4')}
+                className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg transition-colors ${t.btnGhost}`}
+              >
+                📦 View Archive
+              </button>
+            )}
+            {filterStatus === '4' && (
+              <button
+                onClick={() => setFilterStatus('')}
+                className="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg bg-fuchsia-100 text-fuchsia-600 transition-colors"
+              >
+                ← Back to Inbox
+              </button>
+            )}
+            <button onClick={fetchContacts} className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}>
+              <RefreshCw className={`w-4 h-4 ${t.subtext}`} />
             </button>
-          )}
-          {filterStatus === '4' && (
-            <button
-              onClick={() => setFilterStatus('')}
-              className="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg bg-fuchsia-100 text-fuchsia-600 transition-colors"
-            >
-              ← Back to Inbox
-            </button>
-          )}
-          <button onClick={fetchContacts} className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}>
-            <RefreshCw className={`w-4 h-4 ${t.subtext}`} />
-          </button>
           </div>
         </div>
 
@@ -229,10 +227,12 @@ const AdminContacts: React.FC = () => {
       </div>
 
       {/* Body */}
-      <div className="flex h-[calc(100vh-180px)]">
+      <div className="flex h-[calc(100vh-180px)] relative">
 
-        {/* List */}
-        <div className={`flex flex-col border-r ${t.border} transition-all duration-300 ${selected ? 'w-2/5' : 'w-full'}`}>
+        {/* List — full width on mobile, 2/5 on sm+ when detail is open */}
+        <div className={`flex flex-col border-r ${t.border} transition-all duration-300 w-full
+          ${selected ? 'sm:w-2/5' : 'sm:w-full'}
+          ${selected ? 'hidden sm:flex' : 'flex'}`}>
           <div className="flex-1 overflow-y-auto">
             {isLoading ? (
               <div className="flex flex-col gap-px p-4">
@@ -304,10 +304,13 @@ const AdminContacts: React.FC = () => {
           )}
         </div>
 
-        {/* Detail Panel */}
+        {/* Detail Panel — overlays full screen on mobile, side panel on sm+ */}
         {selected && (
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <div className={`px-8 py-5 border-b ${t.border} flex items-start justify-between gap-4`}>
+          <div
+            className="flex-1 flex flex-col overflow-hidden absolute inset-0 sm:static z-10"
+            style={{ background: isDark ? '#0d0d0d' : '#f8fafc' }}
+          >
+            <div className={`px-4 sm:px-8 py-5 border-b ${t.border} flex items-start justify-between gap-4`}>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-1 flex-wrap">
                   <h2 className="text-lg font-bold truncate">{selected.fullName}</h2>
@@ -330,7 +333,7 @@ const AdminContacts: React.FC = () => {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
+            <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className={`rounded-xl p-4 border ${t.card}`}>
                   <p className={`text-xs uppercase tracking-widest mb-1 ${t.subtext}`}>Email</p>
@@ -369,7 +372,9 @@ const AdminContacts: React.FC = () => {
                   {['New', 'Read', 'Responded', 'Closed'].map((s, i, arr) => (
                     <React.Fragment key={s}>
                       <span className={`text-xs font-bold px-3 py-1.5 rounded-full transition-all ${
-                        selected.status === s ? statusBadge(s) + ' scale-105' : isDark ? 'text-zinc-600 bg-white/3' : 'text-slate-400 bg-slate-100'
+                        selected.status === s
+                          ? statusBadge(s) + ' scale-105'
+                          : isDark ? 'text-zinc-600 bg-white/3' : 'text-slate-400 bg-slate-100'
                       }`}>{s}</span>
                       {i < arr.length - 1 && <ChevronRight className={`w-3 h-3 shrink-0 ${t.mutedtext}`} />}
                     </React.Fragment>
@@ -378,7 +383,7 @@ const AdminContacts: React.FC = () => {
               </div>
             </div>
 
-            <div className={`px-8 py-5 border-t ${t.border} flex flex-wrap items-center gap-3`}>
+            <div className={`px-4 sm:px-8 py-5 border-t ${t.border} flex flex-wrap items-center gap-3`}>
               {NEXT_STATUS[selected.status] && (
                 <button onClick={advanceStatus} disabled={isUpdating}
                   className="flex items-center gap-2 px-5 py-2.5 bg-fuchsia-600 hover:bg-fuchsia-500 disabled:opacity-50 rounded-lg text-sm font-bold uppercase tracking-widest transition-colors text-white">

@@ -41,6 +41,10 @@ const MEDIA_LINKS = [
   { label: 'News',    path: '/announcements', icon: <Bell className="w-4 h-4" />,     desc: 'Updates & announcements' },
 ];
 
+// The slug of the House of Opera ministry as stored in the database.
+// Youth Community is accessed exclusively through this ministry's detail page.
+export const HOUSE_OF_OPERA_SLUG = 'house-of-opera';
+
 // ─── DROPDOWN ─────────────────────────────────────────────────────────────────
 
 interface DropdownProps {
@@ -143,13 +147,6 @@ const Navbar: React.FC = () => {
     else navigate('/give');
   };
 
-  const handleYouthClick = (e: React.MouseEvent) => {
-    if (!isAuthenticated) {
-      e.preventDefault();
-      navigate('/login', { state: { from: '/youth' } });
-    }
-  };
-
   const handleMegaEnter = () => { clearTimeout(megaTimeoutRef.current); setMegaOpen(true); };
   const handleMegaLeave = () => {
     megaTimeoutRef.current = setTimeout(() => setMegaOpen(false), 150);
@@ -167,10 +164,11 @@ const Navbar: React.FC = () => {
     '/ministries', '/events', '/contact', '/youth', '/prayer-request', '/counselling'
   ].some(p => location.pathname.startsWith(p));
 
+  // Mobile explore links — Youth Community is intentionally excluded here.
+  // Users access it through the House of Opera ministry detail page instead.
   const mobileExploreLinks = [
-    { label: 'All Ministries', path: '/ministries' },
+    { label: 'All Departments', path: '/ministries' },
     ...navMinistries.map(m => ({ label: m.name, path: `/ministries/${m.slug}` })),
-    { label: 'Youth Community', path: '/youth', requiresAuth: true },
     ...EXPLORE_CHURCH_LIFE.map(l => ({ label: l.label, path: l.path })),
     ...EXPLORE_QUICKLINKS.map(l => ({ label: l.label, path: l.path })),
   ];
@@ -219,7 +217,7 @@ const Navbar: React.FC = () => {
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
             <div className="flex items-center justify-between h-12">
 
-              {/* LOGO —logo + single bold name, no subtitle */}
+              {/* LOGO */}
               <Link to="/" className="flex items-center gap-3 shrink-0 group">
                 <img
                   src={logo}
@@ -404,11 +402,11 @@ const Navbar: React.FC = () => {
               <div className="max-w-7xl mx-auto px-8 py-10">
                 <div className="grid grid-cols-3 gap-12">
 
-                  {/* Column 1 — Ministries */}
+                  {/* Column 1 — Ministries (no hardcoded Youth Community here) */}
                   <div>
                     <p className="text-[9px] font-black uppercase
                       tracking-[0.4em] text-fuchsia-500 mb-5">
-                      Ministries
+                      Departments
                     </p>
                     <ul className="space-y-1">
                       <li>
@@ -421,7 +419,7 @@ const Navbar: React.FC = () => {
                           <div>
                             <p className="text-sm font-bold text-slate-800
                               group-hover:text-fuchsia-700 transition-colors">
-                              All Ministries
+                              All Departments
                             </p>
                             <p className="text-[11px] text-slate-400 mt-0.5">
                               Overview of all arms
@@ -449,35 +447,8 @@ const Navbar: React.FC = () => {
                           </Link>
                         </li>
                       ))}
-                      <li>
-                        <Link
-                          to="/youth"
-                          onClick={handleYouthClick}
-                          className="group flex items-start gap-3 p-2.5
-                            rounded-lg hover:bg-fuchsia-50 transition-colors"
-                        >
-                          <ArrowRight className="w-3 h-3 text-fuchsia-300
-                            group-hover:text-fuchsia-500 mt-1 shrink-0
-                            transition-colors" />
-                          <div>
-                            <p className="text-sm font-bold text-slate-800
-                              group-hover:text-fuchsia-700 transition-colors
-                              flex items-center gap-2">
-                              Youth Community
-                              {!isAuthenticated && (
-                                <span className="text-[9px] font-black
-                                  uppercase tracking-widest px-1.5 py-0.5
-                                  bg-fuchsia-100 text-fuchsia-600 rounded">
-                                  Login required
-                                </span>
-                              )}
-                            </p>
-                            <p className="text-[11px] text-slate-400 mt-0.5">
-                              House of Opera
-                            </p>
-                          </div>
-                        </Link>
-                      </li>
+                      {/* NOTE: Youth Community is no longer listed here.
+                          It is accessible via the House of Opera ministry page. */}
                     </ul>
                   </div>
 
@@ -686,45 +657,15 @@ const Navbar: React.FC = () => {
           {/* Nav sections */}
           <div className="flex-1 overflow-y-auto py-4 px-3">
 
-            {[
-              { label: 'Home',    path: '/' },
-              { label: 'Contact', path: '/contact' },
-              { label: 'Events',  path: '/events' },
-            ].map(link => (
-              <Link key={link.path} to={link.path}
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-between px-3 py-3.5
-                  rounded-xl hover:bg-slate-50 transition-colors group">
-                <span className="text-xs font-black uppercase tracking-widest
-                  text-slate-700 group-hover:text-fuchsia-600 transition-colors">
-                  {link.label}
-                </span>
-                <ArrowRight className="w-3.5 h-3.5 text-slate-300
-                  group-hover:text-fuchsia-400 transition-colors" />
-              </Link>
-            ))}
-
-            <Link to="/prayer-request" onClick={() => setMobileOpen(false)}
-              className="flex items-center justify-between w-full px-3 py-3.5
-                rounded-xl hover:bg-fuchsia-50 transition-colors group">
+            <Link
+              to="/"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center justify-between px-3 py-3.5
+                rounded-xl hover:bg-slate-50 transition-colors group"
+            >
               <span className="text-xs font-black uppercase tracking-widest
-                text-slate-700 group-hover:text-fuchsia-600 transition-colors
-                flex items-center gap-2">
-                <HandHeart className="w-4 h-4 text-fuchsia-400" />
-                Prayer Request
-              </span>
-              <ArrowRight className="w-3.5 h-3.5 text-slate-300
-                group-hover:text-fuchsia-400 transition-colors" />
-            </Link>
-
-            <Link to="/counselling" onClick={() => setMobileOpen(false)}
-              className="flex items-center justify-between w-full px-3 py-3.5
-                rounded-xl hover:bg-fuchsia-50 transition-colors group">
-              <span className="text-xs font-black uppercase tracking-widest
-                text-slate-700 group-hover:text-fuchsia-600 transition-colors
-                flex items-center gap-2">
-                <MessageCircleHeart className="w-4 h-4 text-fuchsia-400" />
-                Counselling
+                text-slate-700 group-hover:text-fuchsia-600 transition-colors">
+                Home
               </span>
               <ArrowRight className="w-3.5 h-3.5 text-slate-300
                 group-hover:text-fuchsia-400 transition-colors" />

@@ -126,14 +126,19 @@ const AdminMinistries = () => {
     try {
       const dto: UpdateMinistryDto = {
         name: ministry.name, shortDescription: ministry.shortDescription,
-        description: ministry.description ?? undefined, coverImageUrl: ministry.coverImageUrl ?? undefined,
-        leaderName: ministry.leaderName ?? undefined, leaderTitle: ministry.leaderTitle ?? undefined,
-        leaderImageUrl: ministry.leaderImageUrl ?? undefined, contactEmail: ministry.contactEmail ?? undefined,
+        description: ministry.description ?? undefined,
+        coverImageUrl: ministry.coverImageUrl ?? undefined,
+        leaderName: ministry.leaderName ?? undefined,
+        leaderTitle: ministry.leaderTitle ?? undefined,
+        leaderImageUrl: ministry.leaderImageUrl ?? undefined,
+        contactEmail: ministry.contactEmail ?? undefined,
         displayOrder: ministry.displayOrder, isPublished: !ministry.isPublished,
       };
       const res = await ministryApi.update(ministry.id, dto);
       if (res.data.isSuccess) {
-        setMinistries(prev => prev.map(m => m.id === ministry.id ? { ...m, isPublished: !m.isPublished } : m));
+        setMinistries(prev => prev.map(m =>
+          m.id === ministry.id ? { ...m, isPublished: !m.isPublished } : m
+        ));
         toast.success(ministry.isPublished ? 'Ministry unpublished' : 'Ministry published');
       }
     } catch { toast.error('Failed to update ministry'); }
@@ -144,34 +149,51 @@ const AdminMinistries = () => {
   return (
     <div className={`min-h-screen font-sans ${t.bg}`}>
 
-      <div className={`px-8 pt-8 pb-6 border-b ${t.border} flex items-center justify-between`}>
+      {/* Header */}
+      <div className={`px-4 sm:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6 border-b ${t.border}
+        flex items-center justify-between gap-3`}>
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-fuchsia-500 mb-1">Admin</p>
-          <h1 className="text-2xl font-bold">Ministries</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">Ministries</h1>
         </div>
-        <div className="flex items-center gap-3">
-          <span className={`text-sm ${t.subtext}`}>{totalCount} total</span>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className={`text-sm hidden sm:block ${t.subtext}`}>{totalCount} total</span>
           <button onClick={fetchMinistries} className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}>
             <RefreshCw className={`w-4 h-4 ${t.subtext}`} />
           </button>
-          <button onClick={openCreate}
-            className="flex items-center gap-2 px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-500 rounded-lg text-sm font-bold uppercase tracking-widest transition-colors text-white">
-            <Plus className="w-4 h-4" /> New Ministry
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-fuchsia-600
+              hover:bg-fuchsia-500 rounded-lg text-xs sm:text-sm font-bold
+              uppercase tracking-widest transition-colors text-white whitespace-nowrap"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">New Ministry</span>
+            <span className="sm:hidden">New</span>
           </button>
         </div>
       </div>
 
-      <div className={`px-8 py-4 border-b ${t.border} flex flex-wrap gap-3`}>
-        <div className="relative flex-1 min-w-48">
+      {/* Filters */}
+      <div className={`px-4 sm:px-8 py-3 sm:py-4 border-b ${t.border} flex flex-col sm:flex-row gap-3`}>
+        <div className="relative flex-1">
           <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${t.subtext}`} />
-          <input type="text" placeholder="Search by name..." value={search}
+          <input
+            type="text"
+            placeholder="Search by name..."
+            value={search}
             onChange={e => setSearch(e.target.value)}
-            className={`w-full pl-9 pr-4 py-2.5 border rounded-lg text-sm outline-none transition-all ${t.input}`} />
+            className={`w-full pl-9 pr-4 py-2.5 border rounded-lg text-sm outline-none transition-all ${t.input}`}
+          />
         </div>
         <div className="relative">
           <Filter className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${t.subtext} pointer-events-none`} />
-          <select value={filterPublished} onChange={e => setFilterPublished(e.target.value)}
-            className={`pl-9 pr-8 py-2.5 border rounded-lg text-sm outline-none appearance-none cursor-pointer ${t.input}`}>
+          <select
+            value={filterPublished}
+            onChange={e => setFilterPublished(e.target.value)}
+            className={`w-full sm:w-auto pl-9 pr-8 py-2.5 border rounded-lg text-sm
+              outline-none appearance-none cursor-pointer ${t.input}`}
+          >
             <option value="">All Ministries</option>
             <option value="true">Published</option>
             <option value="false">Drafts</option>
@@ -179,64 +201,117 @@ const AdminMinistries = () => {
         </div>
       </div>
 
-      <div className="px-8 py-6">
+      {/* List */}
+      <div className="px-4 sm:px-8 py-4 sm:py-6">
         {isLoading ? (
           <div className="space-y-3">
-            {[...Array(5)].map((_, i) => <div key={i} className={`animate-pulse h-24 rounded-xl ${t.skeleton}`} />)}
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className={`animate-pulse h-24 rounded-xl ${t.skeleton}`} />
+            ))}
           </div>
         ) : ministries.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <Users className={`w-10 h-10 mb-4 ${t.mutedtext}`} />
             <p className={t.subtext}>No ministries found</p>
-            <button onClick={openCreate} className="mt-4 text-fuchsia-600 text-sm font-bold uppercase tracking-widest">
+            <button
+              onClick={openCreate}
+              className="mt-4 text-fuchsia-600 text-sm font-bold uppercase tracking-widest"
+            >
               Add your first ministry
             </button>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {ministries.map(ministry => (
-              <div key={ministry.id} className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${t.row}`}>
-                <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-200 shrink-0">
-                  {ministry.coverImageUrl ? (
-                    <img src={ministry.coverImageUrl} alt={ministry.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Users className={`w-6 h-6 ${t.mutedtext}`} />
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <p className="font-bold text-sm truncate">{ministry.name}</p>
-                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                      ministry.isPublished ? 'bg-emerald-500/20 text-emerald-600' : 'bg-amber-500/20 text-amber-600'
-                    }`}>
-                      {ministry.isPublished ? 'Published' : 'Draft'}
-                    </span>
-                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${isDark ? 'bg-white/5 text-zinc-400' : 'bg-slate-100 text-slate-400'}`}>
-                      /{ministry.slug}
-                    </span>
+              <div
+                key={ministry.id}
+                className={`rounded-xl border transition-all p-3 sm:p-4 ${t.row}`}
+              >
+                {/* Top row: image + info + actions */}
+                <div className="flex items-start gap-3">
+                  {/* Cover image */}
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden
+                    bg-slate-200 shrink-0">
+                    {ministry.coverImageUrl ? (
+                      <img
+                        src={ministry.coverImageUrl}
+                        alt={ministry.name}
+                        className="w-full h-full object-cover object-top"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Users className={`w-6 h-6 ${t.mutedtext}`} />
+                      </div>
+                    )}
                   </div>
-                  <p className={`text-xs ${t.subtext} truncate max-w-lg`}>{ministry.shortDescription}</p>
-                  {ministry.leaderName && (
-                    <p className={`text-xs mt-0.5 ${t.mutedtext}`}>
-                      Lead: {ministry.leaderName}{ministry.leaderTitle && ` · ${ministry.leaderTitle}`}
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-bold text-sm sm:text-base truncate">
+                          {ministry.name}
+                        </p>
+                        {/* Badges */}
+                        <div className="flex flex-wrap gap-1.5 mt-1 mb-1.5">
+                          <span className={`text-[10px] font-bold uppercase px-2 py-0.5
+                            rounded-full ${ministry.isPublished
+                              ? 'bg-emerald-500/20 text-emerald-600'
+                              : 'bg-amber-500/20 text-amber-600'
+                            }`}>
+                            {ministry.isPublished ? 'Published' : 'Draft'}
+                          </span>
+                          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full
+                            ${isDark ? 'bg-white/5 text-zinc-400' : 'bg-slate-100 text-slate-400'}`}>
+                            /{ministry.slug}
+                          </span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full
+                            ${isDark ? 'bg-white/5 text-zinc-400' : 'bg-slate-100 text-slate-500'}`}>
+                            Order #{ministry.displayOrder}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Action buttons — always visible */}
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => togglePublish(ministry)}
+                          className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}
+                          title={ministry.isPublished ? 'Unpublish' : 'Publish'}
+                        >
+                          {ministry.isPublished
+                            ? <EyeOff className={`w-4 h-4 ${t.subtext}`} />
+                            : <Eye className={`w-4 h-4 ${t.subtext}`} />
+                          }
+                        </button>
+                        <button
+                          onClick={() => openEdit(ministry)}
+                          className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}
+                          title="Edit"
+                        >
+                          <Pencil className={`w-4 h-4 ${t.subtext}`} />
+                        </button>
+                        <button
+                          onClick={() => setDeleteTarget(ministry)}
+                          className={`p-2 rounded-lg transition-colors ${t.btnGhost} hover:bg-red-500/20`}
+                          title="Delete"
+                        >
+                          <Trash2 className={`w-4 h-4 ${t.subtext}`} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <p className={`text-xs ${t.subtext} line-clamp-2`}>
+                      {ministry.shortDescription}
                     </p>
-                  )}
-                </div>
-                <div className={`text-xs font-bold px-2 py-1 rounded-lg shrink-0 ${isDark ? 'bg-white/5 text-zinc-400' : 'bg-slate-100 text-slate-500'}`}>
-                  #{ministry.displayOrder}
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <button onClick={() => togglePublish(ministry)} className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}>
-                    {ministry.isPublished ? <EyeOff className={`w-4 h-4 ${t.subtext}`} /> : <Eye className={`w-4 h-4 ${t.subtext}`} />}
-                  </button>
-                  <button onClick={() => openEdit(ministry)} className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}>
-                    <Pencil className={`w-4 h-4 ${t.subtext}`} />
-                  </button>
-                  <button onClick={() => setDeleteTarget(ministry)} className={`p-2 rounded-lg transition-colors ${t.btnGhost} hover:bg-red-500/20`}>
-                    <Trash2 className={`w-4 h-4 ${t.subtext}`} />
-                  </button>
+                    {ministry.leaderName && (
+                      <p className={`text-xs mt-1 ${t.mutedtext}`}>
+                        Lead: {ministry.leaderName}
+                        {ministry.leaderTitle && ` · ${ministry.leaderTitle}`}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -245,85 +320,156 @@ const AdminMinistries = () => {
 
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-6">
-            <span className={`text-xs ${t.mutedtext}`}>Page {pageNumber} of {totalPages}</span>
+            <span className={`text-xs ${t.mutedtext}`}>
+              Page {pageNumber} of {totalPages}
+            </span>
             <div className="flex gap-2">
-              <button onClick={() => setPageNumber(p => Math.max(1, p - 1))} disabled={pageNumber === 1}
-                className={`px-3 py-1.5 rounded disabled:opacity-30 text-xs transition-colors ${t.btnGhost}`}>Prev</button>
-              <button onClick={() => setPageNumber(p => Math.min(totalPages, p + 1))} disabled={pageNumber === totalPages}
-                className={`px-3 py-1.5 rounded disabled:opacity-30 text-xs transition-colors ${t.btnGhost}`}>Next</button>
+              <button
+                onClick={() => setPageNumber(p => Math.max(1, p - 1))}
+                disabled={pageNumber === 1}
+                className={`px-3 py-1.5 rounded disabled:opacity-30 text-xs transition-colors ${t.btnGhost}`}
+              >
+                Prev
+              </button>
+              <button
+                onClick={() => setPageNumber(p => Math.min(totalPages, p + 1))}
+                disabled={pageNumber === totalPages}
+                className={`px-3 py-1.5 rounded disabled:opacity-30 text-xs transition-colors ${t.btnGhost}`}
+              >
+                Next
+              </button>
             </div>
           </div>
         )}
       </div>
 
+      {/* ── CREATE / EDIT MODAL ── */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowForm(false)} />
-          <div className={`relative rounded-2xl w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto border ${t.modal}`}>
-            <div className={`flex items-center justify-between px-6 py-4 border-b ${t.border} sticky top-0 z-10`}
-              style={{ background: isDark ? '#161616' : 'white' }}>
+          <div className={`relative rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl shadow-2xl
+            max-h-[90vh] overflow-y-auto border ${t.modal}`}>
+            <div
+              className={`flex items-center justify-between px-5 sm:px-6 py-4 border-b
+                ${t.border} sticky top-0 z-10`}
+              style={{ background: isDark ? '#161616' : 'white' }}
+            >
               <h3 className="font-bold text-lg">{editing ? 'Edit Ministry' : 'New Ministry'}</h3>
               <button onClick={() => setShowForm(false)} className={`p-1.5 rounded-lg transition-colors ${t.btnGhost}`}>
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="px-6 py-5 space-y-5">
+            <div className="px-5 sm:px-6 py-5 space-y-5">
               <div>
-                <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Ministry Name *</label>
-                <input type="text" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+                <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
+                  Ministry Name *
+                </label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
                   placeholder="e.g. Daughters of Honour"
-                  className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`} />
+                  className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`}
+                />
               </div>
               <div>
-                <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Short Description *</label>
-                <input type="text" value={form.shortDescription} onChange={e => setForm(p => ({ ...p, shortDescription: e.target.value }))}
+                <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
+                  Short Description *
+                </label>
+                <input
+                  type="text"
+                  value={form.shortDescription}
+                  onChange={e => setForm(p => ({ ...p, shortDescription: e.target.value }))}
                   placeholder="e.g. Empowering women to walk in their divine purpose"
-                  className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`} />
+                  className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`}
+                />
               </div>
               <div>
-                <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Full Description</label>
-                <textarea rows={4} value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
+                <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
+                  Full Description
+                </label>
+                <textarea
+                  rows={4}
+                  value={form.description}
+                  onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
                   placeholder="Detailed description of the ministry..."
-                  className={`w-full px-4 py-3 border rounded-xl text-sm outline-none resize-none ${t.modalInput}`} />
+                  className={`w-full px-4 py-3 border rounded-xl text-sm outline-none resize-none ${t.modalInput}`}
+                />
               </div>
 
-              <ImageUpload value={form.coverImageUrl || ''} onChange={url => setForm(p => ({ ...p, coverImageUrl: url ?? undefined }))} label="Cover Image" />
+              <ImageUpload
+                value={form.coverImageUrl || ''}
+                onChange={url => setForm(p => ({ ...p, coverImageUrl: url ?? undefined }))}
+                label="Cover Image"
+              />
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Leader Name</label>
-                  <input type="text" value={form.leaderName} onChange={e => setForm(p => ({ ...p, leaderName: e.target.value }))}
+                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
+                    Leader Name
+                  </label>
+                  <input
+                    type="text"
+                    value={form.leaderName}
+                    onChange={e => setForm(p => ({ ...p, leaderName: e.target.value }))}
                     placeholder="e.g. Apostle Faith Musa"
-                    className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`} />
+                    className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`}
+                  />
                 </div>
                 <div>
-                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Leader Title</label>
-                  <input type="text" value={form.leaderTitle} onChange={e => setForm(p => ({ ...p, leaderTitle: e.target.value }))}
+                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
+                    Leader Title
+                  </label>
+                  <input
+                    type="text"
+                    value={form.leaderTitle}
+                    onChange={e => setForm(p => ({ ...p, leaderTitle: e.target.value }))}
                     placeholder="e.g. Co-Pastor"
-                    className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`} />
+                    className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`}
+                  />
                 </div>
               </div>
 
-              <ImageUpload value={form.leaderImageUrl || ''} onChange={url => setForm(p => ({ ...p, leaderImageUrl: url ?? undefined }))} label="Leader Image" />
+              <ImageUpload
+                value={form.leaderImageUrl || ''}
+                onChange={url => setForm(p => ({ ...p, leaderImageUrl: url ?? undefined }))}
+                label="Leader Image"
+              />
 
               <div>
-                <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Contact Email</label>
-                <input type="email" value={form.contactEmail} onChange={e => setForm(p => ({ ...p, contactEmail: e.target.value }))}
+                <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
+                  Contact Email
+                </label>
+                <input
+                  type="email"
+                  value={form.contactEmail}
+                  onChange={e => setForm(p => ({ ...p, contactEmail: e.target.value }))}
                   placeholder="ministry@globalflame.org"
-                  className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`} />
+                  className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`}
+                />
               </div>
               <div>
-                <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Display Order (lower = first)</label>
-                <input type="number" value={form.displayOrder} min={0}
+                <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
+                  Display Order (lower = first)
+                </label>
+                <input
+                  type="number"
+                  value={form.displayOrder}
+                  min={0}
                   onChange={e => setForm(p => ({ ...p, displayOrder: Number(e.target.value) }))}
-                  className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`} />
+                  className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`}
+                />
               </div>
 
-              <div className="flex items-center gap-3 cursor-pointer"
-                onClick={() => setForm(p => ({ ...p, isPublished: !p.isPublished }))}>
-                <div className={`w-11 h-6 rounded-full transition-colors ${form.isPublished ? 'bg-fuchsia-600' : isDark ? 'bg-white/10' : 'bg-slate-200'}`}>
-                  <div className={`w-5 h-5 bg-white rounded-full mt-0.5 transition-transform ${form.isPublished ? 'translate-x-5' : 'translate-x-0.5'}`} />
+              <div
+                className="flex items-center gap-3 cursor-pointer"
+                onClick={() => setForm(p => ({ ...p, isPublished: !p.isPublished }))}
+              >
+                <div className={`w-11 h-6 rounded-full transition-colors
+                  ${form.isPublished ? 'bg-fuchsia-600' : isDark ? 'bg-white/10' : 'bg-slate-200'}`}>
+                  <div className={`w-5 h-5 bg-white rounded-full mt-0.5 transition-transform
+                    ${form.isPublished ? 'translate-x-5' : 'translate-x-0.5'}`} />
                 </div>
                 <span className={`text-sm flex items-center gap-2 ${t.subtext}`}>
                   <Star className="w-4 h-4 text-fuchsia-500" />
@@ -332,11 +478,22 @@ const AdminMinistries = () => {
               </div>
             </div>
 
-            <div className={`px-6 py-4 border-t ${t.border} flex gap-3 justify-end sticky bottom-0 z-10`}
-              style={{ background: isDark ? '#161616' : 'white' }}>
-              <button onClick={() => setShowForm(false)} className={`px-4 py-2 rounded-lg text-sm transition-colors ${t.btnGhost}`}>Cancel</button>
-              <button onClick={handleSave} disabled={isSaving}
-                className="px-5 py-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500 disabled:opacity-50 text-sm font-bold text-white flex items-center gap-2">
+            <div
+              className={`px-5 sm:px-6 py-4 border-t ${t.border} flex gap-3 justify-end sticky bottom-0 z-10`}
+              style={{ background: isDark ? '#161616' : 'white' }}
+            >
+              <button
+                onClick={() => setShowForm(false)}
+                className={`px-4 py-2 rounded-lg text-sm transition-colors ${t.btnGhost}`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="px-5 py-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500
+                  disabled:opacity-50 text-sm font-bold text-white flex items-center gap-2"
+              >
                 {isSaving && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                 {editing ? 'Update Ministry' : 'Create Ministry'}
               </button>
@@ -345,17 +502,34 @@ const AdminMinistries = () => {
         </div>
       )}
 
+      {/* Delete Confirm */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setDeleteTarget(null)} />
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setDeleteTarget(null)}
+          />
           <div className={`relative rounded-2xl p-8 w-full max-w-sm text-center border ${t.modal}`}>
             <Trash2 className="w-8 h-8 text-red-500 mx-auto mb-4" />
             <h3 className="font-bold text-lg mb-2">Delete ministry?</h3>
-            <p className={`text-sm mb-6 ${t.subtext}`}>"{deleteTarget.name}" will be permanently deleted. All events linked to it will be unlinked.</p>
+            <p className={`text-sm mb-6 ${t.subtext}`}>
+              "{deleteTarget.name}" will be permanently deleted.
+              All events linked to it will be unlinked.
+            </p>
             <div className="flex gap-3">
-              <button onClick={() => setDeleteTarget(null)} className={`flex-1 py-2.5 rounded-lg text-sm transition-colors ${t.btnGhost}`}>Cancel</button>
-              <button onClick={handleDelete} disabled={isDeleting}
-                className="flex-1 py-2.5 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-50 text-sm font-bold text-white flex items-center justify-center gap-2">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className={`flex-1 py-2.5 rounded-lg text-sm transition-colors ${t.btnGhost}`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="flex-1 py-2.5 rounded-lg bg-red-500 hover:bg-red-600
+                  disabled:opacity-50 text-sm font-bold text-white
+                  flex items-center justify-center gap-2"
+              >
                 {isDeleting && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                 Delete
               </button>

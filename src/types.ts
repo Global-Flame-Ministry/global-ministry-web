@@ -1,4 +1,16 @@
 // ORIGINAL TYPES 
+export interface Sermon {
+  id: string;
+  title: string;
+  speaker: string;
+  date: string;
+  imageUrl: string;
+  videoUrl?: string;
+  description: string;
+  speakerImageUrl?: string;
+  series: string;
+}
+
 export interface Event {
   id: string;
   title: string;
@@ -196,9 +208,13 @@ export interface UpdateContactStatusDto {
 
 // PRAYER REQUEST 
 export interface CreatePrayerRequestDto {
-  name?: string;
-  email?: string;
+  name: string;
+  email: string;
+  topic?: string;
+  phoneNumber?: string;
+  preferredContact: string;
   content: string;
+  attachment?: string;
 }
 
 export interface PrayerRequestDto {
@@ -504,6 +520,47 @@ export interface MyDonationDto {
   createdAt: string;
 }
 
+// SERMON 
+export interface SermonDto {
+  id: number;
+  title: string;
+  speaker: string;
+  series: string;
+  description: string;
+  speakerImageUrl: string | null;
+  imageUrl: string | null;
+  videoUrl: string | null;
+  audioUrl: string | null;
+  sermonDate: string;
+  isPublished: boolean;
+  createdOn: string;
+}
+
+export interface CreateSermonDto {
+  title: string;
+  speaker: string;
+  series: string;
+  description: string;
+  speakerImageUrl?: string;   // ← ADDED
+  imageUrl?: string;
+  videoUrl?: string;
+  audioUrl?: string;
+  sermonDate: string;
+  isPublished: boolean;
+}
+
+export interface UpdateSermonDto {
+  title: string;
+  speaker: string;
+  series: string;
+  description: string;
+  speakerImageUrl?: string;   // ← ADDED
+  imageUrl?: string;
+  videoUrl?: string;
+  audioUrl?: string;
+  sermonDate: string;
+  isPublished: boolean;
+}
 // COUNSELLING 
 export interface CounsellingResponseDto {
   id: number;
