@@ -160,7 +160,7 @@ const YouthRow: React.FC<{ index: number }> = ({ index }) => {
             <div className="text-center">
               <p className="text-fuchsia-300 text-6xl font-serif italic
                 font-bold opacity-30">
-                House of Opra
+                House of Opera
               </p>
             </div>
           </div>
@@ -189,7 +189,7 @@ const YouthRow: React.FC<{ index: number }> = ({ index }) => {
         <div className="h-px w-16 bg-black mb-8" />
         <p className="text-gray-600 text-lg font-light leading-relaxed mb-4
           text-justify">
-          House of Opra — A vibrant community of young people raising a
+          House of Opera — A vibrant community of young people raising a
           generation passionate about God's kingdom, excellence, and
           transformation in their communities.
         </p>

@@ -117,7 +117,7 @@ const OurStory: React.FC = () => {
             <p className="mb-6 text-justify">
               As the congregation grew, so did the mandate. Ministries were raised up to serve
               distinct needs: daughters were empowered through the <strong>Daughters of Honour</strong> arm,
-              the youth found a home in the <strong>House of Opra</strong>, worshippers found their voice in
+              the youth found a home in the <strong>House of Opera</strong>, worshippers found their voice in
               the <strong>Global Choir</strong>, families found care through the <strong>Home of Love</strong> ministry.,
               and sick ones found health through <strong>Mediplex</strong> ministry.
             </p>
