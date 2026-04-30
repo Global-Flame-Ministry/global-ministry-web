@@ -4,11 +4,7 @@ import {
   X, BookOpen, Filter, Eye, EyeOff,
   Play, Music, Download
 } from 'lucide-react';
-import {
-  sermonApi,
-  type CreateSermonDto,
-  type UpdateSermonDto
-} from '../../api/sermonApi';
+import { sermonApi, type CreateSermonDto, type UpdateSermonDto } from '../../api/sermonApi';
 import type { SermonDto } from '../../types';
 import toast from 'react-hot-toast';
 import { useAdminTheme } from '../../context/AdminThemeContext';
@@ -16,15 +12,9 @@ import AudioUpload from '../../components/AudioUpload';
 import ImageUpload from '../../components/ImageUpload';
 
 const emptyForm = (): CreateSermonDto => ({
-  title: '',
-  speaker: '',
-  series: '',
-  description: '',
-  imageUrl: '',
-  videoUrl: '',
-  audioUrl: '',
-  sermonDate: '',
-  isPublished: false,
+  title: '', speaker: '', series: '', description: '',
+  speakerImageUrl: '',
+  imageUrl: '', videoUrl: '', audioUrl: '', sermonDate: '', isPublished: false,
 });
 
 const AdminSermons = () => {
@@ -36,32 +26,32 @@ const AdminSermons = () => {
     subtext:    isDark ? 'text-zinc-400'             : 'text-slate-500',
     mutedtext:  isDark ? 'text-zinc-600'             : 'text-slate-400',
     input:      isDark
-      ? 'bg-white/5 border-white/8 text-white placeholder-zinc-600 focus:border-fuchsia-500/50'
+      ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-500 focus:border-fuchsia-500'
       : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-fuchsia-500',
     row:        isDark ? 'bg-white/3 hover:bg-white/5 border-white/5' : 'bg-white hover:bg-slate-50 border-slate-200',
     btnGhost:   isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-100 hover:bg-slate-200',
     modal:      isDark ? 'bg-[#161616] border-white/10 text-white' : 'bg-white border-slate-200 shadow-xl text-slate-900',
     modalInput: isDark
-      ? 'bg-white/5 border-white/10 text-white placeholder:text-zinc-600 focus:border-fuchsia-500/50'
+      ? 'bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-fuchsia-500'
       : 'bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-fuchsia-500',
     label:      isDark ? 'text-zinc-400' : 'text-slate-600',
     toggle:     isDark ? 'bg-white/10'  : 'bg-slate-200',
     skeleton:   isDark ? 'bg-white/3'   : 'bg-slate-200',
   };
 
-  const [sermons, setSermons]               = useState<SermonDto[]>([]);
-  const [totalCount, setTotalCount]         = useState(0);
-  const [isLoading, setIsLoading]           = useState(true);
-  const [search, setSearch]                 = useState('');
+  const [sermons, setSermons]                 = useState<SermonDto[]>([]);
+  const [totalCount, setTotalCount]           = useState(0);
+  const [isLoading, setIsLoading]             = useState(true);
+  const [search, setSearch]                   = useState('');
   const [filterPublished, setFilterPublished] = useState('');
-  const [pageNumber, setPageNumber]         = useState(1);
+  const [pageNumber, setPageNumber]           = useState(1);
   const pageSize = 10;
-  const [showForm, setShowForm]             = useState(false);
-  const [editing, setEditing]               = useState<SermonDto | null>(null);
-  const [form, setForm]                     = useState<CreateSermonDto>(emptyForm());
-  const [isSaving, setIsSaving]             = useState(false);
-  const [deleteTarget, setDeleteTarget]     = useState<SermonDto | null>(null);
-  const [isDeleting, setIsDeleting]         = useState(false);
+  const [showForm, setShowForm]               = useState(false);
+  const [editing, setEditing]                 = useState<SermonDto | null>(null);
+  const [form, setForm]                       = useState<CreateSermonDto>(emptyForm());
+  const [isSaving, setIsSaving]               = useState(false);
+  const [deleteTarget, setDeleteTarget]       = useState<SermonDto | null>(null);
+  const [isDeleting, setIsDeleting]           = useState(false);
 
   const fetchSermons = useCallback(async () => {
     setIsLoading(true);
@@ -69,8 +59,7 @@ const AdminSermons = () => {
       const res = await sermonApi.adminGetAll({
         title: search || undefined,
         isPublished: filterPublished === '' ? undefined : filterPublished === 'true',
-        pageNumber,
-        pageSize,
+        pageNumber, pageSize,
       });
       if (res.data.isSuccess && res.data.data) {
         setSermons(res.data.data.items);
@@ -83,24 +72,21 @@ const AdminSermons = () => {
   useEffect(() => { fetchSermons(); }, [fetchSermons]);
   useEffect(() => { setPageNumber(1); }, [search, filterPublished]);
 
-  const openCreate = () => {
-    setEditing(null);
-    setForm(emptyForm());
-    setShowForm(true);
-  };
+  const openCreate = () => { setEditing(null); setForm(emptyForm()); setShowForm(true); };
 
   const openEdit = (s: SermonDto) => {
     setEditing(s);
     setForm({
-      title:       s.title,
-      speaker:     s.speaker,
-      series:      s.series,
-      description: s.description,
-      imageUrl:    s.imageUrl ?? '',
-      videoUrl:    s.videoUrl ?? '',
-      audioUrl:    s.audioUrl ?? '',
-      sermonDate:  s.sermonDate.slice(0, 10),
-      isPublished: s.isPublished,
+      title:           s.title,
+      speaker:         s.speaker,
+      series:          s.series,
+      description:     s.description,
+      speakerImageUrl: s.speakerImageUrl ?? '',
+      imageUrl:        s.imageUrl ?? '',
+      videoUrl:        s.videoUrl ?? '',
+      audioUrl:        s.audioUrl ?? '',
+      sermonDate:      s.sermonDate.slice(0, 10),
+      isPublished:     s.isPublished,
     });
     setShowForm(true);
   };
@@ -109,24 +95,14 @@ const AdminSermons = () => {
     if (!form.title.trim())   { toast.error('Title is required');       return; }
     if (!form.speaker.trim()) { toast.error('Speaker is required');     return; }
     if (!form.sermonDate)     { toast.error('Sermon date is required'); return; }
-
     setIsSaving(true);
     try {
       if (editing) {
-        const dto: UpdateSermonDto = { ...form };
-        const res = await sermonApi.update(editing.id, dto);
-        if (res.data.isSuccess) {
-          toast.success('Sermon updated');
-          setShowForm(false);
-          fetchSermons();
-        }
+        const res = await sermonApi.update(editing.id, { ...form } as UpdateSermonDto);
+        if (res.data.isSuccess) { toast.success('Sermon updated'); setShowForm(false); fetchSermons(); }
       } else {
         const res = await sermonApi.create(form);
-        if (res.data.isSuccess) {
-          toast.success('Sermon created');
-          setShowForm(false);
-          fetchSermons();
-        }
+        if (res.data.isSuccess) { toast.success('Sermon created'); setShowForm(false); fetchSermons(); }
       }
     } catch { toast.error('Failed to save sermon'); }
     finally { setIsSaving(false); }
@@ -148,15 +124,16 @@ const AdminSermons = () => {
   const togglePublish = async (sermon: SermonDto) => {
     try {
       const dto: UpdateSermonDto = {
-        title:       sermon.title,
-        speaker:     sermon.speaker,
-        series:      sermon.series,
-        description: sermon.description,
-        imageUrl:    sermon.imageUrl ?? '',
-        videoUrl:    sermon.videoUrl ?? '',
-        audioUrl:    sermon.audioUrl ?? '',
-        sermonDate:  sermon.sermonDate.slice(0, 10),
-        isPublished: !sermon.isPublished,
+        title:           sermon.title,
+        speaker:         sermon.speaker,
+        series:          sermon.series,
+        description:     sermon.description,
+        speakerImageUrl: sermon.speakerImageUrl ?? '',
+        imageUrl:        sermon.imageUrl ?? '',
+        videoUrl:        sermon.videoUrl ?? '',
+        audioUrl:        sermon.audioUrl ?? '',
+        sermonDate:      sermon.sermonDate.slice(0, 10),
+        isPublished:     !sermon.isPublished,
       };
       const res = await sermonApi.update(sermon.id, dto);
       if (res.data.isSuccess) {
@@ -169,9 +146,7 @@ const AdminSermons = () => {
   };
 
   const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString('en-US', {
-      month: 'short', day: 'numeric', year: 'numeric'
-    });
+    new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -179,28 +154,33 @@ const AdminSermons = () => {
     <div className={`min-h-screen font-sans ${t.bg}`}>
 
       {/* Header */}
-      <div className={`px-8 pt-8 pb-6 border-b ${t.border} flex items-center justify-between`}>
+      <div className={`px-4 sm:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6 border-b ${t.border}
+        flex items-center justify-between gap-3`}>
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-fuchsia-500 mb-1">Admin</p>
-          <h1 className="text-2xl font-bold">Sermons</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">Sermons</h1>
         </div>
-        <div className="flex items-center gap-3">
-          <span className={`text-sm ${t.subtext}`}>{totalCount} total</span>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className={`text-sm hidden sm:block ${t.subtext}`}>{totalCount} total</span>
           <button onClick={fetchSermons} className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}>
             <RefreshCw className={`w-4 h-4 ${t.subtext}`} />
           </button>
           <button
             onClick={openCreate}
-            className="flex items-center gap-2 px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-500 rounded-lg text-sm font-bold uppercase tracking-widest transition-colors text-white"
+            className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-fuchsia-600
+              hover:bg-fuchsia-500 rounded-lg text-xs sm:text-sm font-bold
+              uppercase tracking-widest transition-colors text-white whitespace-nowrap"
           >
-            <Plus className="w-4 h-4" /> New Sermon
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">New Sermon</span>
+            <span className="sm:hidden">New</span>
           </button>
         </div>
       </div>
 
       {/* Filters */}
-      <div className={`px-8 py-4 border-b ${t.border} flex flex-wrap gap-3`}>
-        <div className="relative flex-1 min-w-48">
+      <div className={`px-4 sm:px-8 py-3 sm:py-4 border-b ${t.border} flex flex-col sm:flex-row gap-3`}>
+        <div className="relative flex-1">
           <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${t.subtext}`} />
           <input
             type="text"
@@ -211,11 +191,12 @@ const AdminSermons = () => {
           />
         </div>
         <div className="relative">
-          <Filter className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${t.subtext}`} />
+          <Filter className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${t.subtext} pointer-events-none`} />
           <select
             value={filterPublished}
             onChange={e => setFilterPublished(e.target.value)}
-            className={`pl-9 pr-8 py-2.5 border rounded-lg text-sm outline-none appearance-none cursor-pointer ${t.input}`}
+            className={`w-full sm:w-auto pl-9 pr-8 py-2.5 border rounded-lg text-sm
+              outline-none appearance-none cursor-pointer ${t.input}`}
           >
             <option value="">All Sermons</option>
             <option value="true">Published</option>
@@ -225,11 +206,11 @@ const AdminSermons = () => {
       </div>
 
       {/* List */}
-      <div className="px-8 py-6">
+      <div className="px-4 sm:px-8 py-4 sm:py-6">
         {isLoading ? (
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className={`animate-pulse h-24 rounded-xl ${t.skeleton}`} />
+              <div key={i} className={`animate-pulse h-20 sm:h-24 rounded-xl ${t.skeleton}`} />
             ))}
           </div>
         ) : sermons.length === 0 ? (
@@ -244,96 +225,114 @@ const AdminSermons = () => {
             </button>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {sermons.map(sermon => (
-              <div
-                key={sermon.id}
-                className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${t.row}`}
-              >
-                {/* Thumbnail */}
-                <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-200 shrink-0">
-                  {sermon.imageUrl ? (
-                    <img
-                      src={sermon.imageUrl}
-                      alt={sermon.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <BookOpen className={`w-6 h-6 ${t.mutedtext}`} />
+              <div key={sermon.id} className={`rounded-xl border transition-all p-3 sm:p-4 ${t.row}`}>
+                <div className="flex items-start gap-3">
+
+                  {/* Sermon thumbnail — object-top to show faces */}
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden
+                    bg-slate-200 shrink-0">
+                    {sermon.imageUrl ? (
+                      <img
+                        src={sermon.imageUrl}
+                        alt={sermon.title}
+                        className="w-full h-full object-cover object-top"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <BookOpen className={`w-6 h-6 ${t.mutedtext}`} />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Speaker avatar */}
+                  {sermon.speakerImageUrl && (
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden
+                      border-2 border-fuchsia-500/30 shrink-0 hidden sm:block">
+                      <img
+                        src={sermon.speakerImageUrl}
+                        alt={sermon.speaker}
+                        className="w-full h-full object-cover object-top"
+                      />
                     </div>
                   )}
-                </div>
 
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <p className="font-bold text-sm truncate">{sermon.title}</p>
-                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                      sermon.isPublished
-                        ? 'bg-emerald-500/20 text-emerald-600'
-                        : 'bg-amber-500/20 text-amber-600'
-                    }`}>
-                      {sermon.isPublished ? 'Published' : 'Draft'}
-                    </span>
-                  </div>
-                  <div className={`flex items-center gap-4 text-xs ${t.subtext} flex-wrap`}>
-                    <span>{sermon.speaker}</span>
-                    <span className={t.mutedtext}>·</span>
-                    <span>{sermon.series}</span>
-                    <span className={t.mutedtext}>·</span>
-                    <span>{formatDate(sermon.sermonDate)}</span>
-                  </div>
-                  <div className="flex items-center gap-3 mt-2">
-                    {sermon.videoUrl && (
-                      <span className={`flex items-center gap-1 text-[10px] font-bold ${t.mutedtext}`}>
-                        <Play className="w-3 h-3" /> Video
-                      </span>
-                    )}
-                    {sermon.audioUrl && (
-                      <span className={`flex items-center gap-1 text-[10px] font-bold ${t.mutedtext}`}>
-                        <Music className="w-3 h-3" /> Audio
-                      </span>
-                    )}
-                  </div>
-                </div>
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-bold text-sm truncate">{sermon.title}</p>
+                        <div className="flex flex-wrap gap-1.5 mt-1">
+                          <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                            sermon.isPublished
+                              ? 'bg-emerald-500/20 text-emerald-600'
+                              : 'bg-amber-500/20 text-amber-600'
+                          }`}>
+                            {sermon.isPublished ? 'Published' : 'Draft'}
+                          </span>
+                        </div>
+                      </div>
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => togglePublish(sermon)}
+                          className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}
+                        >
+                          {sermon.isPublished
+                            ? <EyeOff className={`w-4 h-4 ${t.subtext}`} />
+                            : <Eye className={`w-4 h-4 ${t.subtext}`} />
+                          }
+                        </button>
+                        <button
+                          onClick={() => openEdit(sermon)}
+                          className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}
+                        >
+                          <Pencil className={`w-4 h-4 ${t.subtext}`} />
+                        </button>
+                        <button
+                          onClick={() => setDeleteTarget(sermon)}
+                          className={`p-2 rounded-lg transition-colors ${t.btnGhost} hover:bg-red-500/20`}
+                        >
+                          <Trash2 className={`w-4 h-4 ${t.subtext}`} />
+                        </button>
+                      </div>
+                    </div>
 
-                {/* Actions */}
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={() => togglePublish(sermon)}
-                    className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}
-                    title={sermon.isPublished ? 'Unpublish' : 'Publish'}
-                  >
-                    {sermon.isPublished
-                      ? <EyeOff className={`w-4 h-4 ${t.subtext}`} />
-                      : <Eye className={`w-4 h-4 ${t.subtext}`} />
-                    }
-                  </button>
-                  <button
-                    onClick={() => openEdit(sermon)}
-                    className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}
-                    title="Edit"
-                  >
-                    <Pencil className={`w-4 h-4 ${t.subtext}`} />
-                  </button>
-                  <button
-                    onClick={() => setDeleteTarget(sermon)}
-                    className={`p-2 rounded-lg transition-colors ${t.btnGhost} hover:bg-red-500/20`}
-                    title="Delete"
-                  >
-                    <Trash2 className={`w-4 h-4 ${t.subtext}`} />
-                  </button>
+                    {/* Meta info — wraps properly on mobile */}
+                    <div className={`flex flex-wrap items-center gap-x-3 gap-y-1 text-xs mt-1 ${t.subtext}`}>
+                      <span className="truncate max-w-[120px]">{sermon.speaker}</span>
+                      <span className={`hidden sm:inline ${t.mutedtext}`}>·</span>
+                      <span className="truncate max-w-[120px] hidden sm:inline">{sermon.series}</span>
+                      <span className={`hidden sm:inline ${t.mutedtext}`}>·</span>
+                      <span>{formatDate(sermon.sermonDate)}</span>
+                    </div>
+
+                    {/* Media indicators */}
+                    <div className="flex items-center gap-3 mt-1.5">
+                      {sermon.videoUrl && (
+                        <span className={`flex items-center gap-1 text-[10px] font-bold ${t.mutedtext}`}>
+                          <Play className="w-3 h-3" /> Video
+                        </span>
+                      )}
+                      {sermon.audioUrl && (
+                        <span className={`flex items-center gap-1 text-[10px] font-bold ${t.mutedtext}`}>
+                          <Music className="w-3 h-3" /> Audio
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-6">
-            <span className={`text-xs ${t.mutedtext}`}>Page {pageNumber} of {totalPages}</span>
+            <span className={`text-xs ${t.mutedtext}`}>
+              Page {pageNumber} of {totalPages}
+            </span>
             <div className="flex gap-2">
               <button
                 onClick={() => setPageNumber(p => Math.max(1, p - 1))}
@@ -354,39 +353,27 @@ const AdminSermons = () => {
         )}
       </div>
 
-      {/* ── FORM MODAL ──────────────────────────────────────────────────────── */}
+      {/* ── CREATE / EDIT MODAL ── */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => setShowForm(false)}
-          />
-          <div className={`relative rounded-2xl w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto border ${t.modal}`}>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowForm(false)} />
+          <div className={`relative rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl shadow-2xl
+            max-h-[90vh] overflow-y-auto border ${t.modal}`}>
 
-            {/* Modal Header */}
             <div
-              className={`flex items-center justify-between px-6 py-4 border-b ${t.border} sticky top-0 z-10`}
+              className={`flex items-center justify-between px-5 sm:px-6 py-4 border-b
+                ${t.border} sticky top-0 z-10`}
               style={{ background: isDark ? '#161616' : 'white' }}
             >
-              <h3 className="font-bold text-lg">
-                {editing ? 'Edit Sermon' : 'New Sermon'}
-              </h3>
-              <button
-                onClick={() => setShowForm(false)}
-                className={`p-1.5 rounded-lg transition-colors ${t.btnGhost}`}
-              >
+              <h3 className="font-bold text-lg">{editing ? 'Edit Sermon' : 'New Sermon'}</h3>
+              <button onClick={() => setShowForm(false)} className={`p-1.5 rounded-lg transition-colors ${t.btnGhost}`}>
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <div className="px-6 py-5 space-y-5">
-
-              {/* Title */}
+            <div className="px-5 sm:px-6 py-5 space-y-5">
               <div>
-                <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
-                  Title *
-                </label>
+                <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Title *</label>
                 <input
                   type="text"
                   value={form.title}
@@ -396,12 +383,9 @@ const AdminSermons = () => {
                 />
               </div>
 
-              {/* Speaker + Series */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
-                    Speaker *
-                  </label>
+                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Speaker *</label>
                   <input
                     type="text"
                     value={form.speaker}
@@ -411,9 +395,7 @@ const AdminSermons = () => {
                   />
                 </div>
                 <div>
-                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
-                    Series
-                  </label>
+                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Series</label>
                   <input
                     type="text"
                     value={form.series}
@@ -424,12 +406,9 @@ const AdminSermons = () => {
                 </div>
               </div>
 
-              {/* Date + Published toggle */}
-              <div className="grid grid-cols-2 gap-3 items-end">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
                 <div>
-                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
-                    Sermon Date *
-                  </label>
+                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Sermon Date *</label>
                   <input
                     type="date"
                     value={form.sermonDate}
@@ -442,12 +421,10 @@ const AdminSermons = () => {
                     className="flex items-center gap-3 cursor-pointer"
                     onClick={() => setForm(p => ({ ...p, isPublished: !p.isPublished }))}
                   >
-                    <div className={`w-11 h-6 rounded-full transition-colors ${
-                      form.isPublished ? 'bg-fuchsia-600' : t.toggle
-                    }`}>
-                      <div className={`w-5 h-5 bg-white rounded-full mt-0.5 transition-transform ${
-                        form.isPublished ? 'translate-x-5' : 'translate-x-0.5'
-                      }`} />
+                    <div className={`w-11 h-6 rounded-full transition-colors
+                      ${form.isPublished ? 'bg-fuchsia-600' : t.toggle}`}>
+                      <div className={`w-5 h-5 bg-white rounded-full mt-0.5 transition-transform
+                        ${form.isPublished ? 'translate-x-5' : 'translate-x-0.5'}`} />
                     </div>
                     <span className={`text-sm ${t.subtext}`}>
                       {form.isPublished ? 'Published' : 'Draft'}
@@ -456,11 +433,8 @@ const AdminSermons = () => {
                 </div>
               </div>
 
-              {/* Description */}
               <div>
-                <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
-                  Description
-                </label>
+                <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Description</label>
                 <textarea
                   rows={3}
                   value={form.description}
@@ -470,14 +444,18 @@ const AdminSermons = () => {
                 />
               </div>
 
-              {/* Image Upload */}
               <ImageUpload
                 value={form.imageUrl || ''}
-                onChange={url => setForm(p => ({ ...p, imageUrl: url }))}
-                label="Sermon Image"
+                onChange={url => setForm(p => ({ ...p, imageUrl: url ?? undefined }))}
+                label="Sermon Cover Image"
               />
 
-              {/* Video URL */}
+              <ImageUpload
+                value={form.speakerImageUrl || ''}
+                onChange={url => setForm(p => ({ ...p, speakerImageUrl: url ?? undefined }))}
+                label="Speaker Photo (shown on sermon detail page)"
+              />
+
               <div>
                 <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
                   <Play className="w-3.5 h-3.5 inline mr-1" /> Video URL
@@ -494,15 +472,12 @@ const AdminSermons = () => {
                 </p>
               </div>
 
-              {/* Audio URL */}
-             {/* ✅ Audio Upload — device upload + URL fallback */}
-<AudioUpload
-  value={form.audioUrl || ''}
-  onChange={url => setForm(p => ({ ...p, audioUrl: url }))}
-  label="Sermon Audio"
-/>
+              <AudioUpload
+                value={form.audioUrl || ''}
+                onChange={url => setForm(p => ({ ...p, audioUrl: url ?? undefined }))}
+                label="Sermon Audio"
+              />
 
-              {/* Audio Preview — only shown when URL is entered */}
               {form.audioUrl && (
                 <div className={`p-4 rounded-xl border ${t.border} space-y-3`}>
                   <p className={`text-xs font-bold uppercase tracking-widest ${t.subtext}`}>
@@ -510,23 +485,21 @@ const AdminSermons = () => {
                   </p>
                   <audio controls className="w-full">
                     <source src={form.audioUrl} />
-                    Your browser does not support audio playback.
                   </audio>
-                  
-                    <a href={form.audioUrl}
+                  <a
+                    href={form.audioUrl}
                     download
-                    className="flex items-center gap-2 text-xs font-bold text-fuchsia-600 hover:text-fuchsia-800 uppercase tracking-widest"
+                    className="flex items-center gap-2 text-xs font-bold text-fuchsia-600
+                      hover:text-fuchsia-800 uppercase tracking-widest"
                   >
-                    <Download className="w-3.5 h-3.5" />
-                    Test Download
+                    <Download className="w-3.5 h-3.5" /> Test Download
                   </a>
                 </div>
               )}
             </div>
 
-            {/* Modal Footer */}
             <div
-              className={`px-6 py-4 border-t ${t.border} flex gap-3 justify-end sticky bottom-0 z-10`}
+              className={`px-5 sm:px-6 py-4 border-t ${t.border} flex gap-3 justify-end sticky bottom-0 z-10`}
               style={{ background: isDark ? '#161616' : 'white' }}
             >
               <button
@@ -538,7 +511,8 @@ const AdminSermons = () => {
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="px-5 py-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500 disabled:opacity-50 text-sm font-bold text-white flex items-center gap-2"
+                className="px-5 py-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500
+                  disabled:opacity-50 text-sm font-bold text-white flex items-center gap-2"
               >
                 {isSaving && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                 {editing ? 'Update Sermon' : 'Create Sermon'}
@@ -548,13 +522,10 @@ const AdminSermons = () => {
         </div>
       )}
 
-      {/* ── DELETE CONFIRM ───────────────────────────────────────────────────── */}
+      {/* Delete Confirm */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => setDeleteTarget(null)}
-          />
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setDeleteTarget(null)} />
           <div className={`relative rounded-2xl p-8 w-full max-w-sm text-center border ${t.modal}`}>
             <Trash2 className="w-8 h-8 text-red-500 mx-auto mb-4" />
             <h3 className="font-bold text-lg mb-2">Delete sermon?</h3>
@@ -571,7 +542,9 @@ const AdminSermons = () => {
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="flex-1 py-2.5 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-50 text-sm font-bold text-white flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 rounded-lg bg-red-500 hover:bg-red-600
+                  disabled:opacity-50 text-sm font-bold text-white
+                  flex items-center justify-center gap-2"
               >
                 {isDeleting && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                 Delete

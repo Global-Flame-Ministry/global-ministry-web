@@ -42,9 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const isAdmin = user?.roles?.includes('Admin') ?? false;
-  const isYouthMember = !!user?.roles?.some(
-    r => r === 'Member' || r === 'YouthMember'
-  );
+  const isYouthMember = user?.roles?.includes('YouthMember') ?? false;
 
   return (
     <AuthContext.Provider value={{

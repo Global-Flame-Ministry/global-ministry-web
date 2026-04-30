@@ -10,7 +10,7 @@ import Footer from './components/Footer';
 import BookStore from './pages/BookStore';
 import ConfirmEmailChange from './pages//auth/ConfirmEmailChange';
 
-// ─── MINISTRY PAGES ───────────────────────────────────────────────────────────
+// MINISTRY PAGES 
 import Home              from './pages/Home';
 import Sermons           from './pages/Sermons';
 import SermonDetail      from './pages/SermonDetail';
@@ -23,26 +23,24 @@ import PrayerRequestPage from './pages/PrayerRequestPage';
 import MinistryDetail    from './pages/MinistryDetail';
 import CounsellingPage   from './pages/CounsellingPage';
 
-// ─── ABOUT PAGES ──────────────────────────────────────────────────────────────
+// ABOUT PAGES 
 import OurStory    from './pages/OurStory';
 import OurMission  from './pages/OurMission';
 import SeniorPastor from './pages/SeniorPastor';
 import CoPastor    from './pages/CoPastor';
 import CoreBeliefs from './pages/CoreBeliefs';
 
-// ─── AUTH PAGES ───────────────────────────────────────────────────────────────
+// AUTH PAGES 
 import LoginPage          from './pages/auth/LoginPage';
 import RegisterPage       from './pages/auth/RegisterPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ResetPasswordPage  from './pages/auth/ResetPasswordPage';
 import ResendConfirmPage  from './pages/auth/ResendConfirmPage';
 
-// ─── PROTECTED PAGES ──────────────────────────────────────────────────────────
+// PROTECTED PAGES 
 import UserDashboard from './pages/UserDashboard';
-import YouthPage     from './pages/Youth/YouthPage';
-import YouthAnnouncements from './pages/Youth/YouthAnnouncement';
 
-// ─── ADMIN PAGES ──────────────────────────────────────────────────────────────
+// ADMIN PAGES 
 import Admin               from './pages/Admin/Admin';
 import AdminContacts       from './pages/Admin/AdminContacts';
 import AdminAnnouncements  from './pages/Admin/AdminAnnouncements';
@@ -57,14 +55,28 @@ import AdminBulkEmail      from './pages/Admin/AdminBulkEmail';
 import AdminMinistries     from './pages/Admin/AdminMinistries';
 import AdminCounselling    from './pages/Admin/AdminCounselling';
 
-// ─── SCROLL TO TOP ────────────────────────────────────────────────────────────
+// Add these imports at the top of your existing App.tsx
+import YouthLayout            from './components/Youth/YouthLayout';
+import YouthHomePage          from './pages/Youth/YouthHomePage';
+import YouthAboutPage         from './pages/Youth/YouthAboutPage';
+import YouthServicesPage      from './pages/Youth/YouthServicesPage';
+import YouthActivitiesPage    from './pages/Youth/YouthActivitiesPage';
+import YouthTeamPage          from './pages/Youth/YouthTeamPage';
+import YouthBlogPage          from './pages/Youth/YouthBlogPage';
+import YouthReviewPage        from './pages/Youth/YouthReviewPage';
+import YouthContactPage       from './pages/Youth/YouthContactPage';
+import YouthEventsPage        from './pages/Youth/YouthEventsPage';
+import YouthAnnouncementsPage from './pages/Youth/YouthAnnouncementsPage';
+import JoinYouthPage          from './pages/Youth/JoinYouthPage';
+
+//  SCROLL TO TOP 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
   return null;
 };
 
-// ─── LAYOUTS ──────────────────────────────────────────────────────────────────
+// LAYOUTS 
 const PublicLayout = ({ children }: { children: React.ReactNode }) => (
   <>
     <Navbar />
@@ -77,7 +89,7 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => (
   <div className="min-h-screen bg-gray-50">{children}</div>
 );
 
-// ─── 404 ──────────────────────────────────────────────────────────────────────
+// 404 
 function NotFoundPage() {
   return (
     <div className="flex flex-col items-center justify-center h-screen text-center">
@@ -90,7 +102,7 @@ function NotFoundPage() {
   );
 }
 
-// ─── APP ──────────────────────────────────────────────────────────────────────
+// APP 
 const App: React.FC = () => {
   return (
     <Router>
@@ -108,7 +120,26 @@ const App: React.FC = () => {
         <div className="flex flex-col min-h-screen">
           <Routes>
 
-            {/* ── PUBLIC ROUTES ───────────────────────────────────────── */}
+            {/* ── YOUTH COMMUNITY ROUTES ────────────────────────────────── */}
+          <Route path="/youth" element={<YouthLayout />}>
+            <Route index element={<YouthHomePage />} />
+            <Route path="about"         element={<YouthAboutPage />} />
+            <Route path="services"      element={<YouthServicesPage />} />
+            <Route path="activities"    element={<YouthActivitiesPage />} />
+            <Route path="team"          element={<YouthTeamPage />} />
+            <Route path="blog"          element={<YouthBlogPage />} />
+            <Route path="reviews"       element={<YouthReviewPage />} />
+            <Route path="contact"       element={<YouthContactPage />} />
+            <Route path="events"        element={<YouthEventsPage />} />
+            <Route path="announcements" element={<YouthAnnouncementsPage />} />
+
+            {/* Join Youth — only for logged-in Ministry members */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="join" element={<JoinYouthPage />} />
+            </Route>
+          </Route>
+
+            {/* PUBLIC ROUTES */}
             <Route path="/"
               element={<PublicLayout><Home /></PublicLayout>} />
 
@@ -149,7 +180,7 @@ const App: React.FC = () => {
             <Route path="/counselling"
               element={<PublicLayout><CounsellingPage /></PublicLayout>} />
 
-            {/* ── AUTH ROUTES ─────────────────────────────────────────── */}
+            {/* AUTH ROUTES */}
             <Route path="/login"
               element={<AuthLayout><LoginPage /></AuthLayout>} />
             <Route path="/register"
@@ -161,17 +192,14 @@ const App: React.FC = () => {
             <Route path="/resend-confirmation"
               element={<AuthLayout><ResendConfirmPage /></AuthLayout>} />
 
-            {/* ── PROTECTED ROUTES ────────────────────────────────────── */}
+            {/* PROTECTED ROUTES */}
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard"
                 element={<PublicLayout><UserDashboard /></PublicLayout>} />
-              <Route path="/youth"
-                element={<PublicLayout><YouthPage /></PublicLayout>} />
-              <Route path="/youth/announcements"
-                element={<PublicLayout><YouthAnnouncements /></PublicLayout>} />
             </Route>
 
-            {/* ── ADMIN ROUTES ────────────────────────────────────────── */}
+
+            {/* ADMIN ROUTES */}
             <Route path="/admin" element={<AdminRoute />}>
               <Route index element={<AdminLayout><Admin /></AdminLayout>} />
               <Route path="contacts"
@@ -200,7 +228,7 @@ const App: React.FC = () => {
                 element={<AdminLayout><AdminCounselling /></AdminLayout>} />
             </Route>
 
-            {/* ── 404 ─────────────────────────────────────────────────── */}
+            {/* 404 */}
             <Route path="*" element={<NotFoundPage />} />
 
           </Routes>

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Check, Copy, Loader2, HandHeart,
-  Shield, Mail, Phone, ChevronDown, EyeOff, Eye
+  Shield, Mail, Phone, ChevronDown, Paperclip, X, FileImage
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { prayerApi } from '../api/prayerApi';
@@ -21,19 +21,21 @@ const TOPICS = [
   'Other',
 ];
 
+const CLOUDINARY_CLOUD_NAME = 'dveeb0yop';
+const CLOUDINARY_UPLOAD_PRESET = 'gfm_uploads';
+
 type Step = 'form' | 'success';
 
 const PrayerRequestPage: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [step, setStep]         = useState<Step>('form');
-  const [content, setContent]   = useState('');
-  const [topic, setTopic]       = useState('');
-  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [step, setStep]       = useState<Step>('form');
+  const [content, setContent] = useState('');
+  const [topic, setTopic]     = useState('');
 
-  // Contact fields — pre-filled if logged in
-  const [name, setName]   = useState(
+  const [name, setName] = useState(
     isAuthenticated && user
       ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim()
       : ''
@@ -41,33 +43,94 @@ const PrayerRequestPage: React.FC = () => {
   const [email, setEmail] = useState(
     isAuthenticated && user ? (user.email ?? '') : ''
   );
-  const [phone, setPhone] = useState('');
-  const [preferredContact, setPreferredContact] =
-    useState<'Email' | 'Phone'>('Email');
+  const [phone, setPhone]                       = useState('');
+  const [preferredContact, setPreferredContact] = useState<'Email' | 'Phone'>('Email');
+
+  // Attachment state
+  const [attachmentUrl, setAttachmentUrl]   = useState<string>('');
+  const [attachmentName, setAttachmentName] = useState<string>('');
+  const [isUploading, setIsUploading]       = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [token, setToken]         = useState('');
   const [copied, setCopied]       = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // ── Cloudinary upload ────────────────────────────────────────────
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    if (!content.trim() || content.trim().length < 5) {
-      toast.error('Please enter a valid prayer request (at least 5 characters).');
+    // 5 MB guard
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File is too large. Maximum size is 5 MB.');
       return;
     }
 
-    if (!isAnonymous && !email.trim()) {
-      toast.error('Please provide an email address so we can follow up with you.');
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!allowed.includes(file.type)) {
+      toast.error('Only JPG, PNG, WEBP, or PDF files are allowed.');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`,
+        { method: 'POST', body: formData }
+      );
+
+      if (!res.ok) throw new Error('Upload failed');
+
+      const data = await res.json();
+      setAttachmentUrl(data.secure_url);
+      setAttachmentName(file.name);
+      toast.success('Attachment uploaded');
+    } catch {
+      toast.error('Failed to upload attachment. Please try again.');
+    } finally {
+      setIsUploading(false);
+      // Reset input so the same file can be re-selected if needed
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const removeAttachment = () => {
+    setAttachmentUrl('');
+    setAttachmentName('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  // ── Submit ───────────────────────────────────────────────────────
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!name.trim()) {
+      toast.error('Please enter your full name.');
+      return;
+    }
+    if (!email.trim()) {
+      toast.error('Please enter your email address.');
+      return;
+    }
+    if (!content.trim() || content.trim().length < 5) {
+      toast.error('Please enter a valid prayer request (at least 5 characters).');
       return;
     }
 
     setIsLoading(true);
     try {
       const dto = {
+        name: name.trim(),
+        email: email.trim(),
+        phoneNumber: phone.trim() || undefined,
+        preferredContact,
+        topic: topic || undefined,
         content: content.trim(),
-        name: isAnonymous ? undefined : (name.trim() || undefined),
-        email: isAnonymous ? undefined : (email.trim() || undefined),
+        attachment: attachmentUrl || undefined,
       };
 
       const res = await prayerApi.create(dto);
@@ -92,6 +155,19 @@ const PrayerRequestPage: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const resetForm = () => {
+    setStep('form');
+    setContent('');
+    setTopic('');
+    setAttachmentUrl('');
+    setAttachmentName('');
+    if (!isAuthenticated) {
+      setName('');
+      setEmail('');
+      setPhone('');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
 
@@ -111,8 +187,7 @@ const PrayerRequestPage: React.FC = () => {
             We believe{' '}
             <span className="italic text-fuchsia-400">with you.</span>
           </h1>
-          <p className="text-slate-400 text-lg leading-relaxed max-w-xl
-            mx-auto">
+          <p className="text-slate-400 text-lg leading-relaxed max-w-xl mx-auto">
             Your request is received with care and taken before God by our
             prayer team. Everything shared here is fully confidential.
           </p>
@@ -140,12 +215,11 @@ const PrayerRequestPage: React.FC = () => {
                 {
                   icon: <Mail className="w-5 h-5 text-fuchsia-500" />,
                   title: 'Follow-Up',
-                  desc: 'We may reach out to pray with you directly.'
+                  desc: 'We will reach out to pray with you directly.'
                 },
               ].map(item => (
                 <div key={item.title}
-                  className="text-center p-6 border border-slate-100
-                    rounded-2xl">
+                  className="text-center p-6 border border-slate-100 rounded-2xl">
                   <div className="w-10 h-10 bg-fuchsia-50 rounded-full flex
                     items-center justify-center mx-auto mb-3">
                     {item.icon}
@@ -162,134 +236,104 @@ const PrayerRequestPage: React.FC = () => {
 
             <form onSubmit={handleSubmit} className="space-y-8">
 
-              {/* ── Anonymous toggle ───────────────────────────── */}
-              <div className="flex items-center justify-between p-4
-                bg-slate-50 border border-slate-200 rounded-2xl">
-                <div className="flex items-center gap-3">
-                  {isAnonymous
-                    ? <EyeOff className="w-4 h-4 text-slate-400" />
-                    : <Eye className="w-4 h-4 text-fuchsia-500" />
-                  }
+              {/* ── Contact fields ─────────────────────────────── */}
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                  {/* Full Name */}
                   <div>
-                    <p className="text-sm font-bold text-slate-800">
-                      {isAnonymous ? 'Submitting anonymously' : 'Include contact details'}
-                    </p>
-                    <p className="text-xs text-slate-400">
-                      {isAnonymous
-                        ? 'Your name and email will not be shared.'
-                        : 'Allows our team to follow up with you.'
-                      }
-                    </p>
+                    <label className="block text-xs font-black uppercase
+                      tracking-widest text-slate-500 mb-2">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={name}
+                      onChange={e => setName(e.target.value)}
+                      placeholder="Your full name"
+                      disabled={isAuthenticated}
+                      className="w-full border-b-2 border-slate-200 py-3
+                        text-base font-light text-slate-900 outline-none
+                        focus:border-fuchsia-600 transition-colors bg-transparent
+                        placeholder:text-slate-300
+                        disabled:text-slate-400 disabled:cursor-not-allowed"
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label className="block text-xs font-black uppercase
+                      tracking-widest text-slate-500 mb-2">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder="your@email.com"
+                      disabled={isAuthenticated}
+                      className="w-full border-b-2 border-slate-200 py-3
+                        text-base font-light text-slate-900 outline-none
+                        focus:border-fuchsia-600 transition-colors bg-transparent
+                        placeholder:text-slate-300
+                        disabled:text-slate-400 disabled:cursor-not-allowed"
+                    />
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setIsAnonymous(v => !v)}
-                  className={`w-12 h-6 rounded-full transition-colors relative
-                    shrink-0 ${
-                      isAnonymous ? 'bg-slate-300' : 'bg-fuchsia-600'
-                    }`}
-                >
-                  <div className={`absolute top-0.5 w-5 h-5 bg-white
-                    rounded-full shadow transition-transform ${
-                      isAnonymous ? 'translate-x-0.5' : 'translate-x-6'
-                    }`} />
-                </button>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                  {/* Phone */}
+                  <div>
+                    <label className="block text-xs font-black uppercase
+                      tracking-widest text-slate-500 mb-2">
+                      Phone Number (Optional)
+                    </label>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={e => setPhone(e.target.value)}
+                      placeholder="+234..."
+                      className="w-full border-b-2 border-slate-200 py-3
+                        text-base font-light text-slate-900 outline-none
+                        focus:border-fuchsia-600 transition-colors bg-transparent
+                        placeholder:text-slate-300"
+                    />
+                  </div>
+
+                  {/* Preferred Contact */}
+                  <div>
+                    <label className="block text-xs font-black uppercase
+                      tracking-widest text-slate-500 mb-2">
+                      Preferred Follow-Up Method
+                    </label>
+                    <div className="flex gap-3 mt-1">
+                      {(['Email', 'Phone'] as const).map(method => (
+                        <button
+                          key={method}
+                          type="button"
+                          onClick={() => setPreferredContact(method)}
+                          className={`flex items-center gap-2 px-5 py-2.5
+                            rounded-full border-2 text-xs font-black uppercase
+                            tracking-widest transition-all ${
+                              preferredContact === method
+                                ? 'border-fuchsia-600 bg-fuchsia-600 text-white'
+                                : 'border-slate-200 text-slate-500 hover:border-fuchsia-300'
+                            }`}
+                        >
+                          {method === 'Email'
+                            ? <Mail className="w-3.5 h-3.5" />
+                            : <Phone className="w-3.5 h-3.5" />
+                          }
+                          {method}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
-
-              {/* ── Contact fields — hidden when anonymous ─────── */}
-              {!isAnonymous && (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Full Name */}
-                    <div>
-                      <label className="block text-xs font-black uppercase
-                        tracking-widest text-slate-500 mb-2">
-                        Full Name
-                      </label>
-                      <input
-                        type="text"
-                        value={name}
-                        onChange={e => setName(e.target.value)}
-                        placeholder="Your full name"
-                        className="w-full border-b-2 border-slate-200 py-3
-                          text-base font-light text-slate-900 outline-none
-                          focus:border-fuchsia-600 transition-colors
-                          bg-transparent placeholder:text-slate-300"
-                      />
-                    </div>
-
-                    {/* Email */}
-                    <div>
-                      <label className="block text-xs font-black uppercase
-                        tracking-widest text-slate-500 mb-2">
-                        Email Address *
-                      </label>
-                      <input
-                        type="email"
-                        required={!isAnonymous}
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        placeholder="your@email.com"
-                        className="w-full border-b-2 border-slate-200 py-3
-                          text-base font-light text-slate-900 outline-none
-                          focus:border-fuchsia-600 transition-colors
-                          bg-transparent placeholder:text-slate-300"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Phone */}
-                    <div>
-                      <label className="block text-xs font-black uppercase
-                        tracking-widest text-slate-500 mb-2">
-                        Phone Number (Optional)
-                      </label>
-                      <input
-                        type="tel"
-                        value={phone}
-                        onChange={e => setPhone(e.target.value)}
-                        placeholder="+234..."
-                        className="w-full border-b-2 border-slate-200 py-3
-                          text-base font-light text-slate-900 outline-none
-                          focus:border-fuchsia-600 transition-colors
-                          bg-transparent placeholder:text-slate-300"
-                      />
-                    </div>
-
-                    {/* Preferred Contact */}
-                    <div>
-                      <label className="block text-xs font-black uppercase
-                        tracking-widest text-slate-500 mb-2">
-                        Preferred Follow-Up Method
-                      </label>
-                      <div className="flex gap-3 mt-1">
-                        {(['Email', 'Phone'] as const).map(method => (
-                          <button
-                            key={method}
-                            type="button"
-                            onClick={() => setPreferredContact(method)}
-                            className={`flex items-center gap-2 px-5 py-2.5
-                              rounded-full border-2 text-xs font-black
-                              uppercase tracking-widest transition-all ${
-                                preferredContact === method
-                                  ? 'border-fuchsia-600 bg-fuchsia-600 text-white'
-                                  : 'border-slate-200 text-slate-500 hover:border-fuchsia-300'
-                              }`}
-                          >
-                            {method === 'Email'
-                              ? <Mail className="w-3.5 h-3.5" />
-                              : <Phone className="w-3.5 h-3.5" />
-                            }
-                            {method}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* ── Topic ──────────────────────────────────────── */}
               <div>
@@ -312,8 +356,7 @@ const PrayerRequestPage: React.FC = () => {
                     ))}
                   </select>
                   <ChevronDown className="absolute right-2 top-1/2
-                    -translate-y-1/2 w-4 h-4 text-slate-400
-                    pointer-events-none" />
+                    -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 </div>
               </div>
 
@@ -342,31 +385,112 @@ const PrayerRequestPage: React.FC = () => {
                       : '✓ Ready to submit'
                     }
                   </span>
-                  <span>{content.length} / 2000</span>
+                  <span>{content.length} / 5000</span>
                 </div>
               </div>
 
+              {/* ── Attachment ─────────────────────────────────── */}
+              <div>
+                <label className="block text-xs font-black uppercase
+                  tracking-widest text-slate-500 mb-2">
+                  Attachment (Optional)
+                </label>
+
+                {attachmentUrl ? (
+                  /* Uploaded — show preview pill */
+                  <div className="flex items-center gap-3 p-4 bg-fuchsia-50
+                    border border-fuchsia-200 rounded-2xl">
+                    <div className="w-9 h-9 bg-fuchsia-100 rounded-xl flex
+                      items-center justify-center shrink-0">
+                      <FileImage className="w-4 h-4 text-fuchsia-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-slate-800 truncate">
+                        {attachmentName}
+                      </p>
+                      <p className="text-[10px] text-fuchsia-500 uppercase
+                        tracking-widest font-black mt-0.5">
+                        Uploaded successfully
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={removeAttachment}
+                      className="p-1.5 hover:bg-fuchsia-100 rounded-lg
+                        transition-colors text-slate-400 hover:text-slate-600
+                        shrink-0"
+                      title="Remove attachment"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  /* Not uploaded — show upload trigger */
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="w-full border-2 border-dashed border-slate-200
+                      rounded-2xl py-8 flex flex-col items-center gap-3
+                      hover:border-fuchsia-300 hover:bg-fuchsia-50/50
+                      transition-all disabled:opacity-50
+                      disabled:cursor-not-allowed group"
+                  >
+                    {isUploading ? (
+                      <>
+                        <Loader2 className="w-6 h-6 text-fuchsia-500 animate-spin" />
+                        <span className="text-xs font-black uppercase
+                          tracking-widest text-slate-400">
+                          Uploading...
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-10 h-10 bg-slate-100 rounded-full
+                          flex items-center justify-center
+                          group-hover:bg-fuchsia-100 transition-colors">
+                          <Paperclip className="w-5 h-5 text-slate-400
+                            group-hover:text-fuchsia-600 transition-colors" />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xs font-black uppercase
+                            tracking-widest text-slate-500">
+                            Click to attach a file
+                          </p>
+                          <p className="text-[10px] text-slate-400 mt-1">
+                            JPG, PNG, WEBP or PDF &middot; Max 5 MB
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </button>
+                )}
+
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,application/pdf"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </div>
+
               {/* ── Privacy note ───────────────────────────────── */}
-              <div className="p-5 bg-slate-50 border border-slate-200
-                rounded-2xl">
+              <div className="p-5 bg-slate-50 border border-slate-200 rounded-2xl">
                 <p className="text-xs text-slate-500 leading-relaxed">
                   <strong className="text-slate-700">Confidentiality:</strong>{' '}
                   All prayer requests are treated with the utmost care and
                   confidentiality. Your information will only be seen by our
-                  pastoral prayer team.
-                  {isAnonymous && (
-                    <span className="block mt-1 text-slate-400">
-                      You are submitting anonymously — we will not be able to
-                      follow up with you personally.
-                    </span>
-                  )}
+                  pastoral prayer team. We will follow up with you within
+                  48 hours.
                 </p>
               </div>
 
               {/* ── Submit ─────────────────────────────────────── */}
               <button
                 type="submit"
-                disabled={isLoading || content.trim().length < 5}
+                disabled={isLoading || isUploading || content.trim().length < 5}
                 className="w-full py-5 bg-slate-900 text-white font-black
                   uppercase tracking-widest text-sm hover:bg-fuchsia-600
                   transition-all disabled:opacity-30 flex items-center
@@ -398,25 +522,22 @@ const PrayerRequestPage: React.FC = () => {
             </div>
 
             <div>
-              <h3 className="font-serif text-3xl text-slate-900 mb-3
-                font-bold">
+              <h3 className="font-serif text-3xl text-slate-900 mb-3 font-bold">
                 Request Received.
               </h3>
               <p className="text-slate-500 leading-relaxed">
-                We are standing in faith with you. Our prayer team has
-                received your request and will bring it before God.
+                We are standing in faith with you. Our prayer team has received
+                your request and will bring it before God.
               </p>
-              {!isAnonymous && email && (
-                <p className="text-slate-400 text-sm mt-2">
-                  We may follow up with you at{' '}
-                  <strong className="text-slate-600">{email}</strong>.
-                </p>
-              )}
+              <p className="text-slate-400 text-sm mt-2">
+                We will follow up with you at{' '}
+                <strong className="text-slate-600">{email}</strong> within
+                48 hours.
+              </p>
             </div>
 
             {/* Reference ID */}
-            <div className="bg-slate-50 rounded-2xl p-6 border
-              border-slate-100">
+            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
               <span className="text-[9px] font-black uppercase tracking-widest
                 text-slate-400 block mb-3">
                 Reference ID
@@ -447,17 +568,7 @@ const PrayerRequestPage: React.FC = () => {
 
             <div className="flex flex-col gap-3 pt-4">
               <button
-                onClick={() => {
-                  setStep('form');
-                  setContent('');
-                  setTopic('');
-                  if (!isAuthenticated) {
-                    setName('');
-                    setEmail('');
-                    setPhone('');
-                  }
-                  setIsAnonymous(false);
-                }}
+                onClick={resetForm}
                 className="text-[10px] font-black uppercase tracking-widest
                   py-4 border-2 border-slate-200 rounded-2xl
                   hover:bg-slate-50 transition-all text-slate-700"

@@ -33,7 +33,7 @@ const CounsellingPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted]       = useState(false);
 
-  // ✅ FIXED: Added the missing < after React.ChangeEvent
+  // FIXED: Added the missing < after React.ChangeEvent
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -111,7 +111,7 @@ const CounsellingPage: React.FC = () => {
             bg-fuchsia-500/10 rounded-full mb-6">
             <Heart className="w-7 h-7 text-fuchsia-400" />
           </div>
-          <h2 className="text-fuchsia-400 text-[10px] font-black uppercase
+          <h2 className="text-fuchsia-400 text-[20px] font-black uppercase
             tracking-[0.4em] mb-4">
             Pastoral Care
           </h2>
@@ -121,7 +121,7 @@ const CounsellingPage: React.FC = () => {
           </h1>
           <p className="text-slate-400 text-lg leading-relaxed max-w-xl mx-auto">
             You don't have to carry it alone. Our pastoral team is here to walk
-            with you through whatever you're facing — in complete confidence.
+            with you through whatever you're facing - in complete confidence.
           </p>
         </div>
       </div>

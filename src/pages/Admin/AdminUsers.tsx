@@ -17,19 +17,20 @@ const AdminUsers = () => {
   const { isDark } = useAdminTheme();
 
   const t = {
-    bg:       isDark ? 'bg-[#0d0d0d] text-white'     : 'bg-slate-50 text-slate-900',
-    border:   isDark ? 'border-white/5'               : 'border-slate-200',
-    subtext:  isDark ? 'text-zinc-400'                : 'text-slate-500',
-    mutedtext:isDark ? 'text-zinc-600'                : 'text-slate-400',
-    input:    isDark ? 'bg-white/5 border-white/8 text-white placeholder-zinc-600 focus:border-fuchsia-500/50'
-                     : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-fuchsia-500',
-    rowActive:isDark ? 'bg-fuchsia-500/10 border-fuchsia-500/20' : 'bg-fuchsia-50 border-fuchsia-300',
-    rowIdle:  isDark ? 'border-transparent hover:bg-white/4'     : 'border-transparent hover:bg-white',
-    card:     isDark ? 'bg-white/4 border-white/5'    : 'bg-white border-slate-200',
-    btnGhost: isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-100 hover:bg-slate-200',
-    modal:    isDark ? 'bg-[#161616] border-white/10 text-white' : 'bg-white border-slate-200 shadow-xl text-slate-900',
-    skeleton: isDark ? 'bg-white/3'                   : 'bg-slate-200',
-    avatar:   isDark ? 'bg-fuchsia-600/30 text-fuchsia-300' : 'bg-fuchsia-100 text-fuchsia-700',
+    bg:        isDark ? 'bg-[#0d0d0d] text-white'     : 'bg-slate-50 text-slate-900',
+    border:    isDark ? 'border-white/5'               : 'border-slate-200',
+    subtext:   isDark ? 'text-zinc-400'                : 'text-slate-500',
+    mutedtext: isDark ? 'text-zinc-600'                : 'text-slate-400',
+    input: isDark
+      ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-500 focus:border-fuchsia-500'
+      : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-fuchsia-500',
+    rowActive: isDark ? 'bg-fuchsia-500/10 border-fuchsia-500/20' : 'bg-fuchsia-50 border-fuchsia-300',
+    rowIdle:   isDark ? 'border-transparent hover:bg-white/4'     : 'border-transparent hover:bg-white',
+    card:      isDark ? 'bg-white/4 border-white/5'    : 'bg-white border-slate-200',
+    btnGhost:  isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-100 hover:bg-slate-200',
+    modal:     isDark ? 'bg-[#161616] border-white/10 text-white' : 'bg-white border-slate-200 shadow-xl text-slate-900',
+    skeleton:  isDark ? 'bg-white/3'                   : 'bg-slate-200',
+    avatar:    isDark ? 'bg-fuchsia-600/30 text-fuchsia-300' : 'bg-fuchsia-100 text-fuchsia-700',
   };
 
   const [users, setUsers]               = useState<UserDto[]>([]);
@@ -83,7 +84,7 @@ const AdminUsers = () => {
     <div className={`min-h-screen font-sans ${t.bg}`}>
 
       {/* Header */}
-      <div className={`px-8 pt-8 pb-6 border-b ${t.border} flex items-center justify-between`}>
+      <div className={`px-4 sm:px-8 pt-8 pb-6 border-b ${t.border} flex items-center justify-between`}>
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-fuchsia-500 mb-1">Admin</p>
           <h1 className="text-2xl font-bold">Users</h1>
@@ -97,7 +98,7 @@ const AdminUsers = () => {
       </div>
 
       {/* Search */}
-      <div className={`px-8 py-4 border-b ${t.border}`}>
+      <div className={`px-4 sm:px-8 py-4 border-b ${t.border}`}>
         <div className="relative max-w-sm">
           <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${t.subtext}`} />
           <input type="text" placeholder="Search by name or email..." value={search}
@@ -106,9 +107,13 @@ const AdminUsers = () => {
         </div>
       </div>
 
-      <div className="flex h-[calc(100vh-160px)]">
-        {/* List */}
-        <div className={`flex flex-col border-r ${t.border} transition-all duration-300 ${selected ? 'w-2/5' : 'w-full'}`}>
+      {/* Split view */}
+      <div className="flex h-[calc(100vh-160px)] relative">
+
+        {/* List — full width on mobile, 2/5 on sm+ when detail is open */}
+        <div className={`flex flex-col border-r ${t.border} transition-all duration-300 w-full
+          ${selected ? 'sm:w-2/5' : 'sm:w-full'}
+          ${selected ? 'hidden sm:flex' : 'flex'}`}>
           <div className="flex-1 overflow-y-auto p-4">
             {isLoading ? (
               <div className="space-y-2">
@@ -139,8 +144,10 @@ const AdminUsers = () => {
                         </div>
                         <p className={`text-xs truncate ${t.subtext}`}>{u.email}</p>
                       </div>
-                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${u.emailConfirmed ? 'bg-emerald-500' : isDark ? 'bg-zinc-600' : 'bg-slate-300'}`}
-                        title={u.emailConfirmed ? 'Email confirmed' : 'Email not confirmed'} />
+                      <div
+                        className={`w-2 h-2 rounded-full flex-shrink-0 ${u.emailConfirmed ? 'bg-emerald-500' : isDark ? 'bg-zinc-600' : 'bg-slate-300'}`}
+                        title={u.emailConfirmed ? 'Email confirmed' : 'Email not confirmed'}
+                      />
                     </div>
                   </button>
                 ))}
@@ -149,10 +156,13 @@ const AdminUsers = () => {
           </div>
         </div>
 
-        {/* Detail panel */}
+        {/* Detail panel — overlays full screen on mobile, side panel on sm+ */}
         {selected && (
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <div className={`px-8 py-5 border-b ${t.border} flex items-center justify-between`}>
+          <div
+            className="flex-1 flex flex-col overflow-hidden absolute inset-0 sm:static z-10"
+            style={{ background: isDark ? '#0d0d0d' : '#f8fafc' }}
+          >
+            <div className={`px-4 sm:px-8 py-5 border-b ${t.border} flex items-center justify-between`}>
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${t.avatar}`}>
                   {selected.firstName?.[0]}{selected.lastName?.[0]}
@@ -171,7 +181,7 @@ const AdminUsers = () => {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-8 py-6 space-y-4">
+            <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 space-y-4">
               {[
                 { label: 'Email',           value: selected.email,     icon: <Mail className="w-3.5 h-3.5" /> },
                 { label: 'Username',        value: selected.userName,  icon: null },
@@ -211,7 +221,7 @@ const AdminUsers = () => {
               </div>
             </div>
 
-            <div className={`px-8 py-5 border-t ${t.border}`}>
+            <div className={`px-4 sm:px-8 py-5 border-t ${t.border}`}>
               <button onClick={() => setDeleteTarget(selected)}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold uppercase tracking-widest transition-colors hover:bg-red-500/20 hover:text-red-500 ${t.btnGhost} ${t.subtext}`}>
                 <Trash2 className="w-4 h-4" /> Delete User
