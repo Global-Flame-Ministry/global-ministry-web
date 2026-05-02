@@ -3,10 +3,10 @@ import { useState, useMemo } from 'react';
 import type { FC } from 'react';
 import {
     Calendar, 
-    User,     
-    Tag,      
+    User,
+    Tag,
     ArrowRight, 
-    Search,   
+    Search,
     X, 
 } from 'lucide-react';
 

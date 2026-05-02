@@ -715,7 +715,7 @@ const Home: React.FC = () => {
               Itinerary
             </p>
             <h2 className="text-3xl md:text-4xl font-serif">
-              Join Our Global Community
+              Upcoming Events &amp; Gatherings
             </h2>
           </AnimatedDiv>
           {upcomingEvents.length > 0 ? (

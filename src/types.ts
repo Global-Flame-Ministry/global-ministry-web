@@ -390,6 +390,7 @@ export interface DashboardStatsDto {
 // BULK EMAIL 
 export interface SendBulkEmailDto {
   subject: string;
+  imageUrl?: string;
   htmlBody: string;
   targetGroup: 'All' | 'Ministry' | 'Youth' | 'Custom';
   customEmails?: string;
@@ -399,6 +400,7 @@ export interface SendBulkEmailDto {
 export interface BulkEmailResponseDto {
   id: number;
   subject: string;
+  imageUrl: string | null;
   targetGroup: string;
   status: string;
   totalRecipients: number;

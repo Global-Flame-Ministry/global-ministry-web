@@ -6,11 +6,19 @@ import {
 } from "recharts";
 import {
   Home, Users, MessageSquare, HeartHandshake, Sparkles,
-  TrendingUp, Heart, Library
+  TrendingUp, Heart, Library, RefreshCw, WifiOff, ServerCrash, ShieldAlert
 } from "lucide-react";
 import { adminApi } from "../../api/adminApi";
 import type { DashboardStatsDto } from "../../types";
 import { useAdminTheme } from "../../context/AdminThemeContext";
+
+// ── ERROR TYPE ─────────────────────────────────────────────
+type ErrorType = "network" | "auth" | "forbidden" | "server" | "unknown";
+
+interface DashboardError {
+  type: ErrorType;
+  message: string;
+}
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -18,7 +26,7 @@ export default function AdminDashboard() {
 
   const [stats, setStats]         = useState<DashboardStatsDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError]         = useState<string | null>(null);
+  const [error, setError]         = useState<DashboardError | null>(null);
 
   const [chartData] = useState([
     { day: "Mon", activity: 20 },
@@ -30,30 +38,76 @@ export default function AdminDashboard() {
     { day: "Sun", activity: 75 },
   ]);
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const res = await adminApi.getDashboardStats();
-        if (res.data.isSuccess && res.data.data) {
-          setStats(res.data.data);
-        } else {
-          setError("Failed to load dashboard stats.");
-        }
-      } catch (err) {
-        setError("Could not reach the server. Check your connection.");
-        console.error("Dashboard fetch error:", err);
-      } finally {
-        setIsLoading(false);
+  // ── FETCH STATS ────────────────────────────────────────────
+  const fetchStats = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const res = await adminApi.getDashboardStats();
+      if (res.data.isSuccess && res.data.data) {
+        setStats(res.data.data);
+      } else {
+        setError({
+          type: "unknown",
+          message: res.data.message || "Failed to load dashboard stats.",
+        });
       }
-    };
+    } catch (err: any) {
+      if (err.response) {
+        // Server responded with an error status
+        switch (err.response.status) {
+          case 401:
+            setError({
+              type: "auth",
+              message: "Your session has expired. Please log in again.",
+            });
+            break;
+          case 403:
+            setError({
+              type: "forbidden",
+              message: "You do not have permission to view this dashboard.",
+            });
+            break;
+          case 500:
+            setError({
+              type: "server",
+              message: "A server error occurred. Please try again later.",
+            });
+            break;
+          default:
+            setError({
+              type: "server",
+              message:
+                err.response.data?.message ||
+                `Server error (${err.response.status}). Please try again.`,
+            });
+        }
+      } else if (err.request) {
+        // No response received — actual network/connection issue
+        setError({
+          type: "network",
+          message:
+            "Could not reach the server. Please check your connection and ensure the API is running.",
+        });
+      } else {
+        setError({
+          type: "unknown",
+          message: "An unexpected error occurred. Please try again.",
+        });
+      }
+      console.error("Dashboard fetch error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchStats();
   }, []);
 
   // ── THEME CLASSES ──────────────────────────────────────────
   const t = {
-    page:     isDark ? 'bg-[#0d0d0d] text-white'               : 'bg-gray-100 text-gray-900',
+    page:     isDark ? 'bg-[#0d0d0d] text-white'                : 'bg-gray-100 text-gray-900',
     card:     isDark ? 'bg-[#161616] border-white/10 text-white' : 'bg-white border-gray-200 text-gray-900',
     subtext:  isDark ? 'text-zinc-400'                          : 'text-gray-500',
     row:      isDark ? 'bg-white/5'                             : 'bg-gray-50',
@@ -61,7 +115,39 @@ export default function AdminDashboard() {
     minicard: isDark ? 'bg-white/5 text-white'                  : 'bg-gray-50 text-gray-800',
   };
 
-  // ── STAT CARD ─────────────────────────────────────────────
+  // ── ERROR CONFIG ───────────────────────────────────────────
+  const errorConfig: Record<ErrorType, {
+    icon: React.ComponentType<{ size: number; className: string }>;
+    title: string;
+    action?: { label: string; onClick: () => void };
+  }> = {
+    network: {
+      icon: WifiOff,
+      title: "Connection Failed",
+      action: { label: "Retry", onClick: fetchStats },
+    },
+    auth: {
+      icon: ShieldAlert,
+      title: "Session Expired",
+      action: { label: "Log In Again", onClick: () => navigate("/login") },
+    },
+    forbidden: {
+      icon: ShieldAlert,
+      title: "Access Denied",
+    },
+    server: {
+      icon: ServerCrash,
+      title: "Server Error",
+      action: { label: "Try Again", onClick: fetchStats },
+    },
+    unknown: {
+      icon: ServerCrash,
+      title: "Something Went Wrong",
+      action: { label: "Try Again", onClick: fetchStats },
+    },
+  };
+
+  // ── STAT CARD ──────────────────────────────────────────────
   const StatCard = ({
     icon: Icon, title, value, growth,
   }: {
@@ -91,7 +177,7 @@ export default function AdminDashboard() {
     </div>
   );
 
-  // ── SIDE STAT ROW ─────────────────────────────────────────
+  // ── SIDE STAT ROW ──────────────────────────────────────────
   const SideStat = ({
     icon: Icon, label, value, color,
   }: {
@@ -133,43 +219,54 @@ export default function AdminDashboard() {
         </button>
       </div>
 
-      {/* ── ERROR ────────────────────────────────────────── */}
-      {error && (
-        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl
-          text-red-500 text-sm">
-          ⚠️ {error}
-        </div>
-      )}
+      {/* ── ERROR BANNER ──────────────────────────────────── */}
+      {error && (() => {
+        const cfg = errorConfig[error.type];
+        const Icon = cfg.icon;
+        return (
+          <div className={`mb-6 p-4 rounded-xl border flex items-start gap-4
+            ${isDark
+              ? 'bg-red-500/10 border-red-500/20 text-red-400'
+              : 'bg-red-50 border-red-200 text-red-700'
+            }`}
+          >
+            <div className={`p-2 rounded-lg shrink-0
+              ${isDark ? 'bg-red-500/20' : 'bg-red-100'}`}>
+              <Icon size={20} className={isDark ? 'text-red-400' : 'text-red-600'} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm">{cfg.title}</p>
+              <p className={`text-sm mt-0.5 ${isDark ? 'text-red-400/80' : 'text-red-600/80'}`}>
+                {error.message}
+              </p>
+            </div>
+            {cfg.action && (
+              <button
+                onClick={cfg.action.onClick}
+                className={`flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5
+                  rounded-lg shrink-0 transition
+                  ${isDark
+                    ? 'bg-red-500/20 hover:bg-red-500/30 text-red-300'
+                    : 'bg-red-100 hover:bg-red-200 text-red-700'
+                  }`}
+              >
+                <RefreshCw size={13} />
+                {cfg.action.label}
+              </button>
+            )}
+          </div>
+        );
+      })()}
 
-      {/* ── KPI CARDS — 2 cols on mobile, 4 on desktop ───── */}
+      {/* ── KPI CARDS ─────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-4 sm:mb-6">
-        <StatCard
-          icon={Users}
-          title="Total Users"
-          value={stats?.totalUsers}
-          growth="+12% this month"
-        />
-        <StatCard
-          icon={MessageSquare}
-          title="Contacts"
-          value={stats?.totalContacts}
-          growth="+8% engagement"
-        />
-        <StatCard
-          icon={HeartHandshake}
-          title="Prayer Requests"
-          value={stats?.totalPrayerRequests}
-          growth="+5% increase"
-        />
-        <StatCard
-          icon={Sparkles}
-          title="Testimonies"
-          value={stats?.totalTestimonies}
-          growth="+18% growth"
-        />
+        <StatCard icon={Users}         title="Total Users"       value={stats?.totalUsers}         growth="+12% this month"  />
+        <StatCard icon={MessageSquare} title="Contacts"          value={stats?.totalContacts}       growth="+8% engagement"   />
+        <StatCard icon={HeartHandshake} title="Prayer Requests"  value={stats?.totalPrayerRequests} growth="+5% increase"     />
+        <StatCard icon={Sparkles}      title="Testimonies"       value={stats?.totalTestimonies}    growth="+18% growth"      />
       </div>
 
-      {/* ── DONATIONS + BOOKS — stacked on mobile, side-by-side on md+ ── */}
+      {/* ── DONATIONS + BOOKS ─────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
 
         {/* DONATIONS */}
@@ -241,7 +338,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ── CHART + SIDE PANEL — stacked on mobile, side-by-side on lg+ ── */}
+      {/* ── CHART + SIDE PANEL ────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
 
         {/* CHART */}
@@ -285,43 +382,18 @@ export default function AdminDashboard() {
         <div className={`border rounded-2xl shadow-sm p-4 sm:p-6 flex flex-col gap-3 ${t.card}`}>
           <h2 className="text-base sm:text-lg font-semibold">Live Statistics</h2>
 
-          <SideStat
-            icon={MessageSquare}
-            label="Contacts"
-            value={stats?.totalContacts}
-            color="text-indigo-500"
-          />
-          <SideStat
-            icon={HeartHandshake}
-            label="Prayer Requests"
-            value={stats?.totalPrayerRequests}
-            color="text-pink-500"
-          />
-          <SideStat
-            icon={Sparkles}
-            label="Testimonies"
-            value={stats?.totalTestimonies}
-            color="text-yellow-500"
-          />
-          <SideStat
-            icon={Heart}
-            label="Donations"
-            value={stats?.completedDonations}
-            color="text-rose-500"
-          />
-          <SideStat
-            icon={Library}
-            label="Books"
-            value={stats?.totalBooks}
-            color="text-violet-500"
-          />
+          <SideStat icon={MessageSquare}  label="Contacts"        value={stats?.totalContacts}       color="text-indigo-500" />
+          <SideStat icon={HeartHandshake} label="Prayer Requests" value={stats?.totalPrayerRequests} color="text-pink-500"   />
+          <SideStat icon={Sparkles}       label="Testimonies"     value={stats?.totalTestimonies}    color="text-yellow-500" />
+          <SideStat icon={Heart}          label="Donations"       value={stats?.completedDonations}  color="text-rose-500"   />
+          <SideStat icon={Library}        label="Books"           value={stats?.totalBooks}          color="text-violet-500" />
 
           {!isLoading && stats && (
             <div className="grid grid-cols-2 gap-2 text-center text-xs mt-1">
               {[
-                { label: 'Events',          value: stats.totalEvents          },
-                { label: 'Sermons',         value: stats.totalSermons         },
-                { label: 'Announcements',   value: stats.totalAnnouncements   },
+                { label: 'Events',          value: stats.totalEvents           },
+                { label: 'Sermons',         value: stats.totalSermons          },
+                { label: 'Announcements',   value: stats.totalAnnouncements    },
                 { label: 'Pending Prayers', value: stats.pendingPrayerRequests },
               ].map(item => (
                 <div key={item.label} className={`rounded-xl p-2 ${t.minicard}`}>

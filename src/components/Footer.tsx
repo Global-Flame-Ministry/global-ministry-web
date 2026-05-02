@@ -187,7 +187,7 @@ const Footer: React.FC = () => {
                 },
                 {
                   icon: <Mail className="w-4 h-4 shrink-0 text-fuchsia-500" />,
-                  text: 'globalflameministries@gmail.com'
+                  text: 'info@globalflameministry.org'
                 },
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-3 text-xs

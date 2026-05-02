@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Mail, Send, Clock, RefreshCw, Search, Filter,
   Users, CheckCircle, XCircle, X,
-  Calendar, Trash2, AlertCircle
+  Calendar, Trash2, AlertCircle, Image as ImageIcon
 } from 'lucide-react';
 import { bulkEmailApi } from '../../api/bulkEmailApi';
 import type {
@@ -12,71 +12,68 @@ import type {
 } from '../../types';
 import toast from 'react-hot-toast';
 import { useAdminTheme } from '../../context/AdminThemeContext';
+import ImageUpload from '../../components/ImageUpload';
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
-
 const TARGET_GROUPS = ['All', 'Ministry', 'Youth', 'Custom'] as const;
 type TargetGroup = typeof TARGET_GROUPS[number];
 
 const STATUS_FILTERS = ['', 'Sent', 'Scheduled', 'Sending', 'Failed', 'Cancelled'];
 
 const emptyForm = (): SendBulkEmailDto => ({
-  subject:     '',
-  htmlBody:    '',
-  targetGroup: 'All',
+  subject:      '',
+  htmlBody:     '',
+  targetGroup:  'All',
   customEmails: '',
-  scheduledAt: null,
+  scheduledAt:  null,
+  imageUrl:     '',
 });
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
-
 const AdminBulkEmail = () => {
   const { isDark } = useAdminTheme();
 
   // ── THEME ──────────────────────────────────────────────────────────────────
   const t = {
-    bg:         isDark ? 'bg-[#0d0d0d] text-white'              : 'bg-slate-50 text-slate-900',
-    border:     isDark ? 'border-white/5'                        : 'border-slate-200',
-    subtext:    isDark ? 'text-zinc-400'                         : 'text-slate-500',
-    mutedtext:  isDark ? 'text-zinc-600'                         : 'text-slate-400',
-    input: isDark
+    bg:         isDark ? 'bg-[#0d0d0d] text-white'                : 'bg-slate-50 text-slate-900',
+    border:     isDark ? 'border-white/5'                          : 'border-slate-200',
+    subtext:    isDark ? 'text-zinc-400'                           : 'text-slate-500',
+    mutedtext:  isDark ? 'text-zinc-600'                           : 'text-slate-400',
+    input:      isDark
       ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-500 focus:border-fuchsia-500'
       : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-fuchsia-500',
-    card:       isDark ? 'bg-white/5 border-white/10'            : 'bg-white border-slate-200',
+    card:       isDark ? 'bg-white/5 border-white/10'              : 'bg-white border-slate-200',
     row:        isDark ? 'bg-white/3 hover:bg-white/5 border-white/5' : 'bg-white hover:bg-slate-50 border-slate-200',
-    btnGhost:   isDark ? 'bg-white/5 hover:bg-white/10'          : 'bg-slate-100 hover:bg-slate-200',
-    modal:      isDark ? 'bg-[#161616] border-white/10 text-white' : 'bg-white border-slate-200 shadow-xl text-slate-900',
+    btnGhost:   isDark ? 'bg-white/5 hover:bg-white/10'            : 'bg-slate-100 hover:bg-slate-200',
+    modal:      isDark ? 'bg-[#161616] border-white/10 text-white'  : 'bg-white border-slate-200 shadow-xl text-slate-900',
     modalInput: isDark
       ? 'bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-fuchsia-500'
       : 'bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-fuchsia-500',
-    label:      isDark ? 'text-zinc-400'                         : 'text-slate-600',
-    skeleton:   isDark ? 'bg-white/5'                            : 'bg-slate-200',
+    label:      isDark ? 'text-zinc-400'                           : 'text-slate-600',
+    skeleton:   isDark ? 'bg-white/5'                              : 'bg-slate-200',
   };
 
   // ── STATE ──────────────────────────────────────────────────────────────────
-  const [history, setHistory]           = useState<BulkEmailResponseDto[]>([]);
-  const [stats, setStats]               = useState<BulkEmailStatsDto | null>(null);
-  const [totalCount, setTotalCount]     = useState(0);
+  const [history, setHistory]                   = useState<BulkEmailResponseDto[]>([]);
+  const [stats, setStats]                       = useState<BulkEmailStatsDto | null>(null);
+  const [totalCount, setTotalCount]             = useState(0);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [isLoadingStats, setIsLoadingStats]     = useState(true);
-  const [search, setSearch]             = useState('');
-  const [filterStatus, setFilterStatus] = useState('');
-  const [pageNumber, setPageNumber]     = useState(1);
+  const [search, setSearch]                     = useState('');
+  const [filterStatus, setFilterStatus]         = useState('');
+  const [pageNumber, setPageNumber]             = useState(1);
   const pageSize = 10;
 
-  // Compose modal
-  const [showCompose, setShowCompose]   = useState(false);
-  const [form, setForm]                 = useState<SendBulkEmailDto>(emptyForm());
-  const [isScheduled, setIsScheduled]   = useState(false);
-  const [isSending, setIsSending]       = useState(false);
-  const [charCount, setCharCount]       = useState(0);
+  const [showCompose, setShowCompose] = useState(false);
+  const [form, setForm]               = useState<SendBulkEmailDto>(emptyForm());
+  const [isScheduled, setIsScheduled] = useState(false);
+  const [isSending, setIsSending]     = useState(false);
+  const [charCount, setCharCount]     = useState(0);
 
-  // Delete confirm
   const [cancelTarget, setCancelTarget] = useState<BulkEmailResponseDto | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
 
-  // Preview modal
-  const [previewOpen, setPreviewOpen]   = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   // ── FETCH ──────────────────────────────────────────────────────────────────
   const fetchHistory = useCallback(async () => {
@@ -103,9 +100,7 @@ const AdminBulkEmail = () => {
     setIsLoadingStats(true);
     try {
       const res = await bulkEmailApi.getStats();
-      if (res.data.isSuccess && res.data.data) {
-        setStats(res.data.data);
-      }
+      if (res.data.isSuccess && res.data.data) setStats(res.data.data);
     } catch {
       toast.error('Failed to load stats');
     } finally {
@@ -119,8 +114,8 @@ const AdminBulkEmail = () => {
 
   // ── SEND / SCHEDULE ────────────────────────────────────────────────────────
   const handleSend = async () => {
-    if (!form.subject.trim()) { toast.error('Subject is required');      return; }
-    if (!form.htmlBody.trim()) { toast.error('Message body is required'); return; }
+    if (!form.subject.trim())  { toast.error('Subject is required');       return; }
+    if (!form.htmlBody.trim()) { toast.error('Message body is required');   return; }
     if (form.targetGroup === 'Custom' && !form.customEmails?.trim()) {
       toast.error('Please enter at least one email address');
       return;
@@ -186,16 +181,17 @@ const AdminBulkEmail = () => {
 
   const statusBadge = (status: string) => {
     switch (status) {
-      case 'Sent':       return 'bg-emerald-500/20 text-emerald-600';
-      case 'Scheduled':  return 'bg-blue-500/20 text-blue-600';
-      case 'Sending':    return 'bg-amber-500/20 text-amber-600';
-      case 'Failed':     return 'bg-red-500/20 text-red-500';
-      case 'Cancelled':  return 'bg-slate-500/20 text-slate-500';
-      default:           return 'bg-slate-200 text-slate-500';
+      case 'Sent':      return 'bg-emerald-500/20 text-emerald-600';
+      case 'Scheduled': return 'bg-blue-500/20 text-blue-600';
+      case 'Sending':   return 'bg-amber-500/20 text-amber-600';
+      case 'Failed':    return 'bg-red-500/20 text-red-500';
+      case 'Cancelled': return 'bg-slate-500/20 text-slate-500';
+      default:          return 'bg-slate-200 text-slate-500';
     }
   };
 
   const totalPages = Math.ceil(totalCount / pageSize);
+  const modalBg    = isDark ? '#161616' : 'white';
 
   // ── RENDER ─────────────────────────────────────────────────────────────────
   return (
@@ -204,9 +200,7 @@ const AdminBulkEmail = () => {
       {/* ── HEADER ──────────────────────────────────────────────────────── */}
       <div className={`px-8 pt-8 pb-6 border-b ${t.border} flex items-center justify-between`}>
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-fuchsia-500 mb-1">
-            Admin
-          </p>
+          <p className="text-xs font-bold uppercase tracking-[0.3em] text-fuchsia-500 mb-1">Admin</p>
           <h1 className="text-2xl font-bold">Bulk Email</h1>
         </div>
         <div className="flex items-center gap-3">
@@ -230,43 +224,20 @@ const AdminBulkEmail = () => {
       {/* ── STATS CARDS ─────────────────────────────────────────────────── */}
       <div className="px-8 pt-6 grid grid-cols-2 lg:grid-cols-4 gap-4 mb-2">
         {[
-          {
-            icon: <Send className="w-4 h-4 text-fuchsia-500" />,
-            bg:   isDark ? 'bg-fuchsia-500/10' : 'bg-fuchsia-50',
-            label: 'Emails Sent',
-            value: isLoadingStats ? null : stats?.totalEmailsSent ?? 0,
-          },
-          {
-            icon: <Users className="w-4 h-4 text-blue-500" />,
-            bg:   isDark ? 'bg-blue-500/10' : 'bg-blue-50',
-            label: 'Recipients Reached',
-            value: isLoadingStats ? null : stats?.totalRecipientsReached ?? 0,
-          },
-          {
-            icon: <CheckCircle className="w-4 h-4 text-emerald-500" />,
-            bg:   isDark ? 'bg-emerald-500/10' : 'bg-emerald-50',
-            label: 'Success Rate',
-            value: isLoadingStats ? null : `${stats?.successRate ?? 0}%`,
-          },
-          {
-            icon: <Clock className="w-4 h-4 text-amber-500" />,
-            bg:   isDark ? 'bg-amber-500/10' : 'bg-amber-50',
-            label: 'Scheduled',
-            value: isLoadingStats ? null : stats?.totalScheduled ?? 0,
-          },
+          { icon: <Send className="w-4 h-4 text-fuchsia-500" />,  bg: isDark ? 'bg-fuchsia-500/10' : 'bg-fuchsia-50', label: 'Emails Sent',         value: isLoadingStats ? null : stats?.totalEmailsSent ?? 0 },
+          { icon: <Users className="w-4 h-4 text-blue-500" />,    bg: isDark ? 'bg-blue-500/10'    : 'bg-blue-50',    label: 'Recipients Reached',   value: isLoadingStats ? null : stats?.totalRecipientsReached ?? 0 },
+          { icon: <CheckCircle className="w-4 h-4 text-emerald-500" />, bg: isDark ? 'bg-emerald-500/10' : 'bg-emerald-50', label: 'Success Rate', value: isLoadingStats ? null : `${stats?.successRate ?? 0}%` },
+          { icon: <Clock className="w-4 h-4 text-amber-500" />,   bg: isDark ? 'bg-amber-500/10'   : 'bg-amber-50',   label: 'Scheduled',            value: isLoadingStats ? null : stats?.totalScheduled ?? 0 },
         ].map((card, i) => (
           <div key={i} className={`border rounded-2xl p-5 ${t.card}`}>
             <div className="flex items-center gap-3 mb-2">
               <div className={`p-2 rounded-lg ${card.bg}`}>{card.icon}</div>
-              <span className={`text-xs font-bold uppercase tracking-widest ${t.subtext}`}>
-                {card.label}
-              </span>
+              <span className={`text-xs font-bold uppercase tracking-widest ${t.subtext}`}>{card.label}</span>
             </div>
-            {card.value === null ? (
-              <div className={`h-7 w-20 rounded animate-pulse ${t.skeleton}`} />
-            ) : (
-              <p className="text-2xl font-black">{card.value}</p>
-            )}
+            {card.value === null
+              ? <div className={`h-7 w-20 rounded animate-pulse ${t.skeleton}`} />
+              : <p className="text-2xl font-black">{card.value}</p>
+            }
           </div>
         ))}
       </div>
@@ -288,8 +259,7 @@ const AdminBulkEmail = () => {
           <select
             value={filterStatus}
             onChange={e => setFilterStatus(e.target.value)}
-            className={`pl-9 pr-8 py-2.5 border rounded-lg text-sm outline-none
-              appearance-none cursor-pointer ${t.input}`}
+            className={`pl-9 pr-8 py-2.5 border rounded-lg text-sm outline-none appearance-none cursor-pointer ${t.input}`}
           >
             {STATUS_FILTERS.map(s => (
               <option key={s} value={s}>{s || 'All Statuses'}</option>
@@ -324,39 +294,38 @@ const AdminBulkEmail = () => {
                 key={email.id}
                 className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${t.row}`}
               >
-                {/* Icon */}
-                <div className={`p-2.5 rounded-xl shrink-0 ${
-                  isDark ? 'bg-fuchsia-500/10' : 'bg-fuchsia-50'
-                }`}>
+                <div className={`p-2.5 rounded-xl shrink-0 ${isDark ? 'bg-fuchsia-500/10' : 'bg-fuchsia-50'}`}>
                   <Mail className="w-4 h-4 text-fuchsia-500" />
                 </div>
-
-                {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <p className="font-bold text-sm truncate">{email.subject}</p>
-                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5
-                      rounded-full ${statusBadge(email.status)}`}>
+                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${statusBadge(email.status)}`}>
                       {email.status}
                     </span>
-                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5
-                      rounded-full ${isDark
-                        ? 'bg-white/10 text-zinc-400'
-                        : 'bg-slate-100 text-slate-500'}`}>
+                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                      isDark ? 'bg-white/10 text-zinc-400' : 'bg-slate-100 text-slate-500'
+                    }`}>
                       {email.targetGroup}
                     </span>
+                    {/* Image indicator */}
+                    {email.imageUrl && (
+                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                        isDark ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-500'
+                      }`}>
+                        <ImageIcon className="w-2.5 h-2.5" /> Image
+                      </span>
+                    )}
                   </div>
                   <div className={`flex items-center gap-4 text-xs ${t.subtext} flex-wrap`}>
                     <span className="flex items-center gap-1">
-                      <Users className="w-3 h-3" />
-                      {email.totalRecipients} recipients
+                      <Users className="w-3 h-3" /> {email.totalRecipients} recipients
                     </span>
                     {email.successCount > 0 && (
                       <>
                         <span className={t.mutedtext}>·</span>
                         <span className="text-emerald-500 flex items-center gap-1">
-                          <CheckCircle className="w-3 h-3" />
-                          {email.successCount} delivered
+                          <CheckCircle className="w-3 h-3" /> {email.successCount} delivered
                         </span>
                       </>
                     )}
@@ -364,8 +333,7 @@ const AdminBulkEmail = () => {
                       <>
                         <span className={t.mutedtext}>·</span>
                         <span className="text-red-500 flex items-center gap-1">
-                          <XCircle className="w-3 h-3" />
-                          {email.failedCount} failed
+                          <XCircle className="w-3 h-3" /> {email.failedCount} failed
                         </span>
                       </>
                     )}
@@ -387,18 +355,14 @@ const AdminBulkEmail = () => {
                   </div>
                   {email.errorMessage && (
                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {email.errorMessage}
+                      <AlertCircle className="w-3 h-3" /> {email.errorMessage}
                     </p>
                   )}
                 </div>
-
-                {/* Cancel button — only for scheduled */}
                 {email.status === 'Scheduled' && (
                   <button
                     onClick={() => setCancelTarget(email)}
-                    className={`p-2 rounded-lg transition-colors shrink-0
-                      ${t.btnGhost} hover:bg-red-500/20`}
+                    className={`p-2 rounded-lg transition-colors shrink-0 ${t.btnGhost} hover:bg-red-500/20`}
                     title="Cancel scheduled email"
                   >
                     <Trash2 className={`w-4 h-4 ${t.subtext}`} />
@@ -412,23 +376,19 @@ const AdminBulkEmail = () => {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-6">
-            <span className={`text-xs ${t.mutedtext}`}>
-              Page {pageNumber} of {totalPages}
-            </span>
+            <span className={`text-xs ${t.mutedtext}`}>Page {pageNumber} of {totalPages}</span>
             <div className="flex gap-2">
               <button
                 onClick={() => setPageNumber(p => Math.max(1, p - 1))}
                 disabled={pageNumber === 1}
-                className={`px-3 py-1.5 rounded disabled:opacity-30 text-xs
-                  transition-colors ${t.btnGhost}`}
+                className={`px-3 py-1.5 rounded disabled:opacity-30 text-xs transition-colors ${t.btnGhost}`}
               >
                 Prev
               </button>
               <button
                 onClick={() => setPageNumber(p => Math.min(totalPages, p + 1))}
                 disabled={pageNumber === totalPages}
-                className={`px-3 py-1.5 rounded disabled:opacity-30 text-xs
-                  transition-colors ${t.btnGhost}`}
+                className={`px-3 py-1.5 rounded disabled:opacity-30 text-xs transition-colors ${t.btnGhost}`}
               >
                 Next
               </button>
@@ -440,27 +400,18 @@ const AdminBulkEmail = () => {
       {/* ── COMPOSE MODAL ───────────────────────────────────────────────── */}
       {showCompose && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => setShowCompose(false)}
-          />
-          <div className={`relative rounded-2xl w-full max-w-2xl shadow-2xl
-            max-h-[90vh] overflow-y-auto border ${t.modal}`}>
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowCompose(false)} />
+          <div className={`relative rounded-2xl w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto border ${t.modal}`}>
 
             {/* Modal header */}
             <div
-              className={`flex items-center justify-between px-6 py-4 border-b
-                ${t.border} sticky top-0 z-10`}
-              style={{ background: isDark ? '#161616' : 'white' }}
+              className={`flex items-center justify-between px-6 py-4 border-b ${t.border} sticky top-0 z-10`}
+              style={{ background: modalBg }}
             >
               <h3 className="font-bold text-lg flex items-center gap-2">
-                <Mail className="w-5 h-5 text-fuchsia-500" />
-                Compose Email
+                <Mail className="w-5 h-5 text-fuchsia-500" /> Compose Email
               </h3>
-              <button
-                onClick={() => setShowCompose(false)}
-                className={`p-1.5 rounded-lg transition-colors ${t.btnGhost}`}
-              >
+              <button onClick={() => setShowCompose(false)} className={`p-1.5 rounded-lg transition-colors ${t.btnGhost}`}>
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -469,8 +420,7 @@ const AdminBulkEmail = () => {
 
               {/* Subject */}
               <div>
-                <label className={`text-xs font-bold uppercase tracking-widest
-                  mb-1.5 block ${t.label}`}>
+                <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
                   Subject *
                 </label>
                 <input
@@ -478,31 +428,26 @@ const AdminBulkEmail = () => {
                   value={form.subject}
                   onChange={e => setForm(p => ({ ...p, subject: e.target.value }))}
                   placeholder="e.g. Sunday Service Reminder"
-                  className={`w-full px-4 py-3 border rounded-xl text-sm
-                    outline-none ${t.modalInput}`}
+                  className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`}
                 />
               </div>
 
               {/* Target Group */}
               <div>
-                <label className={`text-xs font-bold uppercase tracking-widest
-                  mb-1.5 block ${t.label}`}>
+                <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
                   Send To *
                 </label>
-                <div className="relative flex bg-slate-100 rounded-2xl p-1"
-                  style={{ background: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9' }}>
+                <div
+                  className="relative flex rounded-2xl p-1"
+                  style={{ background: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9' }}
+                >
                   <div
-                    className="absolute top-1 bottom-1 bg-white rounded-xl shadow-sm
-                      border border-gray-200 transition-all duration-300"
+                    className="absolute top-1 bottom-1 rounded-xl shadow-sm transition-all duration-300"
                     style={{
-                      width:     `calc(${100 / TARGET_GROUPS.length}% - 4px)`,
-                      transform: `translateX(calc(${
-                        TARGET_GROUPS.indexOf(
-                          form.targetGroup as TargetGroup) * 100}% + ${
-                        TARGET_GROUPS.indexOf(
-                          form.targetGroup as TargetGroup) * 4}px))`,
-                      background: isDark ? '#2a2a2a' : 'white',
-                      borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0',
+                      width:       `calc(${100 / TARGET_GROUPS.length}% - 4px)`,
+                      transform:   `translateX(calc(${TARGET_GROUPS.indexOf(form.targetGroup as TargetGroup) * 100}% + ${TARGET_GROUPS.indexOf(form.targetGroup as TargetGroup) * 4}px))`,
+                      background:  isDark ? '#2a2a2a' : 'white',
+                      border:      `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'}`,
                     }}
                   />
                   {TARGET_GROUPS.map(group => (
@@ -510,12 +455,11 @@ const AdminBulkEmail = () => {
                       key={group}
                       type="button"
                       onClick={() => setForm(p => ({ ...p, targetGroup: group }))}
-                      className={`relative z-10 flex-1 py-2.5 text-xs font-semibold
-                        rounded-xl transition-colors duration-300
-                        ${form.targetGroup === group
+                      className={`relative z-10 flex-1 py-2.5 text-xs font-semibold rounded-xl transition-colors duration-300 ${
+                        form.targetGroup === group
                           ? isDark ? 'text-white' : 'text-slate-900'
                           : isDark ? 'text-zinc-500' : 'text-slate-400'
-                        }`}
+                      }`}
                     >
                       {group}
                     </button>
@@ -523,37 +467,28 @@ const AdminBulkEmail = () => {
                 </div>
               </div>
 
-              {/* Custom emails — only when Custom is selected */}
+              {/* Custom emails */}
               {form.targetGroup === 'Custom' && (
                 <div>
-                  <label className={`text-xs font-bold uppercase tracking-widest
-                    mb-1.5 block ${t.label}`}>
+                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
                     Email Addresses *
                   </label>
                   <textarea
                     rows={3}
                     value={form.customEmails}
-                    onChange={e =>
-                      setForm(p => ({ ...p, customEmails: e.target.value }))}
-                    placeholder="Paste comma-separated emails e.g. john@example.com, jane@example.com"
-                    className={`w-full px-4 py-3 border rounded-xl text-sm
-                      outline-none resize-none ${t.modalInput}`}
+                    onChange={e => setForm(p => ({ ...p, customEmails: e.target.value }))}
+                    placeholder="john@example.com, jane@example.com"
+                    className={`w-full px-4 py-3 border rounded-xl text-sm outline-none resize-none ${t.modalInput}`}
                   />
-                  <p className={`text-xs mt-1 ${t.label}`}>
-                    Separate multiple emails with commas
-                  </p>
+                  <p className={`text-xs mt-1 ${t.label}`}>Separate multiple emails with commas</p>
                 </div>
               )}
 
               {/* Message body */}
               <div>
                 <div className="flex justify-between items-center mb-1.5">
-                  <label className={`text-xs font-bold uppercase tracking-widest ${t.label}`}>
-                    Message *
-                  </label>
-                  <span className={`text-xs ${
-                    charCount > 5000 ? 'text-red-500' : t.label
-                  }`}>
+                  <label className={`text-xs font-bold uppercase tracking-widest ${t.label}`}>Message *</label>
+                  <span className={`text-xs ${charCount > 5000 ? 'text-red-500' : t.label}`}>
                     {charCount} characters
                   </span>
                 </div>
@@ -565,11 +500,25 @@ const AdminBulkEmail = () => {
                     setCharCount(e.target.value.length);
                   }}
                   placeholder="Write your message here. Line breaks will be preserved in the email."
-                  className={`w-full px-4 py-3 border rounded-xl text-sm
-                    outline-none resize-none ${t.modalInput}`}
+                  className={`w-full px-4 py-3 border rounded-xl text-sm outline-none resize-none ${t.modalInput}`}
                 />
                 <p className={`text-xs mt-1 ${t.label}`}>
                   Your message will be wrapped in the GFM branded email template automatically.
+                </p>
+              </div>
+
+              {/* ── IMAGE UPLOAD (replaces Image URL input) ───────────── */}
+              <div>
+                <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
+                  Email Image <span className={`normal-case font-normal ${t.mutedtext}`}>(optional)</span>
+                </label>
+                <ImageUpload
+                  value={form.imageUrl || null}
+                  onChange={(url) => setForm(p => ({ ...p, imageUrl: url ?? '' }))}
+                  label=""
+                />
+                <p className={`text-xs mt-1 ${t.label}`}>
+                  Uploaded image will appear above your message in the email.
                 </p>
               </div>
 
@@ -582,8 +531,7 @@ const AdminBulkEmail = () => {
                   <div className={`w-11 h-6 rounded-full transition-colors ${
                     isScheduled ? 'bg-fuchsia-600' : isDark ? 'bg-white/10' : 'bg-slate-200'
                   }`}>
-                    <div className={`w-5 h-5 bg-white rounded-full mt-0.5
-                      transition-transform ${
+                    <div className={`w-5 h-5 bg-white rounded-full mt-0.5 transition-transform ${
                       isScheduled ? 'translate-x-5' : 'translate-x-0.5'
                     }`} />
                   </div>
@@ -592,21 +540,17 @@ const AdminBulkEmail = () => {
                     Schedule for later
                   </span>
                 </div>
-
                 {isScheduled && (
                   <div className="mt-3">
-                    <label className={`text-xs font-bold uppercase tracking-widest
-                      mb-1.5 block ${t.label}`}>
+                    <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
                       Send Date & Time *
                     </label>
                     <input
                       type="datetime-local"
                       value={form.scheduledAt ?? ''}
                       min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
-                      onChange={e =>
-                        setForm(p => ({ ...p, scheduledAt: e.target.value }))}
-                      className={`w-full px-4 py-3 border rounded-xl text-sm
-                        outline-none ${t.modalInput}`}
+                      onChange={e => setForm(p => ({ ...p, scheduledAt: e.target.value }))}
+                      className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`}
                     />
                   </div>
                 )}
@@ -615,76 +559,52 @@ const AdminBulkEmail = () => {
 
             {/* Modal footer */}
             <div
-                className={`px-6 py-4 border-t ${t.border} flex gap-3
-                    justify-end sticky bottom-0 z-10`}
-                style={{ background: isDark ? '#161616' : 'white' }}>
-
-                {/* Cancel */}
-                <button
-                    onClick={() => setShowCompose(false)}
-                    className={`px-4 py-2 rounded-lg text-sm transition-colors ${t.btnGhost}`}>
-                        Cancel
-                </button>
-
-                {/* Preview Button */}
-                <button
-                    onClick={() => setPreviewOpen(true)} // Opens preview modal
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${t.btnGhost}`}>
-                    Preview
-                </button>
-
-                {/* Send */}
-                <button
-                    onClick={handleSend}
-                    disabled={isSending}
-                    className="px-5 py-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500
-                    disabled:opacity-50 text-sm font-bold text-white
-                    flex items-center gap-2">
-                    {isSending && (
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    )}
-                    {isScheduled
-                    ? <><Clock className="w-3.5 h-3.5" /> Schedule Email</>
-                    : <><Send className="w-3.5 h-3.5" /> Send Now</>
-                    }
-                </button>
-                </div>
+              className={`px-6 py-4 border-t ${t.border} flex gap-3 justify-end sticky bottom-0 z-10`}
+              style={{ background: modalBg }}
+            >
+              <button onClick={() => setShowCompose(false)} className={`px-4 py-2 rounded-lg text-sm transition-colors ${t.btnGhost}`}>
+                Cancel
+              </button>
+              <button onClick={() => setPreviewOpen(true)} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${t.btnGhost}`}>
+                Preview
+              </button>
+              <button
+                onClick={handleSend}
+                disabled={isSending}
+                className="px-5 py-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500
+                  disabled:opacity-50 text-sm font-bold text-white flex items-center gap-2"
+              >
+                {isSending && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                {isScheduled
+                  ? <><Clock className="w-3.5 h-3.5" /> Schedule Email</>
+                  : <><Send className="w-3.5 h-3.5" /> Send Now</>
+                }
+              </button>
             </div>
+          </div>
         </div>
       )}
 
       {/* ── CANCEL CONFIRM MODAL ────────────────────────────────────────── */}
       {cancelTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => setCancelTarget(null)}
-          />
-          <div className={`relative rounded-2xl p-8 w-full max-w-sm
-            text-center border ${t.modal}`}>
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setCancelTarget(null)} />
+          <div className={`relative rounded-2xl p-8 w-full max-w-sm text-center border ${t.modal}`}>
             <Trash2 className="w-8 h-8 text-red-500 mx-auto mb-4" />
             <h3 className="font-bold text-lg mb-2">Cancel scheduled email?</h3>
             <p className={`text-sm mb-6 ${t.subtext}`}>
               "{cancelTarget.subject}" will be cancelled and not sent.
             </p>
             <div className="flex gap-3">
-              <button
-                onClick={() => setCancelTarget(null)}
-                className={`flex-1 py-2.5 rounded-lg text-sm
-                  transition-colors ${t.btnGhost}`}
-              >
+              <button onClick={() => setCancelTarget(null)} className={`flex-1 py-2.5 rounded-lg text-sm transition-colors ${t.btnGhost}`}>
                 Keep it
               </button>
               <button
                 onClick={handleCancel}
                 disabled={isCancelling}
-                className="flex-1 py-2.5 rounded-lg bg-red-500 hover:bg-red-600
-                  disabled:opacity-50 text-sm font-bold text-white
-                  flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-50 text-sm font-bold text-white flex items-center justify-center gap-2"
               >
-                {isCancelling && (
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                )}
+                {isCancelling && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                 Cancel Email
               </button>
             </div>
@@ -692,81 +612,87 @@ const AdminBulkEmail = () => {
         </div>
       )}
 
-      {/* ── PREVIEW MODAL ───────────────────────────────────────────── */}
-        {previewOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+      {/* ── PREVIEW MODAL ───────────────────────────────────────────────── */}
+      {previewOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setPreviewOpen(false)} />
+          <div className={`relative rounded-2xl w-full max-w-2xl shadow-2xl border ${t.modal}`}>
 
-            {/* Overlay */}
-            <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => setPreviewOpen(false)} // Close when clicking outside
-            />
-
-            {/* Modal Container */}
-            <div className={`relative rounded-2xl w-full max-w-2xl shadow-2xl border ${t.modal}`}>
-
-            {/* Header */}
             <div className={`flex items-center justify-between px-6 py-4 border-b ${t.border}`}>
-                <h3 className="font-bold text-lg flex items-center gap-2">
-                <Mail className="w-5 h-5 text-fuchsia-500" />
-                Email Preview
-                </h3>
-
-                <button
-                onClick={() => setPreviewOpen(false)}
-                className={`p-1.5 rounded-lg transition-colors ${t.btnGhost}`}
-                >
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <Mail className="w-5 h-5 text-fuchsia-500" /> Email Preview
+              </h3>
+              <button onClick={() => setPreviewOpen(false)} className={`p-1.5 rounded-lg transition-colors ${t.btnGhost}`}>
                 <X className="w-4 h-4" />
-                </button>
+              </button>
             </div>
 
-            {/* Body */}
-            <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+            <div className="p-6 max-h-[70vh] overflow-y-auto space-y-4">
 
-                {/* Subject */}
-                <div>
-                <p className={`text-xs font-bold uppercase tracking-widest ${t.label}`}>
-                    Subject
-                </p>
-                <h2 className="text-xl font-bold mt-1">
+              {/* Simulated email card */}
+              <div className="rounded-xl overflow-hidden border border-slate-200 bg-white">
+
+                {/* Email header — matches actual sent email */}
+                <div style={{ background: 'linear-gradient(135deg,#a21caf,#7c3aed)', padding: '24px 32px', textAlign: 'center' }}>
+                  <img
+                    src="https://res.cloudinary.com/dveeb0yop/image/upload/v1777117674/flames_hmyf0q.jpg"
+                    alt="GFM Logo"
+                    style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', display: 'block', margin: '0 auto 10px', border: '2px solid rgba(255,255,255,0.3)' }}
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                  <h1 style={{ color: 'white', margin: 0, fontSize: 18, fontWeight: 'bold', letterSpacing: 1 }}>
+                    GLOBAL FLAME MINISTRY
+                  </h1>
+                  <p style={{ color: 'rgba(255,255,255,0.8)', margin: '4px 0 0', fontSize: 9 }}>
+                    Raising a people of power who will manifest the kingdom...
+                  </p>
+                </div>
+
+                {/* Subject bar */}
+                <div style={{ background: '#faf5ff', padding: '16px 32px', borderBottom: '2px solid #e9d5ff' }}>
+                  <h2 style={{ color: '#7c3aed', margin: 0, fontSize: 16 }}>
                     {form.subject || 'No Subject'}
-                </h2>
+                  </h2>
                 </div>
 
-                {/* Divider */}
-                <div className={`border-t ${t.border}`} />
+                {/* Optional image */}
+                {form.imageUrl && (
+                  <img
+                    src={form.imageUrl}
+                    alt="Email Image"
+                    style={{ width: '100%', maxHeight: 280, objectFit: 'cover', display: 'block' }}
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                )}
 
-                {/* Simulated Email Card */}
-                <div className={`rounded-xl p-5 ${
-                isDark ? 'bg-white/5' : 'bg-white shadow'
-                }`}>
-
-                {/* Email Content */}
-                <div
-                    className="prose max-w-none text-sm"
-                    dangerouslySetInnerHTML={{
-                    __html: form.htmlBody || '<p>No content</p>'
-                    }}
-                />
-
+                {/* Body */}
+                <div style={{ padding: '28px 32px', color: '#374151', fontSize: 14, lineHeight: 1.7 }}>
+                  <p style={{ margin: '0 0 12px' }}>Dear <strong>[Recipient Name]</strong>,</p>
+                  <div style={{ whiteSpace: 'pre-wrap' }}>
+                    {form.htmlBody || 'No content'}
+                  </div>
                 </div>
 
+                {/* Footer */}
+                <div style={{ background: '#f9fafb', padding: '16px 32px', textAlign: 'center', borderTop: '1px solid #e5e7eb' }}>
+                  <p style={{ color: '#9ca3af', fontSize: 11, margin: 0 }}>
+                    You are receiving this email because you are a registered member of Global Flame Ministry.
+                  </p>
+                </div>
+              </div>
             </div>
 
-            {/* Footer */}
             <div className={`px-6 py-4 border-t ${t.border} flex justify-end`}>
-                <button
+              <button
                 onClick={() => setPreviewOpen(false)}
-                className="px-4 py-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500
-                    text-white text-sm font-bold"
-                >
+                className="px-4 py-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500 text-white text-sm font-bold"
+              >
                 Close Preview
-                </button>
+              </button>
             </div>
-
-            </div>
+          </div>
         </div>
-        )}
+      )}
     </div>
   );
 };
