@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ArrowRight, Loader, Users, Flame } from 'lucide-react';
 import { ministryApi } from '../api/ministryApi';
 import type { MinistryResponseDto } from '../types';
@@ -129,12 +129,7 @@ const MinistryRow: React.FC<{
   );
 };
 
-// ─── YOUTH COMMUNITY ROW ──────────────────────────────────────────────────────
-
-
 // ─── EMPTY / COMING SOON STATE ────────────────────────────────────────────────
-// Shown when either the server is unreachable OR there are genuinely no
-// ministries in the database yet. The user never sees a technical error.
 
 const MinistriesComingSoon: React.FC = () => (
   <div className="flex flex-col items-center justify-center py-32 px-6
@@ -184,8 +179,6 @@ const MinistriesComingSoon: React.FC = () => (
 const Ministries: React.FC = () => {
   const [ministries, setMinistries] = useState<MinistryResponseDto[]>([]);
   const [isLoading, setIsLoading]   = useState(true);
-  // NOTE: no error state — we treat all failure modes as "empty"
-  // so the user never sees a technical error message
 
   const rHero = useReveal(0);
 
@@ -197,10 +190,8 @@ const Ministries: React.FC = () => {
         if (res.data.isSuccess && res.data.data) {
           setMinistries(res.data.data.items);
         }
-        // If isSuccess is false we just leave ministries as [] — shows empty state
       } catch {
         // Server unreachable — silently fall through to empty state
-        // The user sees "Something great is coming" instead of a server error
       } finally {
         setIsLoading(false);
       }
