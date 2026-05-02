@@ -5,14 +5,13 @@ import axios, {
 } from 'axios';
 import { storage } from '../utils/storage';
 
-// ✅ Change this one URL and everything updates automatically
-const BASE_URL = 'https://unmaterialistic-jakob-likeliest.ngrok-free.dev';
+// Change this one URL and everything updates automatically
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const api = axios.create({
   baseURL: BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
-    'ngrok-skip-browser-warning': 'true', // ✅ Skip ngrok browser warning page
+    'Content-Type': 'application/json'
   },
 });
 
