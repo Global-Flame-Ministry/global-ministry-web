@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FiArrowLeftCircle, FiArrowRightCircle } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuthContext';
 import bamaiyi from '../../assets/images/dad.jpg';
 import ben from '../../assets/images/seated.jpg';
 import bruce from '../../assets/images/HOO.jpg';

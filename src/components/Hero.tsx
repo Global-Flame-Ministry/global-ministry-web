@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PlayCircle, ArrowRight } from 'lucide-react';
 import auditorium from '../assets/auditorium.jpg';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuthContext';
 
 const Hero: React.FC = () => {
   const navigate = useNavigate();

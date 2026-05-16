@@ -6,7 +6,7 @@ import {
   Sun, Moon, BookOpen, Heart, Library, Mail,
   ChevronLeft, ChevronRight, HeartHandshake
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuthContext';
 import { Building2 } from 'lucide-react';
 import { AdminThemeProvider, useAdminTheme } from '../context/AdminThemeContext';
 

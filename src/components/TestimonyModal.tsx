@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Check, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { testimonyApi } from '../api/testimonyApi';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuthContext';
 
 interface Props {
   isOpen: boolean;

@@ -10,7 +10,7 @@ import logo from '../assets/flames.jpg';
 import { ministryApi } from '../api/ministryApi';
 import { accountApi } from '../api/accountApi';
 import type { MinistryResponseDto } from '../types';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuthContext';
 
 // ─── STATIC NAV DATA ──────────────────────────────────────────────────────────
 
