@@ -4,9 +4,10 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
-import { FiMail, FiLock, FiUser, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiMail, FiUser } from 'react-icons/fi';
 import { authApi } from '../../api/authApi';
 import logo from '../../assets/flames.jpg';
+import { FormInput, PasswordField } from './RegisterFormComponents';
 
 const registerSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters').max(50),
@@ -20,7 +21,6 @@ const registerSchema = z.object({
     .regex(/[0-9]/, 'Must contain at least one number')
     .regex(/[^a-zA-Z0-9]/, 'Must contain at least one special character'),
   confirmPassword: z.string().min(1, 'Please confirm your password'),
-  module: z.enum(['Ministry', 'Youth']),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Passwords do not match',
   path: ['confirmPassword'],
@@ -38,8 +38,6 @@ const RegisterPage = () => {
   const {
   register,
   handleSubmit,
-  watch,    
-  setValue, 
   formState: { errors },
 } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -47,7 +45,6 @@ const RegisterPage = () => {
       firstName: searchParams.get('firstName') ?? '',
       lastName:  searchParams.get('lastName')  ?? '',
       email:     searchParams.get('email')     ?? '',
-      module: 'Ministry',
     },
   });
 
@@ -60,7 +57,6 @@ const RegisterPage = () => {
         userName:  data.userName,
         email:     data.email,
         password:  data.password,
-        module:    data.module,
       });
       if (response.data.isSuccess) {
         toast.success('Account created! Please check your email to confirm.');
@@ -138,37 +134,6 @@ const RegisterPage = () => {
               type="email"
             />
 
-            {/* Community selector */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                Join Community
-              </label>
-              <div className="relative flex bg-gray-100 rounded-2xl p-1">
-                {/* Sliding pill indicator */}
-                <div
-                  className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-xl shadow-sm border border-gray-200
-                    transition-transform duration-300 ease-in-out
-                    ${watch('module') === 'Youth' ? 'translate-x-[calc(100%+8px)]' : 'translate-x-0'}`}
-                />
-                {[
-                  { value: 'Ministry', title: 'Global Flame Ministry', icon: '🔥' },
-                  { value: 'Youth',    title: 'Global Flame Youth Community', icon: '⚡' },
-                ].map((m) => (
-                  <button
-                    key={m.value}
-                    type="button"
-                    onClick={() => setValue('module', m.value as 'Ministry' | 'Youth')}
-                    className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-xl
-                      text-xs font-semibold transition-colors duration-300
-                      ${watch('module') === m.value ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
-                  >
-                    <span>{m.icon}</span>
-                    <span className="leading-tight text-center">{m.title}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Passwords */}
             <PasswordField
               label="Password"
@@ -234,73 +199,3 @@ const RegisterPage = () => {
 };
 
 export default RegisterPage;
-
-/* ─── REUSABLE COMPONENTS ──────────────────────────────────────────────────── */
-
-const FormInput = ({ label, icon, register, error, placeholder, type = 'text' }: {
-  label: string;
-  icon: React.ReactNode;
-  register: any;
-  error?: string;
-  placeholder?: string;
-  type?: string;
-}) => (
-  <div>
-    <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">
-      {label}
-    </label>
-    <div className="relative">
-      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300">{icon}</span>
-      <input
-        {...register}
-        type={type}
-        placeholder={placeholder}
-        className={`w-full pl-11 pr-4 py-3 border rounded-xl text-sm text-gray-900 placeholder-gray-300
-          focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30 focus:border-fuchsia-400 transition-all
-          ${error ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50/50'}`}
-      />
-    </div>
-    {error && (
-      <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-        <span>⚠</span> {error}
-      </p>
-    )}
-  </div>
-);
-
-const PasswordField = ({ label, register, error, show, toggle }: {
-  label: string;
-  register: any;
-  error?: string;
-  show: boolean;
-  toggle: () => void;
-}) => (
-  <div>
-    <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">
-      {label}
-    </label>
-    <div className="relative">
-      <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 w-4 h-4" />
-      <input
-        {...register}
-        type={show ? 'text' : 'password'}
-        placeholder="Minimum 8 characters"
-        className={`w-full pl-11 pr-12 py-3 border rounded-xl text-sm text-gray-900 placeholder-gray-300
-          focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30 focus:border-fuchsia-400 transition-all
-          ${error ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50/50'}`}
-      />
-      <button
-        type="button"
-        onClick={toggle}
-        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 transition-colors"
-      >
-        {show ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
-      </button>
-    </div>
-    {error && (
-      <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-        <span>⚠</span> {error}
-      </p>
-    )}
-  </div>
-);

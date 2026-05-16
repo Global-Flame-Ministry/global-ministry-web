@@ -1,32 +1,17 @@
 import {
-  createContext,
-  useContext,
   useState,
-  useEffect,
   type ReactNode
 } from 'react';
 import type { NewUserDto } from '../types';
 import { storage } from '../utils/storage';
-
-interface AuthContextType {
-  user: NewUserDto | null;
-  isAuthenticated: boolean;
-  isAdmin: boolean;
-  isYouthMember: boolean;
-  login: (user: NewUserDto) => void;
-  logout: () => void;
-}
-
-const AuthContext = createContext<AuthContextType | null>(null);
+import { AuthContext, type AuthContextType } from './useAuthContext';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<NewUserDto | null>(null);
-
-  useEffect(() => {
+  const [user, setUser] = useState<NewUserDto | null>(() => {
     const stored = storage.getUser();
     const token = storage.getToken();
-    if (stored && token) setUser(stored);
-  }, []);
+    return stored && token ? stored : null;
+  });
 
   const login = (userData: NewUserDto) => {
     storage.setUser(userData);
@@ -56,10 +41,4 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
-  return ctx;
 };

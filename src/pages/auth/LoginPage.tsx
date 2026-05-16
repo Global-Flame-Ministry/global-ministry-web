@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
 import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import { authApi } from '../../api/authApi';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuthContext';
 import logo from '../../assets/flames.jpg';
 
 // Updated Schema to include remember boolean

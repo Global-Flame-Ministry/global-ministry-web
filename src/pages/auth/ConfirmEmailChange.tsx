@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { Check, X, Loader, Mail } from 'lucide-react';
 import { accountApi } from '../../api/accountApi';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuthContext';
 
 const ConfirmEmailChange: React.FC = () => {
   const [searchParams]   = useSearchParams();
