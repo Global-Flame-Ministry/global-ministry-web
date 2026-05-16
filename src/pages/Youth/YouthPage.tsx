@@ -7,7 +7,7 @@ import {
 import { eventApi } from '../../api/eventApi';
 import { announcementApi } from '../../api/announcementApi';
 import type { EventDto, AnnouncementDto } from '../../types';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuthContext';
 
 // ─── EVENT STATUS HELPERS ─────────────────────────────────────────────────────
 const getEventStatus = (event: EventDto): 'upcoming' | 'ongoing' | 'past' => {

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Heart, Phone, Mail, MessageSquare, ChevronDown, Check, Loader } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { counsellingApi } from '../api/counsellingApi';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuthContext';
 
 const TOPICS = [
   'Marriage & Relationships',

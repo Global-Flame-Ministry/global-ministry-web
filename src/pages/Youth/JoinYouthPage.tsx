@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Users, ArrowRight, Lock } from 'lucide-react';
 import { youthApi } from '../../api/youthApi';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuthContext';
 import toast from 'react-hot-toast';
 
 const JoinYouthPage = () => {

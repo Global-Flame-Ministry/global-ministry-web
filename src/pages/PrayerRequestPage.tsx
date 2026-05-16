@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { prayerApi } from '../api/prayerApi';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuthContext';
 
 const TOPICS = [
   'Healing & Health',

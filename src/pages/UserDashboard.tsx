@@ -7,7 +7,7 @@ import {
   ShieldCheck, Mail, KeyRound, Upload
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuthContext';
 import { accountApi } from '../api/accountApi';
 import type {
   MyProfileDto, MyRegistrationDto,

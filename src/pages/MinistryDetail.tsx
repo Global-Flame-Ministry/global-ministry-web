@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { ministryApi } from '../api/ministryApi';
 import type { MinistryResponseDto, EventDto } from '../types';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuthContext';
 
 // The slug must match exactly what the admin entered in the dashboard.
 // If they ever rename the ministry, update this constant.

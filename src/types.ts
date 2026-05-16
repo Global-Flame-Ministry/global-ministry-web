@@ -81,7 +81,6 @@ export interface RegisterDto {
   userName: string;
   email: string;
   password: string;
-  module: string;
 }
 
 export interface LoginDto {
