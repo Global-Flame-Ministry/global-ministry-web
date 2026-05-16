@@ -4,7 +4,7 @@ import {
 } from 'react';
 import type { NewUserDto } from '../types';
 import { storage } from '../utils/storage';
-import { AuthContext, type AuthContextType } from './useAuthContext';
+import { AuthContext} from './useAuthContext';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<NewUserDto | null>(() => {
