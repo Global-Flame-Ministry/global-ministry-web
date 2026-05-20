@@ -4,7 +4,7 @@ import { Search, Flame } from 'lucide-react';
 import { blogApi } from '../api/blogApi';
 import type { BlogPostResponseDto, BlogQueryObject } from '../types';
 
-const MODULES = ['All', 'Ministry', 'Youth Community'] as const;
+const MODULES = ['All', 'Ministry', 'Youth'] as const;
 
 type ModuleFilter = (typeof MODULES)[number];
 
