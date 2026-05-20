@@ -52,8 +52,13 @@ export default function AdminDashboard() {
           message: res.data.message || "Failed to load dashboard stats.",
         });
       }
-    } catch (err: any) {
-      if (err.response) {
+    } catch (err: unknown) {
+      const isApiError = (value: unknown): value is {
+        response?: { status?: number; data?: { message?: string } };
+        request?: unknown;
+      } => typeof value === 'object' && value !== null && ('response' in value || 'request' in value);
+
+      if (isApiError(err) && err.response) {
         // Server responded with an error status
         switch (err.response.status) {
           case 401:
@@ -82,7 +87,7 @@ export default function AdminDashboard() {
                 `Server error (${err.response.status}). Please try again.`,
             });
         }
-      } else if (err.request) {
+      } else if (isApiError(err) && err.request) {
         // No response received — actual network/connection issue
         setError({
           type: "network",
