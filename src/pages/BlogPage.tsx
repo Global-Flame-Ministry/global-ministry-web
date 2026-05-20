@@ -124,9 +124,9 @@ const BlogPage: React.FC = () => {
                         <div className="text-sm text-slate-500">By {post.authorName}</div>
                         <Link
                           to={`/blog/${post.slug}`}
-                          className="inline-flex items-center gap-2 rounded-full bg-[#a21caf] px-4 py-3 text-sm font-bold uppercase tracking-[0.25em] text-white transition hover:bg-[#7c3aed]"
+                          className="inline-flex items-center gap-2 rounded-full bg-[#a21caf] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#7c3aed]"
                         >
-                          Read More <ArrowRight className="h-4 w-4" />
+                          Read more <ArrowRight className="h-4 w-4" />
                         </Link>
                       </div>
                     </div>

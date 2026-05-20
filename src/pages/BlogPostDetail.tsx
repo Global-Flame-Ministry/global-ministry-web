@@ -32,7 +32,7 @@ const BlogPostDetail: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="py-16">
+      <div className="pt-28 pb-16">
         <div className="mx-auto w-full max-w-5xl space-y-4">
           <div className="h-6 w-40 animate-pulse rounded-lg bg-slate-200" />
           <div className="h-80 animate-pulse rounded-3xl bg-slate-200" />
@@ -48,7 +48,7 @@ const BlogPostDetail: React.FC = () => {
 
   if (error || !post) {
     return (
-      <div className="py-16">
+      <div className="pt-28 pb-16">
         <div className="mx-auto w-full max-w-3xl rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
           <p className="text-lg font-semibold text-[#111827] mb-3">{error || 'Post not found.'}</p>
           <Link to="/blog" className="inline-flex items-center gap-2 rounded-full bg-[#a21caf] px-4 py-3 text-sm font-bold text-white hover:bg-[#7c3aed] transition">
@@ -60,7 +60,7 @@ const BlogPostDetail: React.FC = () => {
   }
 
   return (
-    <div className="py-16">
+    <div className="pt-28 pb-16">
       <div className="mx-auto w-full max-w-5xl space-y-8">
         <Link to="/blog" className="inline-flex items-center gap-2 text-sm font-semibold text-[#a21caf] hover:text-[#7c3aed] transition">
           <ArrowLeft className="h-4 w-4" /> Back to Blog
