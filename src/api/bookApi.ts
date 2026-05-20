@@ -17,6 +17,9 @@ export const bookApi = {
   getById: (id: number) =>
     api.get<ApiResponse<BookDto>>(`/api/ministry/books/${id}`),
 
+  getBySlug: (slug: string) =>
+    api.get<ApiResponse<BookDto>>(`/api/ministry/books/${slug}`),
+
   // ── ADMIN ──────────────────────────────────────────────────────────────────
   adminGetAll: (params?: {
     pageNumber?: number;

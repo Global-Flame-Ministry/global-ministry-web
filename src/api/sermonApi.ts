@@ -41,6 +41,9 @@ export const sermonApi = {
   getById: (id: number) =>
     api.get<ApiResponse<SermonDto>>(`/api/ministry/sermons/${id}`),
 
+  getBySlug: (slug: string) =>
+    api.get<ApiResponse<SermonDto>>(`/api/ministry/sermons/${slug}`),
+
   // ── Admin ─────────────────────────────────────────────────────────────────
   adminGetAll: (params?: {
     pageNumber?: number;

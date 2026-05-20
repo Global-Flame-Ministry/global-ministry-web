@@ -121,6 +121,7 @@ export interface UserDto {
 // SERMON 
 export interface SermonDto {
   id: number;
+  slug: string;
   title: string;
   speaker: string;
   series: string;
@@ -137,6 +138,7 @@ export interface SermonDto {
 // ANNOUNCEMENT 
 export interface AnnouncementDto {
   id: number;
+  slug: string;
   title: string;
   content: string;
   module: string;
@@ -149,6 +151,7 @@ export interface AnnouncementDto {
 // EVENT 
 export interface EventDto {
   id: number;
+  slug: string;
   title: string;
   description: string | null;
   startDate: string;
@@ -319,6 +322,7 @@ export interface DonationStatsDto {
 // BOOK 
 export interface BookDto {
   id: number;
+  slug: string;
   title: string;
   author: string;
   description: string | null;
@@ -575,6 +579,7 @@ export interface MyDonationDto {
 // SERMON 
 export interface SermonDto {
   id: number;
+  slug: string;
   title: string;
   speaker: string;
   series: string;

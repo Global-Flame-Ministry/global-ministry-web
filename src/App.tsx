@@ -169,7 +169,7 @@ const App: React.FC = () => {
               element={<PublicLayout><BookStore /></PublicLayout>} />
             <Route path="/sermons"
               element={<PublicLayout><Sermons /></PublicLayout>} />
-            <Route path="/sermons/:id"
+            <Route path="/sermons/:slug"
               element={<PublicLayout><SermonDetail /></PublicLayout>} />
             <Route path="/events"
               element={<PublicLayout><Events /></PublicLayout>} />

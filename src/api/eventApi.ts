@@ -57,6 +57,9 @@ export const eventApi = {
   getById: (id: number) =>
     api.get<ApiResponse<EventDto>>(`/api/ministry/events/${id}`),
 
+  getBySlug: (slug: string) =>
+    api.get<ApiResponse<EventDto>>(`/api/ministry/events/${slug}`),
+
   adminGetAll: (params?: {
     pageNumber?: number;
     pageSize?: number;

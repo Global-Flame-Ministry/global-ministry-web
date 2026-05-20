@@ -34,6 +34,11 @@ export const announcementApi = {
       `/api/ministry/announcements/${id}`
     ),
 
+  getBySlug: (slug: string) =>
+    api.get<ApiResponse<AnnouncementDto>>(
+      `/api/ministry/announcements/${slug}`
+    ),
+
   // ── PUBLIC YOUTH ──────────────────────────────────────────────────────────
   getYouthAll: (params?: {
     pageNumber?: number;

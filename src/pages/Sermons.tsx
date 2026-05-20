@@ -161,7 +161,7 @@ const Sermons: React.FC = () => {
               filteredSermons.map((sermon, idx) => (
                 <Link
                   key={sermon.id}
-                  to={`/sermons/${sermon.id}`}
+                  to={`/sermons/${sermon.slug || sermon.id}`}
                   className="group cursor-pointer block animate-fadeUp"
                   style={{ animationDelay: `${idx * 80}ms`, animationFillMode: 'both' }}
                 >

@@ -261,7 +261,7 @@ const Home: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
               {latestSermons.map((sermon, i) => (
                 <AnimatedDiv key={sermon.id} delay={i * 120} direction="up">
-                  <Link to={`/sermons/${sermon.id}`} className="group block">
+                  <Link to={`/sermons/${sermon.slug || sermon.id}`} className="group block">
                     <div className="relative aspect-4/5 overflow-hidden
                       rounded-sm mb-5">
                       {sermon.imageUrl ? (
