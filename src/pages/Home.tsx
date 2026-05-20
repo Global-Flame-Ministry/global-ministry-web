@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import Hero from '../components/Hero';
 import { Link, useNavigate } from 'react-router-dom';
 import { announcementApi } from '../api/announcementApi';
-import { Calendar, Play, ArrowRight, Globe, MapPin, Heart, HandHeart, Star, Library, ShieldCheck } from 'lucide-react';
+import { Calendar, Play, ArrowRight, Globe, MapPin, Heart, HandHeart, Star, Library, ShieldCheck, Flame } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
 import { eventApi } from '../api/eventApi';
 import { bookApi } from '../api/bookApi';
+import { blogApi } from '../api/blogApi';
 import type { SermonDto, EventDto, AnnouncementDto, BookDto } from '../types';
+import type { BlogPostResponseDto } from '../types';
 import daddy from '../assets/daddy.jpg';
 import dadandmum from '../assets/dadandmum.jpg';
 import { useScrollAnimation } from '../context/hooks/useScrollAnimation';
@@ -141,6 +143,7 @@ const Home: React.FC = () => {
   const [upcomingEvents, setUpcomingEvents]           = useState<EventDto[]>([]);
   const [latestAnnouncements, setLatestAnnouncements] = useState<AnnouncementDto[]>([]);
   const [featuredBooks, setFeaturedBooks]             = useState<BookDto[]>([]);
+  const [latestBlogPosts, setLatestBlogPosts]         = useState<BlogPostResponseDto[]>([]);
   const [showTestimonyModal, setShowTestimonyModal]   = useState(false);
 
   useEffect(() => {
@@ -155,6 +158,10 @@ const Home: React.FC = () => {
     });
     bookApi.getPublished({ pageSize: 10, pageNumber: 1 }).then(res => {
       if (res.data.isSuccess && res.data.data) setFeaturedBooks(res.data.data.items);
+    });
+    // Latest blog posts preview for home
+    blogApi.getPublishedPosts({ pageSize: 3, pageNumber: 1 }).then(res => {
+      if (res.data.isSuccess && res.data.data) setLatestBlogPosts(res.data.data.items);
     });
   }, []);
 
@@ -702,6 +709,45 @@ const Home: React.FC = () => {
 
         </div>
       </section>
+
+      {/* ── Blog Preview (latest 3) ───────────────────────────────────── */}
+      {latestBlogPosts.length > 0 && (
+        <section className="py-20 bg-white border-t border-slate-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-2xl font-bold text-slate-900">Latest from the Blog</h3>
+              <Link to="/blog" className="text-sm font-semibold text-[#a21caf] hover:text-[#7c3aed]">View All →</Link>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {latestBlogPosts.map((post) => (
+                <article key={post.id} className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-purple-200 transition-all">
+                  <Link to={`/blog/${post.slug}`} className="block">
+                    <div className="aspect-[16/10] overflow-hidden bg-gray-100">
+                      {post.coverImageUrl ? (
+                        <img src={post.coverImageUrl} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-purple-100 to-fuchsia-100 flex items-center justify-center">
+                          <Flame className="w-10 h-10 text-purple-300" />
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                  <div className="p-4">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">{post.module}</span>
+                    <Link to={`/blog/${post.slug}`} className="block mt-3">
+                      <h4 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-purple-700 transition-colors">{post.title}</h4>
+                    </Link>
+                    {post.excerpt && <p className="mt-2 text-gray-600 text-sm line-clamp-3 leading-relaxed">{post.excerpt}</p>}
+                    <div className="mt-4">
+                      <Link to={`/blog/${post.slug}`} className="text-sm font-medium text-purple-600 hover:text-purple-800">Read more →</Link>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── Event Section ─────────────────────────────────────────────── */}
       <AnimatedSection
