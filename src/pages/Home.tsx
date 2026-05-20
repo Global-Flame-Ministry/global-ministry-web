@@ -559,28 +559,32 @@ const Home: React.FC = () => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-            <AnimatedDiv
-              className="lg:col-span-5 relative"
-              direction="left"
-              delay={100}
-            >
-              <div className="relative z-10 rounded-lg overflow-hidden
-                shadow-2xl aspect-3/4">
-                <img
-                  src={dadandmum}
-                  alt="Leadership"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-white
-                p-4 shadow-xl hidden md:block z-20 rounded-lg">
-                <img
-                  src={daddy}
-                  alt="Apostle"
-                  className="w-full h-full object-cover rounded-md"
-                />
-              </div>
-            </AnimatedDiv>
+          <AnimatedDiv
+            className="lg:col-span-5 relative"
+            direction="left"
+            delay={100}
+          >
+            {/* Main image */}
+            <div className="relative z-10 rounded-lg overflow-hidden shadow-2xl 
+              h-72 md:h-auto md:aspect-3/4">
+              <img
+                src={dadandmum}
+                alt="Leadership"
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Overlay portrait */}
+            <div className="absolute -bottom-8 -right-2 md:-bottom-10 md:-right-10
+              w-28 h-36 md:w-64 md:h-64 bg-white p-1.5 md:p-4
+              shadow-xl z-20 rounded-lg">
+              <img
+                src={daddy}
+                alt="Apostle"
+                className="w-full h-full object-cover rounded-md"
+              />
+            </div>
+          </AnimatedDiv>
             <AnimatedDiv
               className="lg:col-span-7 lg:pl-12"
               direction="right"
@@ -642,7 +646,7 @@ const Home: React.FC = () => {
                 </h2>
                 <p className="text-slate-400 text-sm leading-relaxed max-w-lg">
                   These are not opinions — they are the bedrock convictions on which
-                  Global Flame Ministries was founded and continues to stand.
+                  Global Flame Ministry was founded and continues to stand.
                 </p>
               </div>
               <Link
