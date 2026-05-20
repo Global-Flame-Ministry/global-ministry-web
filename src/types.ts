@@ -258,6 +258,57 @@ export interface DonationGroupDto {
   count: number;
 }
 
+export interface BlogBlockDto {
+  id: number;
+  blockType: 'Heading' | 'Paragraph' | 'Image' | 'Quote';
+  content: string | null;
+  imageUrl: string | null;
+  displayOrder: number;
+}
+
+export interface BlogPostResponseDto {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  coverImageUrl: string | null;
+  authorId: string;
+  authorName: string;
+  module: string;
+  isPublished: boolean;
+  createdOn: string;
+  updatedOn: string | null;
+  blocks: BlogBlockDto[];
+}
+
+export interface CreateBlogBlockDto {
+  blockType: 'Heading' | 'Paragraph' | 'Image' | 'Quote';
+  content?: string;
+  imageUrl?: string;
+  displayOrder: number;
+}
+
+export interface CreateBlogPostDto {
+  title: string;
+  excerpt?: string;
+  coverImageUrl?: string;
+  module: string;
+  isPublished: boolean;
+  blocks: CreateBlogBlockDto[];
+}
+
+export type UpdateBlogPostDto = CreateBlogPostDto;
+
+export interface BlogQueryObject {
+  module?: string;
+  isPublished?: boolean;
+  searchTerm?: string;
+  pageNumber?: number;
+  pageSize?: number;
+  sortBy?: string;
+  isDescending?: boolean;
+}
+
 export interface DonationStatsDto {
   grandTotal: number;
   byType: DonationGroupDto[];

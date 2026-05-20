@@ -8,6 +8,20 @@
   animation: fadeUp 0.6s ease-out;
 }
 
+img, video, iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+button, input, select, textarea {
+  min-height: 44px;
+}
+
 .dark select {
   background-color: rgb(30 41 59);   /* slate-800 */
   color: rgb(241 245 249);           /* slate-100 */

@@ -8,7 +8,7 @@ import AdminLayout from './components/AdminLayout';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import BookStore from './pages/BookStore';
-import ConfirmEmailChange from './pages//auth/ConfirmEmailChange';
+import ConfirmEmailChange from './pages/auth/ConfirmEmailChange';
 
 // MINISTRY PAGES 
 import Home              from './pages/Home';
@@ -54,6 +54,9 @@ import AdminDonations      from './pages/Admin/AdminDonations';
 import AdminBulkEmail      from './pages/Admin/AdminBulkEmail';
 import AdminMinistries     from './pages/Admin/AdminMinistries';
 import AdminCounselling    from './pages/Admin/AdminCounselling';
+import AdminBlog           from './pages/Admin/AdminBlog';
+import BlogPage            from './pages/BlogPage';
+import BlogPostDetail      from './pages/BlogPostDetail';
 
 // Add these imports at the top of your existing App.tsx
 import YouthLayout            from './components/Youth/YouthLayout';
@@ -80,13 +83,19 @@ const ScrollToTop = () => {
 const PublicLayout = ({ children }: { children: React.ReactNode }) => (
   <>
     <Navbar />
-    <main className="grow">{children}</main>
+    <main className="grow bg-white text-[#111827]">
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+        {children}
+      </div>
+    </main>
     <Footer />
   </>
 );
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => (
-  <div className="min-h-screen bg-gray-50">{children}</div>
+  <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6">
+    <div className="mx-auto w-full max-w-md">{children}</div>
+  </div>
 );
 
 // 404 
@@ -170,6 +179,10 @@ const App: React.FC = () => {
               element={<PublicLayout><MinistryDetail /></PublicLayout>} />
             <Route path="/give"
               element={<PublicLayout><Give /></PublicLayout>} />
+            <Route path="/blog"
+              element={<PublicLayout><BlogPage /></PublicLayout>} />
+            <Route path="/blog/:slug"
+              element={<PublicLayout><BlogPostDetail /></PublicLayout>} />
             <Route path="/contact"
               element={<PublicLayout><Contact /></PublicLayout>} />
             <Route path="/announcements"
@@ -226,6 +239,8 @@ const App: React.FC = () => {
                 element={<AdminLayout><AdminMinistries /></AdminLayout>} />
               <Route path="counselling"
                 element={<AdminLayout><AdminCounselling /></AdminLayout>} />
+              <Route path="blog"
+                element={<AdminLayout><AdminBlog /></AdminLayout>} />
             </Route>
 
             {/* 404 */}

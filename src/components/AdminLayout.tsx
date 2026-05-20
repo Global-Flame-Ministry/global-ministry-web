@@ -23,6 +23,7 @@ const NAV_ITEMS = [
   { icon: <Heart size={18} />,           label: 'Donations',         route: '/admin/donations' },
   { icon: <Library size={18} />,         label: 'Books',             route: '/admin/books' },
   { icon: <Mail size={18} />,            label: 'Bulk Email',        route: '/admin/bulk-email' },
+  { icon: <BookOpen size={18} />,        label: 'Blog',              route: '/admin/blog' },
   { icon: <Building2 size={18} />,       label: 'Ministries',        route: '/admin/ministries' },
 ];
 
@@ -221,7 +222,9 @@ const AdminLayoutInner: React.FC<{ children: React.ReactNode }> = ({ children })
 
         {/* Page content */}
         <div className="flex-1 overflow-y-auto">
-          {children}
+          <div className="min-h-full px-4 py-6 sm:px-6 lg:px-8">
+            {children}
+          </div>
         </div>
       </div>
     </div>

@@ -22,6 +22,36 @@ const ABOUT_LINKS = [
   { label: 'Core Beliefs',  path: '/core-beliefs',  desc: 'What we stand on',         icon: <ShieldCheck className="w-4 h-4" /> },
 ];
 
+const UserAvatar = ({
+  size = 'sm',
+  profilePicUrl,
+  firstName,
+  lastName,
+}: {
+  size?: 'sm' | 'md';
+  profilePicUrl: string | null;
+  firstName?: string;
+  lastName?: string;
+}) => {
+  const dim = size === 'sm' ? 'w-6 h-6' : 'w-8 h-8';
+  const text = size === 'sm' ? 'text-[9px]' : 'text-xs';
+  if (profilePicUrl) {
+    return (
+      <img
+        src={profilePicUrl}
+        alt={firstName ?? 'User'}
+        className={`${dim} rounded-full object-cover ring-2 ring-[#a21caf]/20 shrink-0`}
+      />
+    );
+  }
+  return (
+    <div className={`${dim} rounded-full bg-[#f3e8ff] text-[#7c3aed]
+      flex items-center justify-center ${text} font-black shrink-0`}>
+      {firstName?.[0]}{lastName?.[0]}
+    </div>
+  );
+};
+
 const EXPLORE_CHURCH_LIFE = [
   { label: 'Events',         path: '/events',         icon: <Calendar className="w-4 h-4" /> },
   { label: 'Contact',        path: '/contact',        icon: <Phone className="w-4 h-4" /> },
@@ -122,19 +152,30 @@ const Navbar: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated) { setProfilePicUrl(null); return; }
-    accountApi.getProfile()
-      .then(res => {
-        if (res.data.isSuccess && res.data.data)
+    const loadProfile = async () => {
+      if (!isAuthenticated) {
+        setProfilePicUrl(null);
+        return;
+      }
+      try {
+        const res = await accountApi.getProfile();
+        if (res.data.isSuccess && res.data.data) {
           setProfilePicUrl(res.data.data.profilePictureUrl ?? null);
-      })
-      .catch(() => {});
+        }
+      } catch {
+        setProfilePicUrl(null);
+      }
+    };
+    loadProfile();
   }, [isAuthenticated]);
 
   useEffect(() => {
-    setMobileOpen(false);
-    setMobileSection(null);
-    setMegaOpen(false);
+    const resetMenu = () => {
+      setMobileOpen(false);
+      setMobileSection(null);
+      setMegaOpen(false);
+    };
+    resetMenu();
   }, [location.pathname]);
 
   useEffect(() => {
@@ -173,27 +214,6 @@ const Navbar: React.FC = () => {
     ...EXPLORE_QUICKLINKS.map(l => ({ label: l.label, path: l.path })),
   ];
 
-  // ─── USER AVATAR ──────────────────────────────────────────────────────────
-  const UserAvatar = ({ size = 'sm' }: { size?: 'sm' | 'md' }) => {
-    const dim  = size === 'sm' ? 'w-6 h-6' : 'w-8 h-8';
-    const text = size === 'sm' ? 'text-[9px]' : 'text-xs';
-    if (profilePicUrl) {
-      return (
-        <img
-          src={profilePicUrl}
-          alt={user?.firstName ?? 'User'}
-          className={`${dim} rounded-full object-cover ring-2 ring-fuchsia-300 shrink-0`}
-        />
-      );
-    }
-    return (
-      <div className={`${dim} rounded-full bg-fuchsia-100 text-fuchsia-700
-        flex items-center justify-center ${text} font-black shrink-0`}>
-        {user?.firstName?.[0]}{user?.lastName?.[0]}
-      </div>
-    );
-  };
-
   return (
     <>
       <div className="fixed w-full z-50">
@@ -222,10 +242,9 @@ const Navbar: React.FC = () => {
                 <img
                   src={logo}
                   alt="GFM"
-                  className={`rounded-full object-cover transition-all duration-300
-                    ring-2 ring-fuchsia-200 ${scrolled ? 'h-9 w-9' : 'h-11 w-11'}`}
+                  className={`${scrolled ? 'h-9 w-9' : 'h-11 w-11'} object-cover transition-all duration-300`}
                 />
-                <span className={`font-serif font-bold text-slate-900 tracking-tight
+                <span className={`font-serif font-bold text-[#111827] tracking-tight
                   transition-all duration-300 ${scrolled ? 'text-lg' : 'text-xl'}`}>
                   Global Flame
                 </span>
@@ -238,8 +257,8 @@ const Navbar: React.FC = () => {
                   `text-[11px] font-black uppercase tracking-widest transition-colors
                   py-2 px-1 ${
                     isActive
-                      ? 'text-fuchsia-600'
-                      : 'text-slate-700 hover:text-fuchsia-600'
+                      ? 'text-[#a21caf]'
+                      : 'text-[#111827] hover:text-[#a21caf]'
                   }`}>
                   Home
                 </NavLink>
@@ -251,9 +270,9 @@ const Navbar: React.FC = () => {
                       {ABOUT_LINKS.map(item => (
                         <Link key={item.label} to={item.path}
                           className="flex items-start gap-3 p-3 rounded-lg
-                            hover:bg-fuchsia-50 group transition-colors">
-                          <span className="mt-0.5 text-fuchsia-400
-                            group-hover:text-fuchsia-600 transition-colors shrink-0">
+                            hover:bg-[#f3e8ff] group transition-colors">
+                          <span className="mt-0.5 text-[#a21caf]
+                            group-hover:text-[#7c3aed] transition-colors shrink-0">
                             {item.icon}
                           </span>
                           <div>
@@ -281,8 +300,8 @@ const Navbar: React.FC = () => {
                     font-black uppercase tracking-widest transition-colors
                     whitespace-nowrap py-2 px-1 ${
                       isExploreActive || megaOpen
-                        ? 'text-fuchsia-600'
-                        : 'text-slate-700 hover:text-fuchsia-600'
+                        ? 'text-[#a21caf]'
+                        : 'text-[#111827] hover:text-[#a21caf]'
                     }`}>
                     Explore
                     <ChevronDown className={`w-3 h-3 transition-transform
@@ -297,9 +316,8 @@ const Navbar: React.FC = () => {
                       {MEDIA_LINKS.map(item => (
                         <Link key={item.label} to={item.path}
                           className="flex items-center gap-3 p-3 rounded-lg
-                            hover:bg-fuchsia-50 group transition-colors">
-                          <span className="text-fuchsia-400
-                            group-hover:text-fuchsia-600 transition-colors">
+                            hover:bg-[#f3e8ff] group transition-colors">
+                          <span className="text-[#a21caf] group-hover:text-[#7c3aed] transition-colors">
                             {item.icon}
                           </span>
                           <div>
@@ -317,13 +335,20 @@ const Navbar: React.FC = () => {
                   </div>
                 </Dropdown>
 
+                <NavLink to="/blog" className={({ isActive }) =>
+                  `text-[11px] font-black uppercase tracking-widest transition-colors py-2 px-1 ${
+                    isActive ? 'text-[#a21caf]' : 'text-[#111827] hover:text-[#a21caf]'
+                  }`}>
+                  Blog
+                </NavLink>
+
                 <button
                   onClick={handleGiveClick}
                   className="flex items-center gap-1.5 text-[11px] font-black
-                    uppercase tracking-widest text-fuchsia-600
-                    hover:text-white hover:bg-fuchsia-600 transition-all
-                    border border-fuchsia-200 hover:border-fuchsia-600
-                    px-4 py-2 rounded-full whitespace-nowrap"
+                    uppercase tracking-widest text-[#a21caf]
+                    bg-white border border-[#a21caf] hover:border-[#a21caf]
+                    hover:text-white hover:bg-[#a21caf] focus-visible:outline-none
+                    px-4 py-2 rounded-full whitespace-nowrap transition-all"
                 >
                   <Heart className="w-3 h-3 fill-current" /> Give
                 </button>
@@ -346,7 +371,12 @@ const Navbar: React.FC = () => {
                       className="flex items-center gap-1.5 text-[10px]
                         font-black uppercase tracking-widest text-slate-600
                         hover:text-fuchsia-600 transition-colors">
-                      <UserAvatar size="sm" />
+                      <UserAvatar
+                        size="sm"
+                        profilePicUrl={profilePicUrl}
+                        firstName={user?.firstName}
+                        lastName={user?.lastName}
+                      />
                       <span>Hi, {user?.firstName}</span>
                     </Link>
                     <button onClick={logout}
@@ -584,7 +614,7 @@ const Navbar: React.FC = () => {
             border-b border-slate-100">
             <div className="flex items-center gap-3">
               <img src={logo} alt="GFM"
-                className="h-9 w-9 rounded-full object-cover" />
+                className="h-9 w-9 object-cover" />
               <span className="font-serif text-base font-bold text-slate-900">
                 Global Flame
               </span>
@@ -613,7 +643,12 @@ const Navbar: React.FC = () => {
                     className="flex items-center gap-2 text-[10px]
                       font-black uppercase tracking-widest text-slate-600
                       hover:text-fuchsia-600 transition-colors">
-                    <UserAvatar size="md" />
+                    <UserAvatar
+                      size="md"
+                      profilePicUrl={profilePicUrl}
+                      firstName={user?.firstName}
+                      lastName={user?.lastName}
+                    />
                     Hi, {user?.firstName}
                   </Link>
                 </div>
@@ -647,28 +682,42 @@ const Navbar: React.FC = () => {
           {/* Give CTA */}
           <button
             onClick={() => { setMobileOpen(false); handleGiveClick(); }}
-            className="flex items-center justify-center gap-2 mx-6 mt-4 py-3
-              bg-fuchsia-600 text-white rounded-xl text-[10px] font-black
-              uppercase tracking-widest hover:bg-fuchsia-700 transition-colors"
+            className="flex items-center justify-center gap-2 mx-6 mt-4 py-3 min-h-[44px]
+              bg-[#a21caf] text-white rounded-xl text-[10px] font-black
+              uppercase tracking-widest hover:bg-[#7c3aed] transition-colors"
           >
             <Heart className="w-3.5 h-3.5 fill-white" /> Give / Donate
           </button>
 
           {/* Nav sections */}
-          <div className="flex-1 overflow-y-auto py-4 px-3">
+          <div className="flex-1 overflow-y-auto py-4 px-3 space-y-2">
 
             <Link
               to="/"
               onClick={() => setMobileOpen(false)}
-              className="flex items-center justify-between px-3 py-3.5
-                rounded-xl hover:bg-slate-50 transition-colors group"
+              className="flex items-center justify-between w-full px-4 py-3 rounded-xl
+                bg-slate-50 hover:bg-slate-100 transition-colors group"
             >
               <span className="text-xs font-black uppercase tracking-widest
-                text-slate-700 group-hover:text-fuchsia-600 transition-colors">
+                text-[#111827] group-hover:text-[#a21caf] transition-colors">
                 Home
               </span>
               <ArrowRight className="w-3.5 h-3.5 text-slate-300
-                group-hover:text-fuchsia-400 transition-colors" />
+                group-hover:text-[#a21caf] transition-colors" />
+            </Link>
+
+            <Link
+              to="/blog"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center justify-between w-full px-4 py-3 rounded-xl
+                bg-slate-50 hover:bg-[#f3e8ff] transition-colors group"
+            >
+              <span className="text-xs font-black uppercase tracking-widest
+                text-[#111827] group-hover:text-[#a21caf] transition-colors">
+                Blog
+              </span>
+              <ArrowRight className="w-3.5 h-3.5 text-slate-300
+                group-hover:text-[#a21caf] transition-colors" />
             </Link>
 
             {/* Collapsible sections */}
