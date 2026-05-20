@@ -240,25 +240,25 @@ const BlogPage: React.FC = () => {
         </div>
 
         {!isLoading && (
-          <div className="mt-10 flex items-center justify-center gap-4">
+          <div className="mt-10 flex items-center justify-center gap-2">
             <button
-              disabled={pageNumber <= 1}
-              onClick={() => setPageNumber(p => Math.max(1, p - 1))}
-              className="px-5 py-2 rounded-full border border-slate-200 text-sm font-semibold text-slate-700 hover:border-[#a21caf] hover:text-[#a21caf] disabled:opacity-50 disabled:cursor-not-allowed transition"
+                disabled={pageNumber <= 1}
+                onClick={() => setPageNumber(p => Math.max(1, p - 1))}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 hover:border-[#a21caf] hover:text-[#a21caf] disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
             >
-              ← Previous
+                ← Prev
             </button>
-            <span className="text-sm text-slate-500">
-              Page {pageNumber} of {totalPages}
+            <span className="text-sm text-slate-500 whitespace-nowrap">
+                {pageNumber} / {totalPages}
             </span>
             <button
-              disabled={pageNumber >= totalPages}
-              onClick={() => setPageNumber(p => Math.min(totalPages, p + 1))}
-              className="px-5 py-2 rounded-full border border-slate-200 text-sm font-semibold text-slate-700 hover:border-[#a21caf] hover:text-[#a21caf] disabled:opacity-50 disabled:cursor-not-allowed transition"
+                disabled={pageNumber >= totalPages}
+                onClick={() => setPageNumber(p => Math.min(totalPages, p + 1))}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 hover:border-[#a21caf] hover:text-[#a21caf] disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
             >
-              Next →
+                Next →
             </button>
-          </div>
+            </div>
         )}
       </main>
     </div>
