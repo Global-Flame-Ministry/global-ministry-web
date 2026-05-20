@@ -238,17 +238,20 @@ const Navbar: React.FC = () => {
             <div className="flex items-center justify-between h-12">
 
               {/* LOGO */}
-              <Link to="/" className="flex items-center gap-3 shrink-0 group">
-                <img
-                  src={logo}
-                  alt="GFM"
-                  className={`${scrolled ? 'h-9 w-9' : 'h-11 w-11'} object-cover transition-all duration-300`}
-                />
-                <span className={`font-serif font-bold text-[#111827] tracking-tight
-                  transition-all duration-300 ${scrolled ? 'text-lg' : 'text-xl'}`}>
-                  Global Flame
-                </span>
-              </Link>
+                {/* LOGO */}
+                <Link to="/" className="flex items-center gap-3 shrink-0 group">
+                  <div className={`${scrolled ? 'w-9 h-9' : 'w-11 h-11'} rounded-full border-2 border-[#a21caf] flex items-center justify-center transition-all duration-300 overflow-hidden`}>
+                      <img
+                        src={logo}
+                        alt="GFM"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <span className={`font-serif font-bold text-[#111827] tracking-tight
+                    transition-all duration-300 ${scrolled ? 'text-lg' : 'text-xl'}`}>
+                    Global Flame
+                  </span>
+                </Link>
 
               {/* DESKTOP NAV */}
               <div className="hidden lg:flex items-center gap-8">

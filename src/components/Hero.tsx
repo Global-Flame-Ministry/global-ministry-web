@@ -22,16 +22,16 @@ const Hero: React.FC = () => {
 
   return (
     <>
-      <div className="relative h-screen min-h-150 flex items-center justify-center overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src={auditorium}
-            alt="Worship Background"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-slate-900/90 via-slate-900/40 to-slate-900/20" />
-        </div>
+          <div className="relative min-h-[100dvh] sm:h-screen flex items-center justify-center overflow-hidden">
+  {/* Background */}
+  <div className="absolute inset-0 z-0">
+    <img
+      src={auditorium}
+      alt="Worship Background"
+      className="w-full h-full object-cover"
+    />
+    <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
+  </div>
 
         {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -57,10 +57,10 @@ const Hero: React.FC = () => {
                 Watch Latest Service
               </Link>
               <Link
-                to="/about"
+                to="/contact"
                 className="w-full sm:w-auto flex items-center justify-center px-8 py-4 border border-white/30 text-base font-semibold rounded-full text-white hover:bg-white/10 transition-all backdrop-blur-sm"
               >
-                Plan Your Visit
+                Contact Us
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
             </div>
@@ -68,16 +68,16 @@ const Hero: React.FC = () => {
         </div>
 
         {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center pt-2">
-            <div className="w-1.5 h-1.5 bg-white rounded-full" />
-          </div>
+        <div className="hidden sm:block absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+        <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center pt-2">
+          <div className="w-1.5 h-1.5 bg-white rounded-full" />
+        </div>
         </div>
       </div>
 
       {/* Newsletter / Quick Register — hidden when user is already logged in */}
       {!user && (
-        <section className="bg-slate-400/40 py-12 px-4 border-t border-white/10 backdrop-blur-md">
+        <section className="bg-slate-700 py-12 px-4 border-t border-slate-600">
           <div className="max-w-7xl mx-auto text-center">
             <h2 className="text-2xl md:text-3xl font-serif text-white mb-2">
               Sign up to receive life changing hope and encouragement!

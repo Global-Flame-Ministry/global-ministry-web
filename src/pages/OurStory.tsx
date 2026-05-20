@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Flame } from 'lucide-react';
-import dadandmum from '../assets/dadandmum.jpg';
+import daddyandmum from '../assets/daddyandmum.jpeg';
 
 const useReveal = (delay = 0) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -64,7 +64,7 @@ const OurStory: React.FC = () => {
         {/* Hero image */}
         <div ref={r2} style={fadeStyle}>
           <div className="rounded-2xl overflow-hidden mb-14 aspect-video shadow-xl shadow-slate-100">
-            <img src={dadandmum} alt="Global Flame Ministries" className="w-full h-full object-cover" />
+            <img src={daddyandmum} alt="Global Flame Ministry" className="w-full h-full object-cover" />
           </div>
         </div>
 
@@ -74,7 +74,7 @@ const OurStory: React.FC = () => {
           {/* Intro Paragraphs */}
           <div ref={r3} style={fadeStyle}>
             <p className="mb-8 text-justify">
-              Global Flame Ministry can to birth on the 25th December 1999 - via the mandate given 
+              Global Flame Ministry came to birth on the 25th December 1999 - via the mandate given 
               to the president, Pastor Danjuma Musa. 
                  It was formally registered with the Corporate Affairs Commission (CAC) in 2007, under 
               the provision of Company & Allied Matters Act (CAMA) with certicate no. of registration

@@ -46,7 +46,7 @@ const Sermons: React.FC = () => {
     const fetchSermons = async () => {
       setIsLoading(true);
       try {
-        const response = await sermonApi.getAll({ pageSize: 20 });
+        const response = await sermonApi.getAll({ pageSize: 9 });
         if (response.data.isSuccess && response.data.data) {
           setSermons(response.data.data.items);
         }
@@ -145,7 +145,7 @@ const Sermons: React.FC = () => {
 
         {isLoading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-12">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="animate-pulse">
                 <div className="aspect-[16/10] rounded-xl bg-slate-200 mb-6" />
                 <div className="h-4 bg-slate-200 rounded mb-3 w-3/4" />
@@ -176,9 +176,9 @@ const Sermons: React.FC = () => {
                     {sermon.imageUrl ? (
                       <img
                         src={sermon.imageUrl}
-                        className="w-full h-full object-cover object-top
-                          group-hover:scale-105 transition-transform duration-700"
+                        className="w-full h-full object-cover object-top"
                         alt={sermon.title}
+                        loading="lazy"
                       />
                     ) : (
                       <div className="w-full h-full bg-slate-200 flex items-center justify-center">
@@ -270,29 +270,6 @@ const Sermons: React.FC = () => {
                     Clear Search
                   </button>
                 )}
-              </div>
-            )}
-
-            {/* "Upcoming Insight" placeholder card */}
-            {!isLoading && filteredSermons.length > 0 && (
-              <div className="group border-2 border-dashed border-slate-200 rounded-2xl
-                flex flex-col items-center justify-center p-8 text-center
-                bg-slate-50/50 hover:border-blue-300 transition-colors">
-                <div className="w-14 h-14 rounded-full bg-white border border-slate-200
-                  flex items-center justify-center mb-4 shadow-sm">
-                  <Music className="w-6 h-6 text-slate-300" />
-                </div>
-                <h3 className="text-lg font-serif italic text-slate-400">
-                  Upcoming Insight
-                </h3>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 mt-1">
-                  Scheduled for Broadcast
-                </p>
-                <button className="mt-6 px-4 py-2 border border-slate-200 rounded-lg
-                  text-[9px] font-bold uppercase tracking-widest text-slate-500
-                  hover:bg-white transition-all">
-                  Notify Me
-                </button>
               </div>
             )}
           </div>

@@ -173,23 +173,14 @@ const LoginPage = () => {
             </div>
 
             {/* Remember Me Checkbox */}
-            <div className="flex items-center">
-              <label className="relative flex items-center cursor-pointer group">
-                <input
-                  {...register('remember')}
-                  type="checkbox"
-                  className="peer h-4 w-4 cursor-pointer appearance-none rounded border border-gray-300 bg-gray-50/50 transition-all checked:bg-fuchsia-600 checked:border-fuchsia-600 focus:ring-2 focus:ring-fuchsia-500/30"
-                />
-                <span className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </span>
-                <span className="ml-2 text-sm text-gray-500 font-medium group-hover:text-gray-700 transition-colors">
-                  Remember me
-                </span>
-              </label>
-            </div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                {...register('remember')}
+                type="checkbox"
+                className="w-4 h-4 rounded border-gray-300 text-[#a21caf] accent-[#a21caf] cursor-pointer"
+              />
+              <span className="text-sm text-gray-600">Remember me</span>
+            </label>
 
             {/* Submit */}
             <button

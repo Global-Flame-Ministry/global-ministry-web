@@ -389,219 +389,217 @@ const AdminBlog: React.FC = () => {
       </div>
 
       {showEditor && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 px-4 py-6 sm:px-6">
-          <div className="relative w-full max-w-5xl max-h-[calc(100vh-3rem)] overflow-hidden rounded-none bg-white shadow-2xl sm:rounded-3xl">
-            <div className="flex h-full flex-col">
-              <div className="sticky top-0 z-10 border-b border-slate-200 bg-white px-5 py-4 sm:px-6">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <h2 className="text-2xl font-bold text-[#111827]">{editing ? 'Edit Blog Post' : 'Create Blog Post'}</h2>
-                    <p className="text-sm text-slate-500">Use blocks to build the page structure and upload images via Cloudinary.</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowEditor(false)}
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-slate-100"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-black/50 px-4 py-6">
+          <div className="relative w-full max-w-5xl flex flex-col bg-white rounded-3xl shadow-2xl max-h-[90vh]">
+            <div className="flex-shrink-0 sticky top-0 z-10 border-b border-slate-200 bg-white px-6 py-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-[#111827]">{editing ? 'Edit Blog Post' : 'Create Blog Post'}</h2>
+                  <p className="text-sm text-slate-500">Use blocks to build the page structure and upload images via Cloudinary.</p>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowEditor(false)}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-slate-100"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="space-y-2 text-sm text-slate-700">
+                  Title
+                  <input
+                    value={form.title}
+                    onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))}
+                    className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${style.input}`}
+                    placeholder="Enter post title"
+                  />
+                </label>
+                <label className="space-y-2 text-sm text-slate-700">
+                  Module
+                  <select
+                    value={form.module}
+                    onChange={e => setForm(prev => ({ ...prev, module: e.target.value }))}
+                    className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${style.input}`}
+                  >
+                    {MODULES.map(module => <option key={module} value={module}>{module}</option>)}
+                  </select>
+                </label>
               </div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto px-5 py-6 sm:px-6 space-y-6">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <label className="space-y-2 text-sm text-slate-700">
-                    Title
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="space-y-2 text-sm text-slate-700">
+                  Excerpt
+                  <textarea
+                    value={form.excerpt}
+                    onChange={e => setForm(prev => ({ ...prev, excerpt: e.target.value }))}
+                    rows={3}
+                    className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${style.input}`}
+                    placeholder="Enter a short excerpt"
+                  />
+                </label>
+                <label className="space-y-2 text-sm text-slate-700">
+                  Cover Image URL
+                  <div className="flex gap-3 flex-col sm:flex-row">
                     <input
-                      value={form.title}
-                      onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))}
+                      value={form.coverImageUrl ?? ''}
+                      onChange={e => setForm(prev => ({ ...prev, coverImageUrl: e.target.value || undefined }))}
                       className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${style.input}`}
-                      placeholder="Enter post title"
+                      placeholder="Paste image URL or upload below"
                     />
-                  </label>
-                  <label className="space-y-2 text-sm text-slate-700">
-                    Module
-                    <select
-                      value={form.module}
-                      onChange={e => setForm(prev => ({ ...prev, module: e.target.value }))}
-                      className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${style.input}`}
-                    >
-                      {MODULES.map(module => <option key={module} value={module}>{module}</option>)}
-                    </select>
-                  </label>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <label className="space-y-2 text-sm text-slate-700">
-                    Excerpt
-                    <textarea
-                      value={form.excerpt}
-                      onChange={e => setForm(prev => ({ ...prev, excerpt: e.target.value }))}
-                      rows={3}
-                      className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${style.input}`}
-                      placeholder="Enter a short excerpt"
-                    />
-                  </label>
-                  <label className="space-y-2 text-sm text-slate-700">
-                    Cover Image URL
-                    <div className="flex gap-3 flex-col sm:flex-row">
-                      <input
-                        value={form.coverImageUrl ?? ''}
-                        onChange={e => setForm(prev => ({ ...prev, coverImageUrl: e.target.value || undefined }))}
-                        className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${style.input}`}
-                        placeholder="Paste image URL or upload below"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const cloudinary = (window as unknown as { cloudinary: CloudinaryInstance }).cloudinary;
-                          if (!cloudinary) return toast.error('Cloudinary widget not loaded.');
-                          cloudinary.createUploadWidget(
-                            {
-                              cloudName: 'dveeb0yop',
-                              uploadPreset: 'gfm_uploads',
-                              multiple: false,
-                            },
-                            (error: Error | null, result: CloudinaryResult) => {
-                              if (!error && result && result.event === 'success') {
-                                setForm(prev => ({ ...prev, coverImageUrl: result.info.secure_url }));
-                              }
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const cloudinary = (window as unknown as { cloudinary: CloudinaryInstance }).cloudinary;
+                        if (!cloudinary) return toast.error('Cloudinary widget not loaded.');
+                        cloudinary.createUploadWidget(
+                          {
+                            cloudName: 'dveeb0yop',
+                            uploadPreset: 'gfm_uploads',
+                            multiple: false,
+                          },
+                          (error: Error | null, result: CloudinaryResult) => {
+                            if (!error && result && result.event === 'success') {
+                              setForm(prev => ({ ...prev, coverImageUrl: result.info.secure_url }));
                             }
-                          ).open();
-                        }}
-                        className="inline-flex h-11 min-h-[44px] items-center justify-center rounded-2xl bg-[#a21caf] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#7c3aed]"
-                      >
-                        <Image className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </label>
-                </div>
-
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">Content Blocks</p>
-                    <p className="text-sm text-slate-500">Add headings, paragraphs, quotes, and images in order.</p>
+                          }
+                        ).open();
+                      }}
+                      className="inline-flex h-11 min-h-[44px] items-center justify-center rounded-2xl bg-[#a21caf] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#7c3aed]"
+                    >
+                      <Image className="h-4 w-4" />
+                    </button>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {BLOCK_TYPES.map(type => (
-                      <button
-                        type="button"
-                        key={type}
-                        onClick={() => addBlock(type)}
-                        className="inline-flex min-h-[44px] items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-[#a21caf] hover:text-[#a21caf]"
-                      >
-                        {type === 'Heading' ? <FileText className="h-4 w-4" /> : type === 'Image' ? <Image className="h-4 w-4" /> : type === 'Quote' ? <Quote className="h-4 w-4" /> : <BookOpen className="h-4 w-4" />}
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                </label>
+              </div>
 
-                <div className="space-y-4">
-                  {displayBlocks.length === 0 && (
-                    <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-slate-500">
-                      Add one or more blocks to build the blog post layout.
-                    </div>
-                  )}
-                  {displayBlocks.map((block, index) => (
-                    <div key={block.id} className="rounded-3xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
-                      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="text-sm font-semibold text-slate-900">{block.blockType} Block</div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => moveBlock(index, 'up')}
-                            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 transition hover:bg-[#f3e8ff] hover:text-[#7c3aed]"
-                          >
-                            <ChevronUp className="h-4 w-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => moveBlock(index, 'down')}
-                            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 transition hover:bg-[#f3e8ff] hover:text-[#7c3aed]"
-                          >
-                            <ChevronDown className="h-4 w-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => removeBlock(index)}
-                            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-red-600 transition hover:bg-red-100"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </div>
-                      {block.blockType === 'Paragraph' && (
-                        <textarea
-                          value={block.content}
-                          onChange={e => setBlockField(index, 'content', e.target.value)}
-                          rows={4}
-                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition"
-                          placeholder="Paragraph text..."
-                        />
-                      )}
-                      {block.blockType === 'Heading' && (
-                        <input
-                          value={block.content}
-                          onChange={e => setBlockField(index, 'content', e.target.value)}
-                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition"
-                          placeholder="Heading text..."
-                        />
-                      )}
-                      {block.blockType === 'Quote' && (
-                        <textarea
-                          value={block.content}
-                          onChange={e => setBlockField(index, 'content', e.target.value)}
-                          rows={3}
-                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition"
-                          placeholder="Quote text..."
-                        />
-                      )}
-                      {block.blockType === 'Image' && (
-                        <div className="space-y-3">
-                          <button
-                            type="button"
-                            onClick={() => openCloudinary(index)}
-                            className="inline-flex items-center gap-2 rounded-2xl bg-[#a21caf] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#7c3aed]"
-                          >
-                            <Image className="h-4 w-4" /> Upload Image
-                          </button>
-                          {block.imageUrl ? (
-                            <img src={block.imageUrl} alt="Block" className="w-full rounded-3xl object-cover" />
-                          ) : (
-                            <p className="text-sm text-slate-500">No image uploaded yet.</p>
-                          )}
-                        </div>
-                      )}
-                    </div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Content Blocks</p>
+                  <p className="text-sm text-slate-500">Add headings, paragraphs, quotes, and images in order.</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {BLOCK_TYPES.map(type => (
+                    <button
+                      type="button"
+                      key={type}
+                      onClick={() => addBlock(type)}
+                      className="inline-flex min-h-[44px] items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-[#a21caf] hover:text-[#a21caf]"
+                    >
+                      {type === 'Heading' ? <FileText className="h-4 w-4" /> : type === 'Image' ? <Image className="h-4 w-4" /> : type === 'Quote' ? <Quote className="h-4 w-4" /> : <BookOpen className="h-4 w-4" />}
+                      {type}
+                    </button>
                   ))}
                 </div>
               </div>
 
-              <div className="sticky bottom-0 z-10 border-t border-slate-200 bg-white px-5 py-4 sm:px-6">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <label className="inline-flex min-h-[44px] items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-                    <input
-                      type="checkbox"
-                      checked={form.isPublished}
-                      onChange={e => setForm(prev => ({ ...prev, isPublished: e.target.checked }))}
-                      className="h-4 w-4 rounded border-slate-300 text-[#a21caf] focus:ring-[#a21caf]"
-                    />
-                    Publish now
-                  </label>
-                  <div className="flex flex-wrap gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setShowEditor(false)}
-                      className="inline-flex min-h-[44px] items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                    >Cancel</button>
-                    <button
-                      type="button"
-                      onClick={savePost}
-                      disabled={isSaving}
-                      className="inline-flex min-h-[44px] items-center justify-center rounded-2xl bg-[#a21caf] px-4 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-white transition hover:bg-[#7c3aed] disabled:cursor-not-allowed disabled:opacity-60"
-                    >{editing ? 'Update Post' : 'Create Post'}</button>
+              <div className="space-y-4">
+                {displayBlocks.length === 0 && (
+                  <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-slate-500">
+                    Add one or more blocks to build the blog post layout.
                   </div>
+                )}
+                {displayBlocks.map((block, index) => (
+                  <div key={block.id} className="rounded-3xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+                    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="text-sm font-semibold text-slate-900">{block.blockType} Block</div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => moveBlock(index, 'up')}
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 transition hover:bg-[#f3e8ff] hover:text-[#7c3aed]"
+                        >
+                          <ChevronUp className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveBlock(index, 'down')}
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 transition hover:bg-[#f3e8ff] hover:text-[#7c3aed]"
+                        >
+                          <ChevronDown className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeBlock(index)}
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-red-600 transition hover:bg-red-100"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                    {block.blockType === 'Paragraph' && (
+                      <textarea
+                        value={block.content}
+                        onChange={e => setBlockField(index, 'content', e.target.value)}
+                        rows={4}
+                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition"
+                        placeholder="Paragraph text..."
+                      />
+                    )}
+                    {block.blockType === 'Heading' && (
+                      <input
+                        value={block.content}
+                        onChange={e => setBlockField(index, 'content', e.target.value)}
+                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition"
+                        placeholder="Heading text..."
+                      />
+                    )}
+                    {block.blockType === 'Quote' && (
+                      <textarea
+                        value={block.content}
+                        onChange={e => setBlockField(index, 'content', e.target.value)}
+                        rows={3}
+                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition"
+                        placeholder="Quote text..."
+                      />
+                    )}
+                    {block.blockType === 'Image' && (
+                      <div className="space-y-3">
+                        <button
+                          type="button"
+                          onClick={() => openCloudinary(index)}
+                          className="inline-flex items-center gap-2 rounded-2xl bg-[#a21caf] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#7c3aed]"
+                        >
+                          <Image className="h-4 w-4" /> Upload Image
+                        </button>
+                        {block.imageUrl ? (
+                          <img src={block.imageUrl} alt="Block" className="w-full rounded-3xl object-cover" />
+                        ) : (
+                          <p className="text-sm text-slate-500">No image uploaded yet.</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex-shrink-0 sticky bottom-0 z-10 border-t border-slate-200 bg-white px-6 py-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <label className="inline-flex min-h-[44px] items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={form.isPublished}
+                    onChange={e => setForm(prev => ({ ...prev, isPublished: e.target.checked }))}
+                    className="h-4 w-4 rounded border-slate-300 text-[#a21caf] focus:ring-[#a21caf]"
+                  />
+                  Publish now
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowEditor(false)}
+                    className="inline-flex min-h-[44px] items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                  >Cancel</button>
+                  <button
+                    type="button"
+                    onClick={savePost}
+                    disabled={isSaving}
+                    className="inline-flex min-h-[44px] items-center justify-center rounded-2xl bg-[#a21caf] px-4 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-white transition hover:bg-[#7c3aed] disabled:cursor-not-allowed disabled:opacity-60"
+                  >{editing ? 'Update Post' : 'Create Post'}</button>
                 </div>
               </div>
             </div>
@@ -613,7 +611,9 @@ const AdminBlog: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
           <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
             <h3 className="text-xl font-bold text-[#111827]">Delete post?</h3>
-            <p className="mt-3 text-slate-600">This action cannot be undone. Are you sure you want to delete "{deleteTarget.title}"?</p>
+            <p className="mt-3 text-slate-600">
+              This action cannot be undone. Are you sure you want to delete "{deleteTarget.title}"?
+            </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
               <button
                 type="button"

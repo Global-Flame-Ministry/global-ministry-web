@@ -89,7 +89,7 @@ const RegisterPage = () => {
             <img src={logo} alt="Logo" className="w-10 h-10 rounded-xl object-cover" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-            Global Flame Ministry
+            Global Flame
           </h1>
           <p className="text-sm text-gray-400 mt-1">Create your member account</p>
         </div>
