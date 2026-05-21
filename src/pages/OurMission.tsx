@@ -1,10 +1,16 @@
 import React from 'react';
+import SEO from '../components/SEO';
 import { Globe, Eye } from 'lucide-react';
 import auditorimImg from '../assets/auditorium.jpg';
 
 const OurMission: React.FC = () => {
   return (
     <div className="min-h-screen bg-white pt-28 pb-20">
+      <SEO
+        title="Our Mission"
+        description="Learn about Global Flame Ministry's mission and vision to empower believers and transform communities."
+        url="https://globalflameministry.org/our-mission"
+      />
 
       {/* ================= HEADER ================= */}
       <div className="text-center max-w-3xl mx-auto px-6 mb-16">

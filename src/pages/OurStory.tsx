@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import SEO from '../components/SEO';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Flame } from 'lucide-react';
 import daddyandmum from '../assets/daddyandmum.jpeg';
@@ -44,6 +45,11 @@ const OurStory: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white pt-28 pb-20">
+      <SEO
+        title="Our Story"
+        description="Discover the founding story of Global Flame Ministry and how it has grown into a vibrant global movement."
+        url="https://globalflameministry.org/our-story"
+      />
       <div className="max-w-4xl mx-auto px-6">
 
         {/* Label */}

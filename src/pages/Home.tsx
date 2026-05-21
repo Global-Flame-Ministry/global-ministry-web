@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Hero from '../components/Hero';
+import SEO from '../components/SEO';
 import { Link, useNavigate } from 'react-router-dom';
 import { announcementApi } from '../api/announcementApi';
 import { Calendar, Play, ArrowRight, Globe, MapPin, Heart, HandHeart, Star, Library, ShieldCheck, Flame } from 'lucide-react';
@@ -177,6 +178,11 @@ const Home: React.FC = () => {
 
   return (
     <div className="bg-white selection:bg-brand-100">
+      <SEO
+        title="Global Flame Ministry"
+        description="Raising a people of power who will manifest the kingdom. Join us for worship, sermons, and community at Global Flame Ministry in Jos, Nigeria."
+        url="https://globalflameministry.org"
+      />
       <Hero />
 
       {/* ── Quick Actions Bar ─────────────────────────────────────────── */}

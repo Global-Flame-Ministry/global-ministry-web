@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import SEO from '../components/SEO';
 import { Play, Search, Filter, Music, Video } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
 import type { SermonDto } from '../types';
@@ -72,6 +73,11 @@ const Sermons: React.FC = () => {
 
   return (
     <div className="bg-[#fcfcfc] min-h-screen pb-20">
+      <SEO
+        title="Sermons & Messages"
+        description="Watch and listen to powerful sermons and messages from Apostle Danjuma Musa and Global Flame Ministry. Browse our full message archive."
+        url="https://globalflameministry.org/sermons"
+      />
 
       {/* ── CINEMATIC HEADER ── */}
       <section className="relative h-[40vh] sm:h-[45vh] flex items-center overflow-hidden bg-slate-900">

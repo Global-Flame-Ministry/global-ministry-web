@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import SEO from '../components/SEO';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import mummy from '../assets/mummy.jpg';
@@ -39,6 +40,11 @@ const CoPastor: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white pt-28 pb-20">
+      <SEO
+        title="Co-Pastor"
+        description="Meet Co-Pastor Faith Musa and learn about her leadership at Global Flame Ministry."
+        url="https://globalflameministry.org/co-pastor"
+      />
       <div className="max-w-4xl mx-auto px-6">
 
         {/* Label + Title */}

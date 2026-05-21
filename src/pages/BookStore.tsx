@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import SEO from '../components/SEO';
 import { Library, Loader, X, ShoppingBag, ExternalLink } from 'lucide-react';
 import { bookApi } from '../api/bookApi';
 import type { BookDto } from '../types';
@@ -247,6 +248,11 @@ const Bookstore: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 pt-24 pb-20">
+      <SEO
+        title="Books & Resources"
+        description="Kingdom literature and recommended books from Global Flame Ministry."
+        url="https://globalflameministry.org/books"
+      />
 
       <BooksIntro />
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import SEO from '../components/SEO';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Loader, Users, Flame } from 'lucide-react';
 import { ministryApi } from '../api/ministryApi';
@@ -201,6 +202,11 @@ const Ministries: React.FC = () => {
 
   return (
     <div className="bg-white relative animate-in fade-in duration-700">
+      <SEO
+        title="Our Ministries"
+        description="Explore the ministries of Global Flame — Daughters of Honour, House of Opera, and more."
+        url="https://globalflameministry.org/ministries"
+      />
 
       {/* ── HERO ──────────────────────────────────────────────────────── */}
       <section className="bg-[#0a0a0a] pt-32 pb-20 px-6">

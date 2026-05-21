@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import SEO from '../components/SEO';
 import { ShieldCheck } from 'lucide-react';
 
 const beliefs = [
@@ -73,6 +74,11 @@ const CoreBeliefs: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white pt-28 pb-20">
+      <SEO
+        title="Core Beliefs"
+        description="Explore the foundational beliefs that guide Global Flame Ministry."
+        url="https://globalflameministry.org/core-beliefs"
+      />
       {/* Slightly narrower container so cards don't stretch too wide — adds natural center breathing room */}
       <div className="max-w-5xl mx-auto px-8">
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import SEO from '../components/SEO';
 import {
   Bell, Search, Calendar, Tag, ArrowRight,
   X, AlertCircle, Link as LinkIcon, ExternalLink
@@ -144,6 +145,11 @@ const AnnouncementsPage: React.FC = () => {
   // ── RENDER ─────────────────────────────────────────────────────────────────
   return (
     <div className="bg-[#fafafa] min-h-screen font-sans selection:bg-fuchsia-100">
+      <SEO
+        title="Announcements"
+        description="Latest announcements and updates from Global Flame Ministry."
+        url="https://globalflameministry.org/announcements"
+      />
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section className="bg-[#0a0a0a] pt-32 pb-20 relative overflow-hidden">

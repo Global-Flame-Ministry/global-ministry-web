@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import SEO from '../components/SEO';
 import {
   ArrowLeft, Check, Copy, Loader2, HandHeart,
   Shield, Mail, Phone, ChevronDown, Paperclip, X, FileImage
@@ -170,6 +171,11 @@ const PrayerRequestPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEO
+        title="Prayer Requests"
+        description="Submit your prayer request to Global Flame Ministry. We believe in the power of prayer."
+        url="https://globalflameministry.org/prayer-request"
+      />
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <div className="bg-[#0a0a0a] pt-32 pb-20 px-6">

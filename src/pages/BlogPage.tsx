@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import SEO from '../components/SEO';
 import { Link } from 'react-router-dom';
 import { Search, Flame } from 'lucide-react';
 import { blogApi } from '../api/blogApi';
@@ -71,6 +72,11 @@ const BlogPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
+      <SEO
+        title="Blog — Stories & Insights"
+        description="Inspiring stories, spiritual insights, and community updates from Global Flame Ministry."
+        url="https://globalflameministry.org/blog"
+      />
       <main className="max-w-6xl mx-auto px-4 py-8 sm:py-12">
         <div className="py-10 border-b border-slate-200 mb-8">
           <p className="text-xs uppercase tracking-widest text-[#a21caf] font-bold mb-2">Blog</p>

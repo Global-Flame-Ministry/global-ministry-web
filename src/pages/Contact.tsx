@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import SEO from '../components/SEO';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -71,6 +72,11 @@ const Contact: React.FC = () => {
 
   return (
     <div className="pt-20 min-h-screen bg-white">
+      <SEO
+        title="Contact Us"
+        description="Get in touch with Global Flame Ministry. Find us at Zarmaganda, Diye, Off Rayfield Road, Jos, Plateau State, Nigeria."
+        url="https://globalflameministry.org/contact"
+      />
       <div className="grid grid-cols-1 lg:grid-cols-2">
 
         {/* Contact Form */}

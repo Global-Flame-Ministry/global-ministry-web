@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import SEO from '../components/SEO';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Flame, Calendar, User } from 'lucide-react';
 import { blogApi } from '../api/blogApi';
@@ -153,6 +154,13 @@ export default function BlogPostDetail() {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
+      <SEO
+        title={post?.title ?? 'Blog Post'}
+        description={post?.excerpt || post?.title || 'Discover spiritual insights from Global Flame Ministry.'}
+        image={post?.coverImageUrl || undefined}
+        url={`https://globalflameministry.org/blog/${post?.slug || slug}`}
+        type="article"
+      />
       <main className="max-w-4xl mx-auto px-4 py-8 sm:py-12 text-left">
         <Link
           to="/blog"

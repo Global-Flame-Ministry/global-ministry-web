@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import SEO from '../components/SEO';
 import {
   ArrowLeft, Loader, Users, Calendar, MapPin,
   Globe, Mail, Heart, Clock, ArrowRight,
@@ -326,6 +327,12 @@ const MinistryDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEO
+        title={ministry.name}
+        description={ministry.shortDescription}
+        image={ministry.coverImageUrl || undefined}
+        url={`https://globalflameministry.org/ministries/${ministry.slug}`}
+      />
 
       {/* ── HERO ── */}
       <div className="relative min-h-[55vh] sm:min-h-[65vh] md:h-[70vh]

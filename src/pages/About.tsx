@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import SEO from '../components/SEO';
 import { CHURCH_NAME } from '../constants';
 import { Globe, Anchor, Compass, ShieldCheck } from 'lucide-react';
 
@@ -29,6 +30,11 @@ const About: React.FC = () => {
 
   return (
     <div className="bg-[#fcfcfc] selection:bg-brand-100">
+      <SEO
+        title="About Global Flame Ministry"
+        description="Learn about Global Flame Ministry, our story, leadership, and core beliefs."
+        url="https://globalflameministry.org/about"
+      />
       
       {/* 1. CINEMATIC CRUISE-STYLE HERO */}
       <section className="relative h-[85vh] flex items-center justify-center overflow-hidden">

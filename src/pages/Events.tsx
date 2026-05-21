@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import SEO from '../components/SEO';
 import { ArrowRight, X, Calendar, MapPin } from 'lucide-react';
 import { eventApi } from '../api/eventApi';
 import type { EventDto } from '../types';
@@ -275,6 +276,11 @@ const Events: React.FC = () => {
 
   return (
     <div className="bg-white relative">
+      <SEO
+        title="Events & Gatherings"
+        description="Upcoming events, conferences, and gatherings at Global Flame Ministry. Join us for worship and community."
+        url="https://globalflameministry.org/events"
+      />
 
       {/* ── HERO ── */}
       <div className="bg-[#0a0a0a] py-24 md:py-32">

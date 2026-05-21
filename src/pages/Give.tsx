@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import SEO from '../components/SEO';
 import {
   ArrowRight, ArrowLeft, Check, ShieldCheck,
   ChevronRight, CreditCard, Building2, Smartphone,
@@ -388,19 +389,32 @@ const GivePage = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <>
+        <SEO
+          title="Give & Donate"
+          description="Support the work of Global Flame Ministry through your generous giving and donations."
+          url="https://globalflameministry.org/give"
+        />
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-fuchsia-600
             border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-slate-500 text-sm">Redirecting to login...</p>
         </div>
       </div>
+    </>
     );
   }
 
   // ── STEP 1 — Category ─────────────────────────────────────────────────────
   if (step === 1) return (
-    <StepLayout
+    <>
+      <SEO
+        title="Give & Donate"
+        description="Support the work of Global Flame Ministry through your generous giving and donations."
+        url="https://globalflameministry.org/give"
+      />
+      <StepLayout
       step={1}
       totalSteps={TOTAL_STEPS}
       label="Initiate"
@@ -478,11 +492,18 @@ const GivePage = () => {
         ))}
       </div>
     </StepLayout>
+    </>
   );
 
   // ── STEP 2 — Amount ───────────────────────────────────────────────────────
   if (step === 2) return (
-    <StepLayout
+    <>
+      <SEO
+        title="Give & Donate"
+        description="Support the work of Global Flame through your generous giving and donations."
+        url="https://globalflameministry.org/give"
+      />
+      <StepLayout
       step={2}
       totalSteps={TOTAL_STEPS}
       label="Amount"
@@ -569,11 +590,18 @@ const GivePage = () => {
         </button>
       </div>
     </StepLayout>
+    </>
   );
 
   // ── STEP 3 — Payment ──────────────────────────────────────────────────────
   return (
-    <StepLayout
+    <>
+      <SEO
+        title="Give & Donate"
+        description="Support the work of Global Flame through your generous giving and donations."
+        url="https://globalflameministry.org/give"
+      />
+      <StepLayout
       step={3}
       totalSteps={TOTAL_STEPS}
       label="Payment"
@@ -652,6 +680,7 @@ const GivePage = () => {
         </div>
       )}
     </StepLayout>
+    </>
   );
 };
 

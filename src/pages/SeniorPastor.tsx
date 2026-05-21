@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import SEO from '../components/SEO';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import dad from '../assets/daddy.jpg';
@@ -39,6 +40,11 @@ const SeniorPastor: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white pt-28 pb-20">
+      <SEO
+        title="Senior Pastor"
+        description="Meet Apostle Danjuma Musa, the Senior Pastor of Global Flame Ministry."
+        url="https://globalflameministry.org/senior-pastor"
+      />
       <div className="max-w-4xl mx-auto px-6">
 
         {/* Label */}

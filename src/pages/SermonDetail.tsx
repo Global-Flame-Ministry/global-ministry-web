@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import SEO from '../components/SEO';
 import {
   Calendar, Tag, Share2, Download,
   ArrowLeft, Play, Clock, ChevronRight, Music,
@@ -112,6 +113,13 @@ const SermonDetail: React.FC = () => {
 
   return (
     <div className="bg-[#0F172A] min-h-screen">
+      <SEO
+        title={sermon.title}
+        description={sermon.description || `${sermon.title} delivered by ${sermon.speaker}`}
+        image={sermon.imageUrl || undefined}
+        url={`https://globalflameministry.org/sermons/${sermon.id}`}
+        type="article"
+      />
       <div className="pt-20 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
