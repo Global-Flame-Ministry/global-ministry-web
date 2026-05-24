@@ -50,6 +50,8 @@ const ReviewModal: FC<{ isOpen: boolean; onClose: () => void }> = ({
   const [rating, setRating]       = useState(5);
   const [name, setName]           = useState('');
   const [content, setContent]     = useState('');
+  const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [error, setError]         = useState('');
 
   if (!isOpen) return null;
@@ -63,10 +65,9 @@ const ReviewModal: FC<{ isOpen: boolean; onClose: () => void }> = ({
     try {
       setLoading(true);
       setError('');
-      // FIX 2: CreateTestimonyDto uses 'name', not 'fullName'
       await testimonyApi.create({
-        name: name || 'Anonymous',
-        content,
+        name: name.trim() || 'Anonymous',
+        content: content.trim(),
       });
       setSubmitted(true);
       setTimeout(onClose, 2000);
@@ -139,6 +140,30 @@ const ReviewModal: FC<{ isOpen: boolean; onClose: () => void }> = ({
                     className="w-full border border-gray-300 p-3 rounded-xl
                                focus:border-fuchsia-500 focus:ring-2
                                focus:ring-fuchsia-200" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Email (Optional)
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="Your email address"
+                    className="w-full border border-gray-300 p-3 rounded-xl focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-200"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Phone (Optional)
+                  </label>
+                  <input
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={e => setPhoneNumber(e.target.value)}
+                    placeholder="Your phone number"
+                    className="w-full border border-gray-300 p-3 rounded-xl focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-200"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold
