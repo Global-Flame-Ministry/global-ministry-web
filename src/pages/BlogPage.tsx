@@ -5,9 +5,9 @@ import { Search, Flame } from 'lucide-react';
 import { blogApi } from '../api/blogApi';
 import type { BlogPostResponseDto, BlogQueryObject } from '../types';
 
-const MODULES = ['All', 'Ministry', 'Youth'] as const;
+const DEPARTMENTS = ['All', 'Royal Priesthood', 'House of Opera', 'Home of Love', 'Flame Stars'] as const;
 
-type ModuleFilter = (typeof MODULES)[number];
+type DepartmentFilter = (typeof DEPARTMENTS)[number];
 
 const BlogPage: React.FC = () => {
   const [posts, setPosts] = useState<BlogPostResponseDto[]>([]);
@@ -16,7 +16,7 @@ const BlogPage: React.FC = () => {
   const [pageSize] = useState(9);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [activeModule, setActiveModule] = useState<ModuleFilter>('All');
+  const [activeDepartment, setActiveDepartment] = useState<DepartmentFilter>('All');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,22 +25,20 @@ const BlogPage: React.FC = () => {
       setDebouncedSearch(searchTerm);
       setPageNumber(1);
     }, 300);
-
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
   const fetchPosts = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-
     try {
       const query: BlogQueryObject = {
         pageNumber,
         pageSize,
       };
 
-      if (activeModule !== 'All') {
-        query.module = activeModule;
+      if (activeDepartment !== 'All') {
+        query.department = activeDepartment;
       }
 
       if (debouncedSearch) {
@@ -62,7 +60,7 @@ const BlogPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [pageNumber, pageSize, activeModule, debouncedSearch]);
+  }, [pageNumber, pageSize, activeDepartment, debouncedSearch]);
 
   useEffect(() => {
     fetchPosts();
@@ -83,6 +81,7 @@ const BlogPage: React.FC = () => {
           <h1 className="text-4xl font-bold text-[#111827] mb-3">Stories & Insights</h1>
           <p className="text-slate-500">Discover inspiring stories, spiritual insights, and community updates from our ministry family.</p>
         </div>
+
         <div className="mb-8 space-y-4">
           <div className="relative max-w-md">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -96,21 +95,21 @@ const BlogPage: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {MODULES.map((module) => (
+            {DEPARTMENTS.map((dept) => (
               <button
-                key={module}
+                key={dept}
                 type="button"
                 onClick={() => {
-                  setActiveModule(module);
+                  setActiveDepartment(dept);
                   setPageNumber(1);
                 }}
                 className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
-                  activeModule === module
+                  activeDepartment === dept
                     ? 'bg-purple-600 text-white shadow-md'
                     : 'bg-white text-gray-700 border border-gray-200 hover:border-purple-300 hover:text-purple-700'
                 }`}
               >
-                {module}
+                {dept}
               </button>
             ))}
           </div>
@@ -130,7 +129,9 @@ const BlogPage: React.FC = () => {
           </div>
         )}
 
-        <p className="text-sm text-slate-500 mb-6">Showing {posts.length} of {totalCount} posts</p>
+        <p className="text-sm text-slate-500 mb-6">
+          Showing {posts.length} of {totalCount} posts
+        </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLoading ? (
@@ -141,7 +142,6 @@ const BlogPage: React.FC = () => {
               >
                 <div className="aspect-[16/10] bg-gray-200" />
                 <div className="p-5">
-                  <div className="h-5 w-20 bg-gray-200 rounded-full mb-3" />
                   <div className="h-6 bg-gray-200 rounded mb-2" />
                   <div className="h-6 w-3/4 bg-gray-200 rounded mb-3" />
                   <div className="space-y-2 mb-4">
@@ -190,10 +190,10 @@ const BlogPage: React.FC = () => {
                     </div>
                   </Link>
                   <div className="p-5">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                      {post.module}
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-purple-600 mb-1 block">
+                      {post.department}
                     </span>
-                    <Link to={`/blog/${post.slug}`} className="block mt-3">
+                    <Link to={`/blog/${post.slug}`} className="block mt-1">
                       <h3 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-purple-700 transition-colors">
                         {post.title}
                       </h3>
@@ -248,23 +248,23 @@ const BlogPage: React.FC = () => {
         {!isLoading && (
           <div className="mt-10 flex items-center justify-center gap-2">
             <button
-                disabled={pageNumber <= 1}
-                onClick={() => setPageNumber(p => Math.max(1, p - 1))}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 hover:border-[#a21caf] hover:text-[#a21caf] disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
+              disabled={pageNumber <= 1}
+              onClick={() => setPageNumber(p => Math.max(1, p - 1))}
+              className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 hover:border-[#a21caf] hover:text-[#a21caf] disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
             >
-                ← Prev
+              ← Prev
             </button>
             <span className="text-sm text-slate-500 whitespace-nowrap">
-                {pageNumber} / {totalPages}
+              {pageNumber} / {totalPages}
             </span>
             <button
-                disabled={pageNumber >= totalPages}
-                onClick={() => setPageNumber(p => Math.min(totalPages, p + 1))}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 hover:border-[#a21caf] hover:text-[#a21caf] disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
+              disabled={pageNumber >= totalPages}
+              onClick={() => setPageNumber(p => Math.min(totalPages, p + 1))}
+              className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 hover:border-[#a21caf] hover:text-[#a21caf] disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
             >
-                Next →
+              Next →
             </button>
-            </div>
+          </div>
         )}
       </main>
     </div>

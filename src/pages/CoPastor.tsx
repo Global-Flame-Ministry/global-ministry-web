@@ -63,8 +63,12 @@ const CoPastor: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 mb-14">
             {/* Image Column */}
             <div className="lg:col-span-2">
-              <div className="rounded-2xl overflow-hidden aspect-[3/4] shadow-2xl shadow-slate-200">
-                <img src={mummy} alt="Apostle Faith Musa" className="w-full h-full object-cover" />
+              <div className="rounded-2xl overflow-hidden shadow-2xl shadow-slate-200 w-full" style={{ aspectRatio: '3 / 4', position: 'relative' }}>
+                <img
+                  src={mummy}
+                  alt="Pastor Faith Musa"
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }}
+                />
               </div>
             </div>
 
@@ -89,7 +93,6 @@ const CoPastor: React.FC = () => {
                 She has a gift for taking complex spiritual truths and delivering them in ways
                 that are accessible, practical, and transformative.
               </p>
-
               <p className="mb-10 text-justify">
                 Together with Apostle Danjuma Musa, she provides Global Flame Ministry with
                 a balanced, complementary leadership that reflects the heart of God for both
@@ -106,7 +109,8 @@ const CoPastor: React.FC = () => {
               to="/senior-pastor"
               className="inline-flex items-center gap-2 px-8 py-4 bg-fuchsia-600
                 text-white font-bold uppercase tracking-widest text-xs
-                hover:bg-fuchsia-700 transition-all duration-200 hover:scale-[1.02] shadow-lg shadow-fuchsia-200 rounded-lg"
+                hover:bg-fuchsia-700 transition-all duration-200 hover:scale-[1.02]
+                shadow-lg shadow-fuchsia-200 rounded-lg"
             >
               Senior Pastor <ArrowRight className="w-3.5 h-3.5" />
             </Link>

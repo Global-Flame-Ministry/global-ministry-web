@@ -182,6 +182,8 @@ export interface TestimonyDto {
 export interface CreateTestimonyDto {
   name?: string;
   content: string;
+  email: string;
+  phoneNumber?: string;
 }
 
 // CONTACT 
@@ -277,10 +279,11 @@ export interface BlogPostResponseDto {
   coverImageUrl: string | null;
   authorId: string;
   authorName: string;
-  module: string;
   isPublished: boolean;
   createdOn: string;
   updatedOn: string | null;
+  department: string;
+  videoUrl: string | null;
   blocks: BlogBlockDto[];
 }
 
@@ -295,21 +298,22 @@ export interface CreateBlogPostDto {
   title: string;
   excerpt?: string;
   coverImageUrl?: string;
-  module: string;
   isPublished: boolean;
+  department: string;
+  videoUrl?: string;
   blocks: CreateBlogBlockDto[];
 }
 
 export type UpdateBlogPostDto = CreateBlogPostDto;
 
 export interface BlogQueryObject {
-  module?: string;
   isPublished?: boolean;
   searchTerm?: string;
   pageNumber?: number;
   pageSize?: number;
   sortBy?: string;
   isDescending?: boolean;
+  department?: string;
 }
 
 export interface DonationStatsDto {
@@ -574,23 +578,6 @@ export interface MyDonationDto {
   eventId: number | null;
   eventTitle: string | null;
   createdAt: string;
-}
-
-// SERMON 
-export interface SermonDto {
-  id: number;
-  slug: string;
-  title: string;
-  speaker: string;
-  series: string;
-  description: string;
-  speakerImageUrl: string | null;
-  imageUrl: string | null;
-  videoUrl: string | null;
-  audioUrl: string | null;
-  sermonDate: string;
-  isPublished: boolean;
-  createdOn: string;
 }
 
 export interface CreateSermonDto {

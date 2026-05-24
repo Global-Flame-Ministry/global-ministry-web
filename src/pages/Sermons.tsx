@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
-import { Play, Search, Filter, Music, Video } from 'lucide-react';
+import { Play, Search, Filter, Music } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
 import type { SermonDto } from '../types';
 import auditorium from '../assets/auditorium.jpg';
@@ -82,10 +82,6 @@ const Sermons: React.FC = () => {
       {/* ── CINEMATIC HEADER ── */}
       <section className="relative h-[40vh] sm:h-[45vh] flex items-center overflow-hidden bg-slate-900">
         <div className="absolute inset-0">
-          {/* 
-            Background image: object-cover + object-center is correct here
-            because the auditorium is a wide establishing shot, not a portrait.
-          */}
           <img
             src={auditorium}
             alt="Atmosphere"
@@ -171,12 +167,6 @@ const Sermons: React.FC = () => {
                   className="group cursor-pointer block animate-fadeUp"
                   style={{ animationDelay: `${idx * 80}ms`, animationFillMode: 'both' }}
                 >
-                  {/* 
-                    Sermon cover image.
-                    object-top is CRITICAL — sermon images are typically photos
-                    of speakers at a pulpit. Without it, the face is cropped out
-                    because object-cover defaults to centering vertically.
-                  */}
                   <div className="relative aspect-[16/10] rounded-xl overflow-hidden
                     shadow-lg border border-slate-100 bg-white">
                     {sermon.imageUrl ? (
@@ -211,48 +201,28 @@ const Sermons: React.FC = () => {
                   </div>
 
                   {/* Card info */}
-                  <div className="mt-5 sm:mt-6 space-y-2 px-1">
-                    <div className="flex items-center gap-2 text-[10px] text-amber-600
-                      font-bold uppercase tracking-widest">
-                      <Video size={12} /> HD Broadcast
-                    </div>
-                    <h3 className="text-lg sm:text-xl font-serif text-slate-900 leading-tight
-                      group-hover:text-gray-600 transition-colors">
+                  <div className="mt-4 space-y-1.5 px-1">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600">
+                      {formatDate(sermon.sermonDate)}
+                    </p>
+                    <h3 className="text-lg sm:text-xl font-serif text-slate-900 leading-tight group-hover:text-gray-600 transition-colors">
                       {sermon.title}
                     </h3>
                     <p className="text-sm text-slate-500 line-clamp-2 font-light text-justify">
                       {sermon.description}
                     </p>
-
-                    {/* Speaker row */}
-                    <div className="flex items-center gap-3 pt-3 sm:pt-4">
-                      {/* 
-                        Speaker avatar: object-top so the face is visible.
-                        Speaker photos are usually headshots — face is at top.
-                      */}
-                      <div className="w-9 h-9 rounded-full bg-slate-100 overflow-hidden
-                        flex items-center justify-center shrink-0 border border-slate-200">
+                    <div className="flex items-center gap-3 pt-3">
+                      <div className="w-9 h-9 rounded-full bg-slate-100 overflow-hidden flex items-center justify-center shrink-0 border border-slate-200">
                         {sermon.speakerImageUrl ? (
-                          <img
-                            src={sermon.speakerImageUrl}
-                            alt={sermon.speaker}
-                            className="w-full h-full object-cover object-top"
-                          />
+                          <img src={sermon.speakerImageUrl} alt={sermon.speaker} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />
                         ) : (
-                          <span className="text-[11px] font-black text-fuchsia-700
-                            uppercase select-none">
+                          <span className="text-[11px] font-black text-fuchsia-700 uppercase select-none">
                             {sermon.speaker.charAt(0)}
                           </span>
                         )}
                       </div>
                       <div>
-                        <span className="text-[11px] font-bold text-slate-600
-                          uppercase tracking-widest block leading-tight">
-                          {sermon.speaker}
-                        </span>
-                        <span className="text-[10px] text-slate-400">
-                          {formatDate(sermon.sermonDate)}
-                        </span>
+                        <span className="text-[11px] font-bold text-slate-600 uppercase tracking-widest block leading-tight">{sermon.speaker}</span>
                       </div>
                     </div>
                   </div>

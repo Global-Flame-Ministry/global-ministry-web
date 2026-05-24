@@ -1,7 +1,7 @@
 import React from 'react';
 import SEO from '../components/SEO';
 import { Globe, Eye } from 'lucide-react';
-import auditorimImg from '../assets/auditorium.jpg';
+import work3 from '../assets/work3.bmp';
 
 const OurMission: React.FC = () => {
   return (
@@ -35,7 +35,7 @@ const OurMission: React.FC = () => {
       <div className="max-w-6xl mx-auto px-6 mb-20">
         <div className="rounded-3xl overflow-hidden shadow-xl">
           <img
-            src={auditorimImg}
+            src={work3}
             alt="Our Mission"
             className="w-full h-[350px] md:h-[450px] object-cover"
           />

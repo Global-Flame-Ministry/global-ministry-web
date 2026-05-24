@@ -3,7 +3,7 @@ import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   Menu, X, Heart, ChevronDown, ShieldCheck,
   UserCircle, Play, Calendar, BookOpen, Bell,
-  Users, MapPin, HandHeart, Globe, Home,
+  Users, MapPin, HandHeart, Globe,
   Flame, ArrowRight, Phone, MessageCircleHeart,
 } from 'lucide-react';
 import logo from '../assets/flames.jpg';
@@ -61,7 +61,6 @@ const EXPLORE_CHURCH_LIFE = [
 
 const EXPLORE_QUICKLINKS = [
   { label: 'Find Us',           path: '/contact',   icon: <MapPin className="w-4 h-4" /> },
-  { label: 'First Timer Guide', path: '/our-story', icon: <Home className="w-4 h-4" /> },
   { label: 'Volunteer',         path: '/contact',   icon: <Users className="w-4 h-4" /> },
 ];
 

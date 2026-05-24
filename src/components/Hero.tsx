@@ -22,24 +22,21 @@ const Hero: React.FC = () => {
 
   return (
     <>
-          <div className="relative min-h-[100dvh] sm:h-screen flex items-center justify-center overflow-hidden">
-  {/* Background */}
-  <div className="absolute inset-0 z-0">
-    <img
-      src={auditorium}
-      alt="Worship Background"
-      className="w-full h-full object-cover"
-    />
-    <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
-  </div>
+      <div className="relative min-h-[100dvh] sm:h-screen flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img
+            src={auditorium}
+            alt="Worship Background"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
+        </div>
 
-        {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="space-y-8">
             <span className="inline-block py-1 px-3 rounded-full bg-fuchsia-500/20 border border-fuchsia-400/40 text-fuchsia-300 text-sm font-semibold tracking-wider uppercase backdrop-blur-sm">
               Welcome Home
             </span>
-
 
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-white tracking-tight leading-snug max-w-4xl mx-auto">
               Raising a people of power who will manifest the kingdom{' '}
@@ -66,16 +63,8 @@ const Hero: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Scroll Indicator */}
-        <div className="hidden sm:block absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center pt-2">
-          <div className="w-1.5 h-1.5 bg-white rounded-full" />
-        </div>
-        </div>
       </div>
 
-      {/* Newsletter / Quick Register — hidden when user is already logged in */}
       {!user && (
         <section className="bg-slate-700 py-12 px-4 border-t border-slate-600">
           <div className="max-w-7xl mx-auto text-center">
@@ -85,7 +74,6 @@ const Hero: React.FC = () => {
             <p className="text-white/70 text-sm mb-8">
               Join our community today — it only takes a minute.
             </p>
-
             <form
               onSubmit={handleSignUp}
               className="flex flex-col md:flex-row items-center justify-center gap-4 max-w-5xl mx-auto"
@@ -118,7 +106,6 @@ const Hero: React.FC = () => {
                 Sign Up
               </button>
             </form>
-
             <p className="mt-6 text-xs text-white/70 max-w-3xl mx-auto leading-relaxed">
               *By submitting this form you will be taken to our registration page to complete your account setup.
               We respect your privacy and will never share your information.

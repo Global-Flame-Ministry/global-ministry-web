@@ -17,6 +17,8 @@ const TestimonyModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const [step, setStep] = useState<Step>('form');
   const [content, setContent] = useState('');
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   if (!isOpen) return null;
@@ -25,6 +27,8 @@ const TestimonyModal: React.FC<Props> = ({ isOpen, onClose }) => {
     setStep('form');
     setContent('');
     setName('');
+    setEmail('');
+    setPhone('');
     onClose();
   };
 
@@ -36,11 +40,18 @@ const TestimonyModal: React.FC<Props> = ({ isOpen, onClose }) => {
       return;
     }
 
+    if (!email.trim()) {
+      toast.error('Please enter your email.');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const dto = {
         content: content.trim(),
+        email: email.trim(),
+        phoneNumber: phone.trim() || undefined,
         ...(!isAuthenticated && { fullName: name.trim() || undefined }),
       };
 
@@ -67,11 +78,11 @@ const TestimonyModal: React.FC<Props> = ({ isOpen, onClose }) => {
         onClick={handleClose}
       />
 
-      {/* Modal */}
-      <div className="relative w-full max-w-lg bg-white border border-gray-200 rounded-xl shadow-lg">
+      {/* Modal Container */}
+      <div className="relative w-full max-w-lg bg-white border border-gray-200 rounded-xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">
               Share a Testimony
@@ -91,93 +102,116 @@ const TestimonyModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
         {/* FORM */}
         {step === 'form' && (
-          <form onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
-
-            {/* User */}
-            {isAuthenticated && user ? (
-              <div className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                <div className="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-medium">
-                  {user.firstName?.[0]}{user.lastName?.[0]}
+          <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden min-h-0">
+            {/* Scrollable Body */}
+            <div className="px-6 py-6 space-y-5 overflow-y-auto flex-1">
+              {/* User */}
+              {isAuthenticated && user ? (
+                <div className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                  <div className="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-medium">
+                    {user.firstName?.[0]}{user.lastName?.[0]}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">
+                      {user.fullName}
+                    </p>
+                    <p className="text-xs text-gray-500">{user.email}</p>
+                  </div>
                 </div>
+              ) : (
                 <div>
-                  <p className="text-sm font-medium text-gray-800">
-                    {user.fullName}
-                  </p>
-                  <p className="text-xs text-gray-500">{user.email}</p>
+                  <label className="text-sm font-medium text-gray-700">
+                    Name (optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Your name"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                  />
                 </div>
-              </div>
-            ) : (
+              )}
+
               <div>
                 <label className="text-sm font-medium text-gray-700">
-                  Name (optional)
+                  Email *
                 </label>
                 <input
-                  type="text"
-                  placeholder="Your name"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
+                  type="email"
+                  placeholder="Your email address"
+                  required
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
                   className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
                 />
               </div>
-            )}
 
-            {/* Content */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Testimony
-              </label>
+              <div>
+                <label className="text-sm font-medium text-gray-700">
+                  Phone Number (optional)
+                </label>
+                <input
+                  type="tel"
+                  placeholder="Your phone number (optional)"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                />
+              </div>
 
-              <textarea
-                rows={5}
-                maxLength={2000}
-                value={content}
-                onChange={e => setContent(e.target.value)}
-                placeholder="Write your testimony..."
-                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-              />
-
-              <div className="flex justify-between text-xs text-gray-400 mt-1">
-                <span>Minimum 10 characters</span>
-                <span>{content.length}/2000</span>
+              {/* Content */}
+              <div>
+                <label className="text-sm font-medium text-gray-700">
+                  Testimony
+                </label>
+                <textarea
+                  rows={5}
+                  maxLength={2000}
+                  value={content}
+                  onChange={e => setContent(e.target.value)}
+                  placeholder="Write your testimony..."
+                  className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                />
+                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>Minimum 10 characters</span>
+                  <span>{content.length}/2000</span>
+                </div>
               </div>
             </div>
 
-            {/* Info */}
-            <div className="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-3">
-              Submissions are reviewed before publication to ensure quality and relevance.
+            {/* Sticky Footer */}
+            <div className="px-6 pb-6 pt-4 border-t border-gray-100 flex-shrink-0 space-y-4">
+              <div className="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-3 mb-4">
+                Submissions are reviewed before publication to ensure quality and relevance.
+              </div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-gray-900 text-white py-3 rounded-lg text-sm font-medium hover:bg-black transition flex items-center justify-center"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  'Submit testimony'
+                )}
+              </button>
             </div>
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-gray-900 text-white py-3 rounded-lg text-sm font-medium hover:bg-black transition flex items-center justify-center"
-            >
-              {isLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                'Submit testimony'
-              )}
-            </button>
           </form>
         )}
 
         {/* SUCCESS */}
         {step === 'success' && (
-          <div className="px-6 py-10 text-center">
-
+          <div className="px-6 py-10 text-center flex-1 overflow-y-auto">
             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Check className="w-6 h-6 text-green-600" />
             </div>
-
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Submission received
             </h3>
-
             <p className="text-sm text-gray-500 mb-6">
               Thank you for sharing your testimony. It will be reviewed before publication.
             </p>
-
             <button
               onClick={handleClose}
               className="w-full bg-gray-900 text-white py-3 rounded-lg text-sm font-medium hover:bg-black"

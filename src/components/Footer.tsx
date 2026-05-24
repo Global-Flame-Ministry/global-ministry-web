@@ -203,23 +203,9 @@ const Footer: React.FC = () => {
           <div ref={rMinistries} className="col-span-1">
             <h4 className="text-[9px] font-black uppercase tracking-[0.4em]
               text-fuchsia-500 mb-5">
-              Ministries
+              DEPARTMENTS
             </h4>
             <ul className="space-y-3">
-
-              {/* "All Ministries" is always the first link */}
-              <li>
-                <Link
-                  to="/ministries"
-                  className="text-sm text-slate-500 hover:text-fuchsia-400
-                    transition-colors flex items-center gap-2 group"
-                >
-                  <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100
-                    -translate-x-2 group-hover:translate-x-0 transition-all
-                    duration-200 text-fuchsia-500 shrink-0" />
-                  All Ministries
-                </Link>
-              </li>
 
               {/* Dynamic ministry links from the backend */}
               {ministries.map(ministry => (

@@ -3,7 +3,7 @@ import Hero from '../components/Hero';
 import SEO from '../components/SEO';
 import { Link, useNavigate } from 'react-router-dom';
 import { announcementApi } from '../api/announcementApi';
-import { Calendar, Play, ArrowRight, Globe, MapPin, Heart, HandHeart, Star, Library, ShieldCheck, Flame } from 'lucide-react';
+import { Calendar, Play, ArrowRight, Globe, Heart, HandHeart, Star, Library, ShieldCheck, Flame, HeartHandshake } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
 import { eventApi } from '../api/eventApi';
 import { bookApi } from '../api/bookApi';
@@ -90,7 +90,7 @@ const featuredBeliefs = [
   },
   {
     title: 'Salvation by Grace',
-    body: 'We believe that for the salvation of lost and sinful people, regeneration by the Holy Spirit is absolutely essential. Salvation is by grace alone, through faith alone, in Christ alone.',
+    body: 'We believe that for the salvation of lost and sinful people, regeneration by the Holy Spirit is absolutely essential. Salvation by grace alone, through faith alone, in Christ alone.',
   },
 ];
 
@@ -187,17 +187,16 @@ const Home: React.FC = () => {
 
       {/* ── Quick Actions Bar ─────────────────────────────────────────── */}
       <AnimatedDiv
-        className="relative z-10 -mt-10 max-w-4xl mx-auto px-6"
+        className="relative z-10 -mt-10 max-w-5xl mx-auto px-6"
         direction="up"
         delay={100}
       >
-        <div className="bg-white shadow-2xl rounded-xl grid grid-cols-3 md:grid-cols-6
+        <div className="bg-white shadow-2xl rounded-xl grid grid-cols-5
           divide-x divide-slate-100 border border-slate-100 overflow-hidden">
           {[
-            { icon: <Play className="w-4 h-4 text-brand-500" />,     label: 'Watch Live', link: '/sermons' },
             { icon: <Calendar className="w-4 h-4 text-brand-500" />, label: 'Events',     link: '/events' },
-            { icon: <MapPin className="w-4 h-4 text-brand-500" />,   label: 'Find Us',    link: '/contact' },
             { icon: <Heart className="w-4 h-4 text-brand-500" />,    label: 'Give',       link: '/give' },
+            { icon: <HeartHandshake className="w-4 h-4 text-brand-500" />, label: 'Counselling', link: '/counselling' },
           ].map((item, i) => (
             <Link
               key={i}
@@ -253,60 +252,53 @@ const Home: React.FC = () => {
                 Spiritual insights for a modern world.
               </h2>
             </div>
-            <Link
-              to="/sermons"
-              className="mt-5 md:mt-0 flex items-center text-slate-700
-                font-bold border-b-2 border-brand-200 hover:border-brand-600
-                transition-all pb-1 uppercase text-[11px] tracking-[0.2em]"
-            >
-              Explore Archive <ArrowRight className="w-3 h-3 ml-2" />
-            </Link>
           </AnimatedDiv>
 
           {latestSermons.length > 0 ? (
+            <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
               {latestSermons.map((sermon, i) => (
                 <AnimatedDiv key={sermon.id} delay={i * 120} direction="up">
                   <Link to={`/sermons/${sermon.slug || sermon.id}`} className="group block">
-                    <div className="relative aspect-4/5 overflow-hidden
-                      rounded-sm mb-5">
+                    <div className="relative aspect-video overflow-hidden rounded-lg mb-3">
                       {sermon.imageUrl ? (
                         <img
                           src={sermon.imageUrl}
                           alt={sermon.title}
-                          className="w-full h-full object-cover grayscale-30
-                            group-hover:grayscale-0 transition-all duration-700
-                            group-hover:scale-105"
+                          className="w-full h-full object-cover object-top transition-all duration-700 group-hover:scale-105"
                         />
                       ) : (
-                        <div className="w-full h-full bg-slate-200 flex
-                          items-center justify-center">
+                        <div className="w-full h-full bg-slate-200 flex items-center justify-center">
                           <Play className="w-10 h-10 text-slate-400" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-linear-to-t
-                        from-slate-900/60 via-transparent to-transparent" />
-                      <div className="absolute bottom-5 left-5">
-                        <span className="px-2.5 py-1 bg-white/10 backdrop-blur-md
-                          border border-white/20 text-white text-[10px] uppercase
-                          tracking-widest rounded-full">
-                          {formatDate(sermon.sermonDate)}
-                        </span>
-                      </div>
                     </div>
-                    <h3 className="text-lg font-serif font-semibold text-slate-900
-                      mb-1.5 group-hover:text-brand-600 transition-colors
-                      leading-snug">
-                      {sermon.title}
-                    </h3>
-                    <p className="text-slate-400 text-xs leading-relaxed uppercase
-                      tracking-wider italic">
-                      {sermon.series}
-                    </p>
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-brand-600">
+                        {formatDate(sermon.sermonDate)}
+                      </p>
+                      <h3 className="text-base font-serif font-semibold text-slate-900 group-hover:text-brand-600 transition-colors leading-snug">
+                        {sermon.title}
+                      </h3>
+                      <p className="text-slate-400 text-xs leading-relaxed uppercase tracking-wider italic">
+                        {sermon.series}
+                      </p>
+                    </div>
                   </Link>
                 </AnimatedDiv>
               ))}
             </div>
+            <div className="mt-12 flex justify-end">
+              <Link
+                to="/sermons"
+                className="flex items-center text-slate-700
+                  font-bold border-b-2 border-brand-200 hover:border-brand-600
+                  transition-all pb-1 uppercase text-[11px] tracking-[0.2em]"
+              >
+                Explore Archive <ArrowRight className="w-3 h-3 ml-2" />
+              </Link>
+            </div>
+            </>
           ) : (
             <AnimatedDiv className="text-center py-16 border-2 border-dashed
               border-slate-200 rounded-2xl">
@@ -655,14 +647,6 @@ const Home: React.FC = () => {
                   Global Flame Ministry was founded and continues to stand.
                 </p>
               </div>
-              <Link
-                to="/core-beliefs"
-                className="mt-6 md:mt-0 flex items-center gap-2 text-slate-700
-                  font-bold border-b-2 border-fuchsia-200 hover:border-fuchsia-600
-                  transition-all pb-1 uppercase text-[11px] tracking-[0.2em] shrink-0"
-              >
-                View All Beliefs <ArrowRight className="w-3 h-3" />
-              </Link>
             </div>
           </AnimatedDiv>
 
@@ -743,7 +727,6 @@ const Home: React.FC = () => {
                     </div>
                   </Link>
                   <div className="p-4">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">{post.module}</span>
                     <Link to={`/blog/${post.slug}`} className="block mt-3">
                       <h4 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-purple-700 transition-colors">{post.title}</h4>
                     </Link>

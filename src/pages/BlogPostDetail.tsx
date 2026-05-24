@@ -12,27 +12,18 @@ function AuthorAvatar({ name, size = 'md' }: { name: string; size?: 'md' | 'lg' 
     .join('')
     .toUpperCase()
     .slice(0, 2);
-
   const sizeClasses = size === 'lg' ? 'w-12 h-12 text-base' : 'w-10 h-10 text-sm';
-
   return (
-    <div
-      className={`${sizeClasses} rounded-full bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center text-white font-semibold`}
-    >
+    <div className={`${sizeClasses} rounded-full bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center text-white font-semibold`}>
       {initials}
     </div>
   );
 }
 
-function ModuleBadge({ module }: { module: string }) {
-  const isYouth = module.toLowerCase().includes('youth');
+function DepartmentBadge({ department }: { department: string }) {
   return (
-    <span
-      className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium ${
-        isYouth ? 'bg-fuchsia-100 text-fuchsia-700' : 'bg-purple-100 text-purple-700'
-      }`}
-    >
-      {module}
+    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-purple-100 text-purple-700">
+      {department}
     </span>
   );
 }
@@ -46,11 +37,11 @@ function ContentBlock({ block }: { block: BlogBlockDto }) {
         </h2>
       );
     case 'Paragraph':
-        return (
-            <p className="w-full max-w-full text-gray-700 text-[17px] leading-relaxed mb-6 whitespace-pre-wrap text-justify">
-            {block.content}
-            </p>
-    );
+      return (
+        <p className="w-full max-w-full text-gray-700 text-[17px] leading-relaxed mb-6 whitespace-pre-wrap text-justify">
+          {block.content}
+        </p>
+      );
     case 'Image':
       return (
         <figure className="my-8">
@@ -80,21 +71,16 @@ export default function BlogPostDetail() {
 
   const fetchPost = useCallback(async () => {
     if (!slug) return;
-
     setIsLoading(true);
     setError(null);
-
     try {
       const response = await blogApi.getBlogPostBySlug(slug);
-
       if (response.data.isSuccess && response.data.data) {
         setPost(response.data.data);
-
         const relatedResponse = await blogApi.getPublishedPosts({
-          module: response.data.data.module,
+          department: response.data.data.department,
           pageSize: 4,
         });
-
         if (relatedResponse.data.isSuccess && relatedResponse.data.data) {
           setRelatedPosts(
             relatedResponse.data.data.items
@@ -172,7 +158,6 @@ export default function BlogPostDetail() {
 
         {isLoading ? (
           <div className="animate-pulse">
-            <div className="h-8 w-32 bg-gray-200 rounded mb-8" />
             <div className="aspect-[21/9] bg-gray-200 rounded-2xl mb-8" />
             <div className="h-6 w-24 bg-gray-200 rounded-full mb-4" />
             <div className="h-10 bg-gray-200 rounded mb-4" />
@@ -188,12 +173,11 @@ export default function BlogPostDetail() {
               <div className="h-4 bg-gray-200 rounded" />
               <div className="h-4 bg-gray-200 rounded" />
               <div className="h-4 w-5/6 bg-gray-200 rounded" />
-              <div className="h-4 bg-gray-200 rounded" />
-              <div className="h-4 w-4/6 bg-gray-200 rounded" />
             </div>
           </div>
         ) : post ? (
           <article>
+            {/* Cover Image */}
             {post.coverImageUrl && (
               <div className="w-full overflow-hidden mb-6">
                 <img
@@ -204,8 +188,19 @@ export default function BlogPostDetail() {
               </div>
             )}
 
+            {/* Video Player (optional) */}
+            {post.videoUrl && (
+              <div className="w-full my-6 rounded-xl overflow-hidden shadow-md">
+                <video
+                  controls
+                  className="w-full rounded-xl"
+                  src={post.videoUrl}
+                />
+              </div>
+            )}
+
             <div className="mb-4">
-              <ModuleBadge module={post.module} />
+              <DepartmentBadge department={post.department} />
             </div>
 
             <h1 className="w-full text-2xl md:text-3xl font-bold text-gray-900 mt-4 mb-4">
@@ -220,7 +215,7 @@ export default function BlogPostDetail() {
                   {post.authorName}
                 </div>
               </div>
-              <div className="inline-flex items-center gap-2 text-gray-500 text-sm"> 
+              <div className="inline-flex items-center gap-2 text-gray-500 text-sm">
                 <Calendar className="w-4 h-4" />
                 {formattedDate}
               </div>
@@ -239,7 +234,9 @@ export default function BlogPostDetail() {
 
         {!isLoading && relatedPosts.length > 0 && (
           <section className="mt-16 pt-12 border-t border-gray-200">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">More from {post?.module}</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">
+              More from {post?.department}
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {relatedPosts.map((relatedPost) => (
                 <Link
