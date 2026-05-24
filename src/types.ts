@@ -182,7 +182,7 @@ export interface TestimonyDto {
 export interface CreateTestimonyDto {
   name?: string;
   content: string;
-  email: string;
+  email?: string
   phoneNumber?: string;
 }
 
