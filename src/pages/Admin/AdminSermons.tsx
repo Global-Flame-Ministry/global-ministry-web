@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Plus, Trash2, RefreshCw, Search, Pencil,
   X, BookOpen, Filter, Eye, EyeOff,
-  Play, Music, Download
+  Play, Music, Download, Star
 } from 'lucide-react';
 import { sermonApi, type CreateSermonDto, type UpdateSermonDto } from '../../api/sermonApi';
 import type { SermonDto } from '../../types';
@@ -14,7 +14,7 @@ import ImageUpload from '../../components/ImageUpload';
 const emptyForm = (): CreateSermonDto => ({
   title: '', speaker: '', series: '', description: '',
   speakerImageUrl: '',
-  imageUrl: '', videoUrl: '', audioUrl: '', sermonDate: '', isPublished: false,
+  imageUrl: '', videoUrl: '', audioUrl: '', sermonDate: '', isPublished: false, isFeatured: false,
 });
 
 const AdminSermons = () => {
@@ -87,6 +87,7 @@ const AdminSermons = () => {
       audioUrl:        s.audioUrl ?? '',
       sermonDate:      s.sermonDate.slice(0, 10),
       isPublished:     s.isPublished,
+      isFeatured:      s.isFeatured,
     });
     setShowForm(true);
   };
@@ -134,6 +135,7 @@ const AdminSermons = () => {
         audioUrl:        sermon.audioUrl ?? '',
         sermonDate:      sermon.sermonDate.slice(0, 10),
         isPublished:     !sermon.isPublished,
+        isFeatured:      sermon.isFeatured,
       };
       const res = await sermonApi.update(sermon.id, dto);
       if (res.data.isSuccess) {
@@ -141,6 +143,19 @@ const AdminSermons = () => {
           s.id === sermon.id ? { ...s, isPublished: !s.isPublished } : s
         ));
         toast.success(sermon.isPublished ? 'Sermon unpublished' : 'Sermon published');
+      }
+    } catch { toast.error('Failed to update sermon'); }
+  };
+
+  const toggleFeatured = async (sermon: SermonDto) => {
+    try {
+      const dto: UpdateSermonDto = { ...sermon, isFeatured: !sermon.isFeatured } as UpdateSermonDto;
+      const res = await sermonApi.update(sermon.id, dto);
+      if (res.data.isSuccess) {
+        setSermons(prev => prev.map(s =>
+          s.id === sermon.id ? { ...s, isFeatured: !s.isFeatured } : s
+        ));
+        toast.success(sermon.isFeatured ? 'Removed from home page' : 'Featured on home page');
       }
     } catch { toast.error('Failed to update sermon'); }
   };
@@ -271,10 +286,26 @@ const AdminSermons = () => {
                           }`}>
                             {sermon.isPublished ? 'Published' : 'Draft'}
                           </span>
+                          {sermon.isFeatured && (
+                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 
+                              rounded-full bg-amber-500/20 text-amber-600">
+                              Featured
+                            </span>
+                          )}
                         </div>
                       </div>
                       {/* Actions */}
                       <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => toggleFeatured(sermon)}
+                          className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}
+                          title={sermon.isFeatured ? 'Remove from home page' : 'Feature on home page'}
+                        >
+                          <Star className={`w-4 h-4 ${sermon.isFeatured 
+                            ? 'text-amber-500 fill-amber-500' 
+                            : t.subtext}`} 
+                          />
+                        </button>
                         <button
                           onClick={() => togglePublish(sermon)}
                           className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}
@@ -428,6 +459,21 @@ const AdminSermons = () => {
                     </div>
                     <span className={`text-sm ${t.subtext}`}>
                       {form.isPublished ? 'Published' : 'Draft'}
+                    </span>
+                  </div>
+                </div>
+                <div className="pb-1">
+                  <div
+                    className="flex items-center gap-3 cursor-pointer"
+                    onClick={() => setForm(p => ({ ...p, isFeatured: !p.isFeatured }))}
+                  >
+                    <div className={`w-11 h-6 rounded-full transition-colors
+                      ${form.isFeatured ? 'bg-amber-500' : t.toggle}`}>
+                      <div className={`w-5 h-5 bg-white rounded-full mt-0.5 transition-transform
+                        ${form.isFeatured ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                    </div>
+                    <span className={`text-sm ${t.subtext}`}>
+                      Featured on Home
                     </span>
                   </div>
                 </div>
