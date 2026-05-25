@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Plus, Trash2, RefreshCw, Search, Pencil,
   X, Eye, EyeOff, ChevronUp, ChevronDown,
-  Image, Quote, FileText, BookOpen,
+  Quote, FileText, BookOpen, Image,
 } from 'lucide-react';
 import { blogApi } from '../../api/blogApi';
 import type {
@@ -13,6 +13,7 @@ import type {
 } from '../../types';
 import toast from 'react-hot-toast';
 import { useAdminTheme } from '../../context/AdminThemeContext';
+import ImageUpload from '../../components/ImageUpload';
 
 const DEPARTMENTS = [
   'Royal Priesthood',
@@ -54,8 +55,6 @@ const AdminBlog: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<BlogPostResponseDto | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const coverImageInputRef = useRef<HTMLInputElement>(null);
-
   const style = useMemo(() => ({
     bg: isDark ? 'bg-[#0d0d0d] text-white' : 'bg-slate-50 text-slate-900',
     border: isDark ? 'border-white/10' : 'border-slate-200',
@@ -86,14 +85,6 @@ const AdminBlog: React.FC = () => {
   useEffect(() => { fetchPosts(); }, [fetchPosts]);
   useEffect(() => { setPageNumber(1); }, [search]);
 
-  const fileToDataUrl = (file: File): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-
   const loadEditor = (post?: BlogPostResponseDto) => {
     if (post) {
       setEditing(post);
@@ -104,7 +95,7 @@ const AdminBlog: React.FC = () => {
         imageUrl: b.imageUrl ?? undefined,
         displayOrder: b.displayOrder,
       })).sort((a, b) => a.displayOrder - b.displayOrder);
-      
+
       setForm({
         title: post.title,
         excerpt: post.excerpt ?? '',
@@ -158,10 +149,8 @@ const AdminBlog: React.FC = () => {
 
   const savePost = async () => {
     if (!form.title.trim()) { toast.error('Title is required'); return; }
-    if (!form.department) {
-      toast.error('Department is required');
-      return;
-    }
+    if (!form.department) { toast.error('Department is required'); return; }
+
     const validDepts = ['Royal Priesthood', 'House of Opera', 'Home of Love', 'Flame Stars'];
     if (!validDepts.includes(form.department)) {
       toast.error('Invalid department selected');
@@ -385,35 +374,11 @@ const AdminBlog: React.FC = () => {
                     placeholder="Enter a short excerpt" />
                 </label>
                 <div className="space-y-4">
-                  <label className="space-y-2 text-sm text-slate-700 block">
-                    Cover Image
-                    <div className="flex gap-3 flex-col sm:flex-row">
-                      <input value={form.coverImageUrl ?? ''}
-                        onChange={e => setForm(prev => ({ ...prev, coverImageUrl: e.target.value }))}
-                        className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${style.input}`}
-                        placeholder="Image URL" />
-                      <button type="button"
-                        onClick={() => coverImageInputRef.current?.click()}
-                        className="inline-flex h-11 min-h-[44px] items-center justify-center rounded-2xl bg-[#a21caf] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#7c3aed]">
-                        <Image className="h-4 w-4" />
-                      </button>
-                      <input
-                        ref={coverImageInputRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          const dataUrl = await fileToDataUrl(file);
-                          setForm(prev => ({ ...prev, coverImageUrl: dataUrl }));
-                        }}
-                      />
-                    </div>
-                    {form.coverImageUrl && (
-                      <img src={form.coverImageUrl} alt="Cover preview" className="mt-2 h-24 rounded-lg object-cover" />
-                    )}
-                  </label>
+                  <ImageUpload
+                    label="Cover Image"
+                    value={form.coverImageUrl ?? null}
+                    onChange={(url) => setForm(prev => ({ ...prev, coverImageUrl: url ?? undefined }))}
+                  />
                   <label className="space-y-2 text-sm text-slate-700 block">
                     Video URL (optional)
                     <input value={form.videoUrl ?? ''}
@@ -481,27 +446,11 @@ const AdminBlog: React.FC = () => {
                         placeholder="Quote text | Author name" />
                     )}
                     {block.blockType === 'Image' && (
-                      <div className="space-y-3">
-                        <label className="inline-flex items-center gap-2 rounded-2xl bg-[#a21caf] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#7c3aed] cursor-pointer">
-                          <Image className="h-4 w-4" /> Upload Image
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={async (e) => {
-                              const file = e.target.files?.[0];
-                              if (!file) return;
-                              const dataUrl = await fileToDataUrl(file);
-                              setBlockField(index, 'imageUrl', dataUrl);
-                            }}
-                          />
-                        </label>
-                        {block.imageUrl ? (
-                          <img src={block.imageUrl} alt="Block" className="w-full rounded-3xl object-cover max-h-64" />
-                        ) : (
-                          <p className="text-sm text-slate-500">No image uploaded yet.</p>
-                        )}
-                      </div>
+                      <ImageUpload
+                        label="Block Image"
+                        value={block.imageUrl ?? null}
+                        onChange={(url) => setBlockField(index, 'imageUrl', url ?? undefined)}
+                      />
                     )}
                   </div>
                 ))}
@@ -523,7 +472,7 @@ const AdminBlog: React.FC = () => {
                   </button>
                   <button type="button" onClick={savePost} disabled={isSaving}
                     className="inline-flex min-h-[44px] items-center justify-center rounded-2xl bg-[#a21caf] px-4 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-white transition hover:bg-[#7c3aed] disabled:cursor-not-allowed disabled:opacity-60">
-                    {editing ? 'Update Post' : 'Create Post'}
+                    {isSaving ? 'Saving...' : editing ? 'Update Post' : 'Create Post'}
                   </button>
                 </div>
               </div>
@@ -546,7 +495,7 @@ const AdminBlog: React.FC = () => {
               </button>
               <button type="button" onClick={confirmDelete} disabled={isDeleting}
                 className="rounded-2xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60">
-                Delete
+                {isDeleting ? 'Deleting...' : 'Delete'}
               </button>
             </div>
           </div>
