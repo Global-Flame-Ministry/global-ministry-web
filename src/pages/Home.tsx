@@ -154,9 +154,9 @@ const Home: React.FC = () => {
   const [pickupLocation, setPickupLocation] = useState('');
 
   useEffect(() => {
-    sermonApi.getAll({ pageSize: 3 }).then(res => {
-      if (res.data.isSuccess && res.data.data) setLatestSermons(res.data.data.items);
-    });
+    sermonApi.getAll({ pageSize: 3, isFeatured: true }).then(res => {
+  if (res.data.isSuccess && res.data.data) setLatestSermons(res.data.data.items);
+  });
     eventApi.getUpcoming({ pageSize: 3 }).then(res => {
       if (res.data.isSuccess && res.data.data) setUpcomingEvents(res.data.data.items);
     });
@@ -269,8 +269,8 @@ const Home: React.FC = () => {
             </div>
           </AnimatedDiv>
 
-          {latestSermons.length > 0 ? (
-            <>
+            {latestSermons.length > 0 && (
+              <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
               {latestSermons.map((sermon, i) => (
                 <AnimatedDiv key={sermon.id} delay={i * 120} direction="up">
@@ -314,14 +314,6 @@ const Home: React.FC = () => {
               </Link>
             </div>
             </>
-          ) : (
-            <AnimatedDiv className="text-center py-16 border-2 border-dashed
-              border-slate-200 rounded-2xl">
-              <Play className="w-8 h-8 text-slate-300 mx-auto mb-3" />
-              <p className="text-slate-400 text-sm font-serif italic">
-                Messages coming soon. Check back later.
-              </p>
-            </AnimatedDiv>
           )}
 
           {/* Announcements */}
