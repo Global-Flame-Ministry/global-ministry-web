@@ -1,7 +1,7 @@
 import React from 'react';
 import SEO from '../components/SEO';
 import { Globe, Eye } from 'lucide-react';
-import work3 from '../assets/work3.bmp';
+import work3 from '../assets/auditoruim outside.bmp';
 
 const OurMission: React.FC = () => {
   return (
