@@ -721,14 +721,19 @@ const Home: React.FC = () => {
                     </div>
                   </Link>
                   <div className="p-4">
-                    <Link to={`/blog/${post.slug}`} className="block mt-3">
-                      <h4 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-purple-700 transition-colors">{post.title}</h4>
-                    </Link>
-                    {post.excerpt && <p className="mt-2 text-gray-600 text-sm line-clamp-3 leading-relaxed">{post.excerpt}</p>}
-                    <div className="mt-4">
-                      <Link to={`/blog/${post.slug}`} className="text-sm font-medium text-purple-600 hover:text-purple-800">Read more →</Link>
+                      {post.department && (
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-fuchsia-600">
+                          {post.department}
+                        </span>
+                      )}
+                      <Link to={`/blog/${post.slug}`} className="block mt-2">
+                        <h4 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-purple-700 transition-colors">{post.title}</h4>
+                      </Link>
+                      {post.excerpt && <p className="mt-2 text-gray-600 text-sm line-clamp-3 leading-relaxed">{post.excerpt}</p>}
+                      <div className="mt-4">
+                        <Link to={`/blog/${post.slug}`} className="text-sm font-medium text-purple-600 hover:text-purple-800">Read more →</Link>
+                      </div>
                     </div>
-                  </div>
                 </article>
               ))}
             </div>
