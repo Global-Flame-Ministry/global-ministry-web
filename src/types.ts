@@ -132,6 +132,7 @@ export interface SermonDto {
   audioUrl: string | null;
   sermonDate: string;
   isPublished: boolean;
+  isFeatured: boolean;
   createdOn: string;
 }
 
