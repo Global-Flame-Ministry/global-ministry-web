@@ -12,6 +12,7 @@ export interface CreateSermonDto {
   audioUrl?: string;
   sermonDate: string;
   isPublished: boolean;
+  isFeatured: boolean;
 }
 
 export interface UpdateSermonDto {
@@ -25,6 +26,7 @@ export interface UpdateSermonDto {
   audioUrl?: string;
   sermonDate: string;
   isPublished: boolean;
+  isFeatured: boolean;
 }
 
 export const sermonApi = {
@@ -35,6 +37,7 @@ export const sermonApi = {
     title?: string;
     speaker?: string;
     series?: string;
+    isFeatured?: boolean;
   }) =>
     api.get<ApiResponse<PagedResult<SermonDto>>>('/api/ministry/sermons', { params }),
 
@@ -52,6 +55,7 @@ export const sermonApi = {
     speaker?: string;
     series?: string;
     isPublished?: boolean;
+    isFeatured?: boolean;
   }) =>
     api.get<ApiResponse<PagedResult<SermonDto>>>('/api/admin/sermons', { params }),
 
@@ -63,4 +67,7 @@ export const sermonApi = {
 
   delete: (id: number) =>
     api.delete<ApiResponse<null>>(`/api/admin/sermons/${id}`),
+
+  toggleFeatured: (id: number) =>
+    api.put<ApiResponse<SermonDto>>(`/api/admin/sermons/${id}/toggle-featured`),
 };
