@@ -45,7 +45,7 @@ function ContentBlock({ block }: { block: BlogBlockDto }) {
     case 'Image':
       return (
         <figure className="my-8">
-          <img src={block.imageUrl ?? ''} alt="" className="w-full max-w-2xl mx-auto rounded-xl object-cover" />
+          <img src={block.imageUrl ?? ''} alt="" className="w-full sm:w-3/4 md:w-2/3 max-w-xl mx-auto rounded-xl object-cover block" />
         </figure>
       );
     case 'Quote': {
