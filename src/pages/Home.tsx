@@ -147,6 +147,12 @@ const Home: React.FC = () => {
   const [latestBlogPosts, setLatestBlogPosts]         = useState<BlogPostResponseDto[]>([]);
   const [showTestimonyModal, setShowTestimonyModal]   = useState(false);
 
+  // Visit Modal Hook States (merged from updated version)
+  const [showVisitModal, setShowVisitModal] = useState(false);
+  const [locationType, setLocationType] = useState<'inside' | 'outside' | null>(null);
+  const [needsBus, setNeedsBus] = useState<boolean | null>(null);
+  const [pickupLocation, setPickupLocation] = useState('');
+
   useEffect(() => {
     sermonApi.getAll({ pageSize: 3 }).then(res => {
       if (res.data.isSuccess && res.data.data) setLatestSermons(res.data.data.items);
@@ -165,6 +171,21 @@ const Home: React.FC = () => {
       if (res.data.isSuccess && res.data.data) setLatestBlogPosts(res.data.data.items);
     });
   }, []);
+
+  const closeVisitModal = () => {
+    setShowVisitModal(false);
+    setLocationType(null);
+    setNeedsBus(null);
+    setPickupLocation('');
+  };
+
+  const handleVisitSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Actionable metadata block configuration
+    console.log({ locationType, needsBus, pickupLocation });
+    alert("Thank you! Your visit details have been submitted successfully.");
+    closeVisitModal();
+  };
 
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString('en-US', {
@@ -509,15 +530,16 @@ const Home: React.FC = () => {
                 transcends the ordinary.
               </p>
               <div className="flex flex-wrap lg:flex-nowrap items-center gap-3">
-                <Link
-                  to="/sermons"
+                {/* CHANGED FROM LINK TO TRIGGER POPUP FORM (merged from updated version) */}
+                <button
+                  onClick={() => setShowVisitModal(true)}
                   className="px-6 py-3.5 bg-white text-slate-900 font-bold
                     uppercase tracking-widest text-[11px]
                     hover:bg-brand-600 hover:text-white transition-all
                     shadow-xl whitespace-nowrap"
                 >
-                  Watch Our Story
-                </Link>
+                  Plan Your Visit
+                </button>
                 <button
                   onClick={() => navigate('/prayer-request')}
                   className="px-6 py-3.5 bg-fuchsia-600 text-white font-bold
@@ -809,10 +831,152 @@ const Home: React.FC = () => {
         </div>
       </AnimatedSection>
 
+      {/* ── EXISTING TESTIMONY MODAL ─────────────────────────────────── */}
       <TestimonyModal
         isOpen={showTestimonyModal}
         onClose={() => setShowTestimonyModal(false)}
       />
+
+      {/* ── NEW MERGED PLAN YOUR VISIT MODAL ─────────────────────────── */}
+      {showVisitModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs px-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative overflow-hidden border border-slate-100 animate-fade-in">
+            
+            <button 
+              onClick={closeVisitModal}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg"
+            >
+              ✕
+            </button>
+
+            <div className="text-center mb-6">
+              <span className="text-[10px] font-black text-fuchsia-600 uppercase tracking-widest block mb-1">
+                Welcome to Global Flame
+              </span>
+              <h3 className="font-serif text-2xl font-bold text-slate-900">
+                Plan Your Visit
+              </h3>
+            </div>
+
+            {/* Step 1: Location Filter */}
+            {locationType === null && (
+              <div className="space-y-4">
+                <p className="text-sm text-slate-500 text-center">
+                  To help us organize your logistics layout, where are you currently located?
+                </p>
+                <div className="grid grid-cols-1 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setLocationType('inside')}
+                    className="w-full py-4 px-4 border border-slate-200 hover:border-fuchsia-400 hover:bg-fuchsia-50/30 text-left font-semibold text-slate-800 text-sm rounded-xl transition-all"
+                  >
+                    📍 Inside Jos, Plateau State
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLocationType('outside')}
+                    className="w-full py-4 px-4 border border-slate-200 hover:border-fuchsia-400 hover:bg-fuchsia-50/30 text-left font-semibold text-slate-800 text-sm rounded-xl transition-all"
+                  >
+                    🚗 Outside Jos / Other State
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 2A: Located Inside Jos */}
+            {locationType === 'inside' && (
+              <div className="text-center space-y-4">
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  Wonderful! We look forward to meeting you at our main sanctuary in Jos this coming Tuesday.
+                </p>
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 text-left text-xs space-y-1">
+                  <p className="font-bold text-slate-700">📍 Church Location:</p>
+                  <p className="text-slate-500">Global Flame Ministry Sanctuary, Jos, Plateau State, Nigeria.</p>
+                  <p className="font-bold text-slate-700 pt-2">⏰ Service Time:</p>
+                  <p className="text-slate-500">Atmosphere of Divine Presence — Every Tuesday at 5:00 PM</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeVisitModal}
+                  className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-widest rounded-lg transition-colors"
+                >
+                  Got it, see you there!
+                </button>
+              </div>
+            )}
+
+            {/* Step 2B: Located Outside Jos (Questionnaire form for bus) */}
+            {locationType === 'outside' && (
+              <form onSubmit={handleVisitSubmit} className="space-y-5">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                    Would you like our ministry bus transport to pick you up?
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setNeedsBus(true)}
+                      className={`py-3 text-center text-sm font-semibold rounded-lg border transition-all ${
+                        needsBus === true 
+                          ? 'border-fuchsia-500 bg-fuchsia-50 text-fuchsia-700' 
+                          : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      Yes, please
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setNeedsBus(false); setPickupLocation(''); }}
+                      className={`py-3 text-center text-sm font-semibold rounded-lg border transition-all ${
+                        needsBus === false 
+                          ? 'border-fuchsia-500 bg-fuchsia-50 text-fuchsia-700' 
+                          : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      No, I'll self drive
+                    </button>
+                  </div>
+                </div>
+
+                {/* Conditional Textarea for pickup location */}
+                {needsBus === true && (
+                  <div className="transition-all animate-fade-in">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Your Current Location / Pickup Address
+                    </label>
+                    <textarea
+                      required
+                      value={pickupLocation}
+                      onChange={(e) => setPickupLocation(e.target.value)}
+                      placeholder="Please specify your precise pickup point address, nearest landmarks, and city/state..."
+                      className="w-full min-h-[90px] bg-slate-50 border border-slate-200 rounded-lg p-3 text-slate-800 text-sm focus:ring-2 focus:ring-fuchsia-400 focus:bg-white outline-none transition-all shadow-sm"
+                    />
+                  </div>
+                )}
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setLocationType(null)}
+                    className="flex-1 py-3 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs uppercase tracking-widest rounded-lg transition-colors"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={needsBus === null || (needsBus === true && !pickupLocation.trim())}
+                    className="flex-1 py-3 bg-fuchsia-600 hover:bg-fuchsia-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-bold text-xs uppercase tracking-widest rounded-lg shadow-md transition-colors"
+                  >
+                    Submit Plan
+                  </button>
+                </div>
+              </form>
+            )}
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

@@ -4,7 +4,7 @@ import SEO from '../components/SEO';
 import {
   ArrowLeft, Loader, Users, Calendar, MapPin,
   Globe, Mail, Heart, Clock, ArrowRight,
-  Sparkles, Lock, ChevronRight,
+  Sparkles, Lock, ChevronRight, Image as ImageIcon,
 } from 'lucide-react';
 import { ministryApi } from '../api/ministryApi';
 import type { MinistryResponseDto, EventDto } from '../types';
@@ -13,6 +13,7 @@ import { useAuth } from '../context/useAuthContext';
 // The slug must match exactly what the admin entered in the dashboard.
 // If they ever rename the ministry, update this constant.
 const HOUSE_OF_OPERA_SLUG = 'house-of-opera';
+const ROYAL_PRIESTHOOD_SLUG = 'royal-priesthood';
 
 // ─── EVENT STATUS HELPERS ──────────────────────────────────────────────────────
 
@@ -116,9 +117,6 @@ const EventCard: React.FC<{ event: EventDto }> = ({ event }) => {
 };
 
 // ─── YOUTH COMMUNITY GATEWAY ──────────────────────────────────────────────────
-// Rendered exclusively on the House of Opera page. Logged-in users get a
-// direct "Enter" CTA; guests see a login prompt. This replaces the old
-// hardcoded "Youth Community" nav entry entirely.
 
 const YouthCommunityGateway: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -134,8 +132,6 @@ const YouthCommunityGateway: React.FC = () => {
 
   return (
     <div className="mt-12 pt-10 border-t border-slate-100">
-
-      {/* Section label */}
       <div className="flex items-center gap-3 mb-6">
         <Sparkles className="w-5 h-5 text-fuchsia-500" />
         <h2 className="text-2xl font-serif font-bold text-slate-900">
@@ -154,11 +150,8 @@ const YouthCommunityGateway: React.FC = () => {
       </p>
 
       {isAuthenticated ? (
-        /* ── LOGGED IN: direct access CTA ── */
         <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br
           from-fuchsia-600 via-purple-700 to-slate-900 p-8">
-
-          {/* Decorative orbs */}
           <div className="absolute top-0 right-0 w-48 h-48 bg-white/5
             rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
           <div className="absolute bottom-0 left-20 w-32 h-32 bg-fuchsia-400/10
@@ -192,7 +185,6 @@ const YouthCommunityGateway: React.FC = () => {
           </div>
         </div>
       ) : (
-        /* ── GUEST: login gate ── */
         <div className="rounded-2xl border-2 border-dashed border-fuchsia-200
           bg-fuchsia-50/40 p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center
@@ -253,6 +245,7 @@ const MinistryDetail: React.FC = () => {
   const [activeTab, setActiveTab]         = useState<'upcoming' | 'ongoing' | 'past'>('upcoming');
 
   const isHouseOfOpera = slug === HOUSE_OF_OPERA_SLUG;
+  const isRoyalPriesthood = slug === ROYAL_PRIESTHOOD_SLUG;
 
   useEffect(() => {
     if (!slug) return;
@@ -300,6 +293,58 @@ const MinistryDetail: React.FC = () => {
     ongoing:  ongoingEvents,
     past:     pastEvents,
   }[activeTab];
+
+  // Inline layout builder for Royal Priesthood Gallery
+  const renderRoyalPriesthoodGallery = () => {
+    // Replace these template strings with your exact filenames located inside public/assets/images/ or src/assets/
+    const images = [
+      '/assets/images/royal-1.jpg',
+      '/assets/images/royal-2.jpg',
+      '/assets/images/royal-3.jpg',
+      '/assets/images/royal-4.jpg'
+    ];
+
+    return (
+      <div className="mt-12 pt-10 border-t border-slate-100">
+        <div className="flex items-center gap-3 mb-6">
+          <ImageIcon className="w-5 h-5 text-fuchsia-500" />
+          <h2 className="text-2xl font-serif font-bold text-slate-900">
+            Ministry Gallery
+          </h2>
+          <span className="text-[9px] font-black uppercase tracking-widest
+            px-2 py-1 bg-fuchsia-100 text-fuchsia-600 rounded-full">
+            Highlights
+          </span>
+        </div>
+
+        <p className="text-slate-500 text-base leading-relaxed mb-8 max-w-lg">
+          Catch a glimpse of the Royal Priesthood assignments, dynamic fellowships, and moving worship snapshots.
+        </p>
+
+        {/* 4 Image Clean Responsive Matrix Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {images.map((src, index) => (
+            <div 
+              key={index} 
+              className="relative aspect-square rounded-2xl overflow-hidden bg-slate-100 
+                border border-slate-100 shadow-sm group hover:shadow-md transition-all duration-300"
+            >
+              <img
+                src={src}
+                alt={`Royal Priesthood Highlight ${index + 1}`}
+                className="w-full h-full object-cover object-center 
+                  group-hover:scale-105 transition-transform duration-500"
+                onError={(e) => {
+                  // Fallback visual treatment if image path breaks/is empty
+                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1438029071396-1e831a7fa6d8?w=500";
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   if (isLoading) {
     return (
@@ -403,7 +448,7 @@ const MinistryDetail: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-12">
 
-          {/* Left — Description + Events + Youth Gateway */}
+          {/* Left — Description + Events + Dynamic Gateways */}
           <div className="lg:col-span-2 space-y-8">
             {ministry.description && (
               <div>
@@ -457,6 +502,7 @@ const MinistryDetail: React.FC = () => {
                 ))}
               </div>
 
+              {/* Event Content Conditional */}
               {eventsLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader className="animate-spin text-fuchsia-600 w-6 h-6" />
@@ -478,8 +524,9 @@ const MinistryDetail: React.FC = () => {
               )}
             </div>
 
-            {/* ── YOUTH COMMUNITY GATEWAY (House of Opera only) ── */}
+            {/* ── CONDITIONAL GATEWAYS BY SLUG ── */}
             {isHouseOfOpera && <YouthCommunityGateway />}
+            {isRoyalPriesthood && renderRoyalPriesthoodGallery()}
           </div>
 
           {/* Right — Sidebar */}
