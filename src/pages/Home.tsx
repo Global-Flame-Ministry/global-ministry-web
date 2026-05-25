@@ -191,49 +191,43 @@ const Home: React.FC = () => {
         direction="up"
         delay={100}
       >
-        <div className="bg-white shadow-2xl rounded-xl grid grid-cols-5
-          divide-x divide-slate-100 border border-slate-100 overflow-hidden">
-          {[
-            { icon: <Calendar className="w-4 h-4 text-brand-500" />, label: 'Events',     link: '/events' },
-            { icon: <Heart className="w-4 h-4 text-brand-500" />,    label: 'Give',       link: '/give' },
-            { icon: <HeartHandshake className="w-4 h-4 text-brand-500" />, label: 'Counselling', link: '/counselling' },
-          ].map((item, i) => (
-            <Link
-              key={i}
-              to={item.link}
-              className="p-5 flex flex-col items-center justify-center gap-3
-                hover:bg-slate-50 transition-colors group"
-            >
-              {item.icon}
-              <span className="text-[10px] font-bold uppercase tracking-widest
-                text-slate-600 group-hover:text-brand-600">
-                {item.label}
-              </span>
-            </Link>
-          ))}
-          <button
-            onClick={() => navigate('/prayer-request')}
-            className="p-5 flex flex-col items-center justify-center gap-3
-              hover:bg-fuchsia-50 transition-colors group"
-          >
-            <HandHeart className="w-4 h-4 text-fuchsia-500" />
-            <span className="text-[10px] font-bold uppercase tracking-widest
-              text-slate-600 group-hover:text-fuchsia-600">
-              Prayer
-            </span>
-          </button>
-          <button
-            onClick={() => setShowTestimonyModal(true)}
-            className="p-5 flex flex-col items-center justify-center gap-3
-              hover:bg-amber-50 transition-colors group"
-          >
-            <Star className="w-4 h-4 text-amber-500" />
-            <span className="text-[10px] font-bold uppercase tracking-widest
-              text-slate-600 group-hover:text-amber-600">
-              Testimony
-            </span>
-          </button>
-        </div>
+<div className="bg-white shadow-2xl rounded-xl grid grid-cols-6 md:grid-cols-5 divide-x divide-y md:divide-y-0 divide-slate-100 border border-slate-100 overflow-hidden">
+  <Link
+    to="/events"
+    className="col-span-2 md:col-span-1 p-5 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 transition-colors group"
+  >
+    <Calendar className="w-4 h-4 text-brand-500" />
+    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600 group-hover:text-brand-600">Events</span>
+  </Link>
+  <Link
+    to="/give"
+    className="col-span-2 md:col-span-1 p-5 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 transition-colors group"
+  >
+    <Heart className="w-4 h-4 text-brand-500" />
+    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600 group-hover:text-brand-600">Give</span>
+  </Link>
+  <Link
+    to="/counselling"
+    className="col-span-2 md:col-span-1 p-5 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 transition-colors group"
+  >
+    <HeartHandshake className="w-4 h-4 text-brand-500" />
+    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600 group-hover:text-brand-600">Counselling</span>
+  </Link>
+  <button
+    onClick={() => navigate('/prayer-request')}
+    className="col-span-3 md:col-span-1 p-5 flex flex-col items-center justify-center gap-3 hover:bg-fuchsia-50 transition-colors group"
+  >
+    <HandHeart className="w-4 h-4 text-fuchsia-500" />
+    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600 group-hover:text-fuchsia-600">Prayer</span>
+  </button>
+  <button
+    onClick={() => setShowTestimonyModal(true)}
+    className="col-span-3 md:col-span-1 p-5 flex flex-col items-center justify-center gap-3 hover:bg-amber-50 transition-colors group"
+  >
+    <Star className="w-4 h-4 text-amber-500" />
+    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600 group-hover:text-amber-600">Testimony</span>
+  </button>
+</div>
       </AnimatedDiv>
 
       {/* ── Sermon Section ────────────────────────────────────────────── */}
