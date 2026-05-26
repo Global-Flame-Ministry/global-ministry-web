@@ -183,7 +183,7 @@ const Footer: React.FC = () => {
                 },
                 {
                   icon: <Phone className="w-4 h-4 shrink-0 text-fuchsia-500" />,
-                  text: '(+234) 815 333 0011'
+                  text: '(+234) 813 816 3685'
                 },
                 {
                   icon: <Mail className="w-4 h-4 shrink-0 text-fuchsia-500" />,
@@ -307,17 +307,20 @@ const Footer: React.FC = () => {
               </p>
               <div className="space-y-2">
                 {[
-                  { day: 'Tuesday',  service: 'Power Service' },
-                  { day: 'Saturday', service: 'Morning Glory' },
+                  { day: 'Tuesday',  service: 'Power Service', Time: '3pm' },
+                  { day: 'Saturday', service: 'Morning Glory', Time: '7am'},
+                  {day: 'Thursday', service: 'Counselling', Time: '10am'},
                 ].map(s => (
                   <div key={s.day} className="flex justify-between items-center">
                     <span className="text-xs font-semibold text-slate-400">
                       {s.day}
                     </span>
-                    <span className="text-[10px] font-bold text-fuchsia-500
-                      uppercase tracking-wider">
-                      {s.service}
-                    </span>
+                    <div className="text-right">
+                      <span className="text-[10px] font-bold text-fuchsia-500 uppercase tracking-wider block">
+                        {s.service}
+                      </span>
+                      <span className="text-[10px] text-slate-500">{s.Time}</span>
+                    </div>
                   </div>
                 ))}
               </div>
