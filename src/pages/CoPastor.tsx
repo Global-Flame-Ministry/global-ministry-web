@@ -85,8 +85,12 @@ const CoPastor: React.FC = () => {
                 Her ministry has a particular anointing for women's empowerment, family
                 wholeness, and worship. She is the driving force behind the <strong>Daughters of Honour</strong> arm
                 of the ministry, a platform dedicated to raising women who are confident
-                in their identity in Christ and effective in their spheres of influence.
+                in their identity in Christ and effective in their spheres of influence—pioneering the annual Royal Priesthood International Conference.
               </p>
+
+              <blockquote className="my-10 p-6 bg-fuchsia-50 rounded-2xl italic font-semibold border-l-4 border-fuchsia-500 not-prose text-fuchsia-900">
+                "Your level of thirst will determine the level of water that you will drink."
+              </blockquote>
 
               <p className="mb-6 text-justify">
                 Her teaching style is direct, compassionate, and deeply rooted in scripture.

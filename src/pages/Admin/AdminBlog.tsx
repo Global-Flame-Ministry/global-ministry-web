@@ -15,13 +15,6 @@ import toast from 'react-hot-toast';
 import { useAdminTheme } from '../../context/AdminThemeContext';
 import ImageUpload from '../../components/ImageUpload';
 
-const DEPARTMENTS = [
-  'Royal Priesthood',
-  'House of Opera',
-  'Home of Love',
-  'Flame Stars',
-];
-
 const BLOCK_TYPES = ['Heading', 'Paragraph', 'Image', 'Quote'] as const;
 type BlockType = (typeof BLOCK_TYPES)[number];
 
@@ -150,12 +143,6 @@ const AdminBlog: React.FC = () => {
   const savePost = async () => {
     if (!form.title.trim()) { toast.error('Title is required'); return; }
     if (!form.department) { toast.error('Department is required'); return; }
-
-    const validDepts = ['Royal Priesthood', 'House of Opera', 'Home of Love', 'Flame Stars'];
-    if (!validDepts.includes(form.department)) {
-      toast.error('Invalid department selected');
-      return;
-    }
 
     const sortedBlocks: CreateBlogBlockDto[] = blocks
       .map((block, idx) => ({
@@ -356,11 +343,22 @@ const AdminBlog: React.FC = () => {
                 </label>
                 <label className="space-y-2 text-sm text-slate-700">
                   Department
-                  <select value={form.department}
+                  <input
+                    list="department-suggestions"
+                    value={form.department}
                     onChange={e => setForm(prev => ({ ...prev, department: e.target.value }))}
-                    className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${style.input}`}>
-                    {DEPARTMENTS.map(dept => <option key={dept} value={dept}>{dept}</option>)}
-                  </select>
+                    className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${style.input}`}
+                    placeholder="Type or select a department"
+                  />
+                  <datalist id="department-suggestions">
+                    <option value="Royal Priesthood" />
+                    <option value="House of Opera" />
+                    <option value="Home of Love" />
+                    <option value="Flame Stars" />
+                    <option value="Tuesday Service" />
+                    <option value="Testimony" />
+                    <option value="General" />
+                  </datalist>
                 </label>
               </div>
 

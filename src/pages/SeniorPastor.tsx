@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import dad from '../assets/daddy.jpg';
+import dad from '../assets/priest.jpeg';
 
 const useReveal = (delay = 0) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -90,7 +90,7 @@ const SeniorPastor: React.FC = () => {
 
               {/* Quote Box */}
               <blockquote className="my-10 p-6 bg-fuchsia-50 rounded-2xl italic font-semibold border-l-4 border-fuchsia-500 not-prose text-fuchsia-900">
-                "Faith activates God - Fear activates the Enemy."
+                "Being diligent gives a man an enviable destiny."
               </blockquote>
 
               <p className="mb-6 text-justify">

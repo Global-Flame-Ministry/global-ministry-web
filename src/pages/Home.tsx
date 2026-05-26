@@ -11,7 +11,8 @@ import { blogApi } from '../api/blogApi';
 import type { SermonDto, EventDto, AnnouncementDto, BookDto } from '../types';
 import type { BlogPostResponseDto } from '../types';
 import daddy from '../assets/daddy.jpg';
-import dadandmum from '../assets/dadandmum.jpg';
+import dddPreaching from '../assets/ddd-preaching.jpeg';
+import daddandmumm from '../assets/daddandmumm.jpeg';
 import { useScrollAnimation } from '../context/hooks/useScrollAnimation';
 import TestimonyModal from '../components/TestimonyModal';
 
@@ -497,7 +498,7 @@ const Home: React.FC = () => {
       >
         <div className="absolute inset-0 z-0">
           <img
-            src={dadandmum}
+            src={dddPreaching}
             className="w-full h-full object-cover opacity-40 scale-110 blur-sm"
             alt="Atmosphere"
           />
@@ -574,7 +575,7 @@ const Home: React.FC = () => {
             <div className="relative z-10 rounded-lg overflow-hidden shadow-2xl 
               h-72 md:h-auto md:aspect-3/4">
               <img
-                src={dadandmum}
+                src={daddandmumm}
                 alt="Leadership"
                 className="w-full h-full object-cover"
               />
@@ -608,7 +609,7 @@ const Home: React.FC = () => {
               <div className="space-y-6">
                 <blockquote className="border-l-4 border-brand-500 pl-6 py-1
                   italic text-xl text-slate-700 font-serif leading-relaxed">
-                  "Faith activates God — Fear activates the Enemy."
+                  "Personal altar sustains your victory - Apostle Danjuma Musa."
                 </blockquote>
                 <p className="text-slate-600 text-base leading-relaxed">
                   Inspired by a commitment to spiritual growth and community,

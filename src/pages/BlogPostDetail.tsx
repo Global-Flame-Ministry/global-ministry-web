@@ -225,6 +225,12 @@ export default function BlogPostDetail() {
               </div>
             </div>
 
+            {post.excerpt && (
+              <p className="text-lg text-gray-600 leading-relaxed mb-8 italic border-l-4 border-purple-200 pl-4">
+                {post.excerpt}
+              </p>
+            )}
+
             <div className="w-full">
               {post.blocks
                 .slice()
