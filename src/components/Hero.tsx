@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PlayCircle, ArrowRight } from 'lucide-react';
-import auditorium from '../assets/auditorium.jpg';
+import auditorium from '../assets/auditorium.png';
 import { useAuth } from '../context/useAuthContext';
 
 const Hero: React.FC = () => {

@@ -2,7 +2,7 @@ import React from 'react';
 import SEO from '../components/SEO';
 import { Link } from 'react-router-dom';
 import { Globe, Eye, ArrowLeft, ArrowRight } from 'lucide-react';
-import work3 from '../assets/auditorium.jpg';
+import work3 from '../assets/auditorium.png';
 
 const OurMission: React.FC = () => {
   return (

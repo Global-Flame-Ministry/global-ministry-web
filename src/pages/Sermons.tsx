@@ -4,7 +4,7 @@ import SEO from '../components/SEO';
 import { Play, Search, Filter, Music } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
 import type { SermonDto } from '../types';
-import auditorium from '../assets/auditorium.jpg';
+import auditorium from '../assets/auditorium.png';
 
 const useReveal = (delay = 0) => {
   const ref = useRef<HTMLDivElement>(null);

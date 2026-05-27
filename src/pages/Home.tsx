@@ -10,7 +10,7 @@ import { bookApi } from '../api/bookApi';
 import { blogApi } from '../api/blogApi';
 import type { SermonDto, EventDto, AnnouncementDto, BookDto } from '../types';
 import type { BlogPostResponseDto } from '../types';
-import daddy from '../assets/daddy.jpg';
+import daddy from '../assets/daddy.png';
 import dddPreaching from '../assets/ddd-preaching.jpeg';
 import daddandmumm from '../assets/dadandmum.jpg';
 import { useScrollAnimation } from '../context/hooks/useScrollAnimation';

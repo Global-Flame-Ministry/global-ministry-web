@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { ArrowLeft, Clock, MapPin, Phone, ChevronDown, CheckCircle2 } from 'lucide-react';
-import auditorium from '../assets/auditorium.jpg';
+import auditorium from '../assets/auditorium.png';
 import dddPreaching from '../assets/ddd-preaching.jpeg';
 import daddandmumm from '../assets/dadandmum.jpg';
 
