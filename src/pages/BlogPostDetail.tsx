@@ -211,20 +211,21 @@ export default function BlogPostDetail() {
             </div>
 
             <h1
-              className="w-full text-3xl md:text-5xl font-black uppercase 
-                tracking-tight text-[#111827] mt-3 mb-2"
+              className="w-full text-2xl md:text-4xl font-bold uppercase 
+                tracking-tight text-[#2e1065] mt-3 mb-2"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
               {post.title}
             </h1>
 
                 {post.conferenceTheme && (
-                  <div className="mt-1 mb-4">
-                    <p className="text-sm font-bold uppercase tracking-widest text-fuchsia-400">
-                      Theme: {post.conferenceTheme}
+                  <div className="mt-6 mb-6">
+                    <p className="text-sm tracking-widest text-fuchsia-600">
+                      <span className="italic font-normal">Theme:</span>
+                      <span className="block mt-1 font-bold text-base uppercase">{post.conferenceTheme}</span>
                     </p>
                     {post.themeScripture && (
-                      <blockquote className="mt-3 border-l-4 border-fuchsia-300 pl-4">
+                      <blockquote className="mt-3 border-l-4 border-fuchsia-500 pl-4">
                         <p className="text-base italic text-gray-600 leading-relaxed">
                           "{post.themeScripture}"
                         </p>
