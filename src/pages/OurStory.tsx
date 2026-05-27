@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Flame } from 'lucide-react';
+import { ArrowRight} from 'lucide-react';
 import daddyandmum from '../assets/daddyandmum.jpeg';
 
 const useReveal = (delay = 0) => {
@@ -83,8 +83,7 @@ const OurStory: React.FC = () => {
               Global Flame Ministry came to birth on the 25th December 1999 - via the mandate given 
               to the president, Pastor Danjuma Musa. 
                  It was formally registered with the Corporate Affairs Commission (CAC) in 2007, under 
-              the provision of Company & Allied Matters Act (CAMA) with certicate no. of registration
-              NO CAC/IT/NO 263303.
+              the provision of Company & Allied Matters Act (CAMA).
               What began as a small gathering of believers hungry for God's presence has grown into a vibrant,
               multi-faceted ministry touching lives across continents.
             </p>
@@ -124,11 +123,11 @@ const OurStory: React.FC = () => {
               As the congregation grew, so did the mandate. Ministries were raised up to serve
               distinct needs: daughters were empowered through the <strong>Daughters of Honour</strong> arm,
               the youth found a home in the <strong>House of Opera</strong>, worshippers found their voice in
-              the <strong>Global Choir</strong>, families found care through the <strong>Home of Love</strong> ministry.,
+              the <strong>Global Choir</strong>, <strong>Teenagers - flaizers</strong>, <strong>Kids - flame stars</strong> families found care through the <strong>Home of Love</strong> ministry.,
               and sick ones found health through <strong>Mediplex</strong> ministry.
             </p>
             <p className="mb-10 text-justify">
-              Today, Global Flame Ministries is not just a local church - it is a movement,
+              Today, Global Flame Ministry is not just a local church - it is a movement,
               a training ground, a place where ordinary people encounter an extraordinary God
               and are sent out to change their world.
             </p>
@@ -137,7 +136,7 @@ const OurStory: React.FC = () => {
           {/* Quote Section */}
           <div ref={r6} style={fadeStyle}>
             <blockquote className="mt-12 p-8 bg-fuchsia-50 rounded-2xl italic font-semibold border-l-4 border-fuchsia-500 not-prose text-fuchsia-900">
-              "Faith activates God — Fear activates the Enemy."
+              "Raising a people of power who will Manifest the Kingdom."
             </blockquote>
           </div>
         </div>
@@ -146,20 +145,12 @@ const OurStory: React.FC = () => {
         <div ref={r7} style={fadeStyle}>
           <div className="mt-16 pt-10 border-t border-slate-100 flex flex-wrap gap-4">
             <Link
-              to="/senior-pastor"
+              to="/our-mission"
               className="inline-flex items-center gap-2 px-8 py-4 bg-fuchsia-600
                 text-white font-bold uppercase tracking-widest text-xs
                 hover:bg-fuchsia-700 transition-all duration-200 hover:scale-[1.02] shadow-lg shadow-fuchsia-200 rounded-lg"
             >
-              Meet Our Pastor <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-            <Link
-              to="/core-beliefs"
-              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200
-                text-slate-700 font-bold uppercase tracking-widest text-xs
-                hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg"
-            >
-              Our Core Beliefs <Flame className="w-3.5 h-3.5" />
+              Our Mission <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>

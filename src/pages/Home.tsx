@@ -10,9 +10,9 @@ import { bookApi } from '../api/bookApi';
 import { blogApi } from '../api/blogApi';
 import type { SermonDto, EventDto, AnnouncementDto, BookDto } from '../types';
 import type { BlogPostResponseDto } from '../types';
-import daddy from '../assets/daddy.jpg';
+import daddy from '../assets/daddy-D.jpeg';
 import dddPreaching from '../assets/ddd-preaching.jpeg';
-import daddandmumm from '../assets/daddandmumm.jpeg';
+import daddandmumm from '../assets/dadandmum.jpg';
 import { useScrollAnimation } from '../context/hooks/useScrollAnimation';
 import TestimonyModal from '../components/TestimonyModal';
 
@@ -216,38 +216,38 @@ const Home: React.FC = () => {
 <div className="bg-white shadow-2xl rounded-xl grid grid-cols-6 md:grid-cols-5 divide-x divide-y md:divide-y-0 divide-slate-100 border border-slate-100 overflow-hidden">
   <Link
     to="/events"
-    className="col-span-2 md:col-span-1 p-5 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 transition-colors group"
+    className="col-span-2 md:col-span-1 p-5 flex flex-col items-center justify-center gap-3 hover:bg-blue-50 transition-colors group"
   >
-    <Calendar className="w-4 h-4 text-brand-500" />
-    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600 group-hover:text-brand-600">Events</span>
+    <Calendar className="w-4 h-4 text-fuchsia-700 group-hover:text-fuchsia-700 transition-colors" />
+    <span className="text-[10px] font-bold uppercase tracking-widest text-fuchsia-700 group-hover:text-fuchsia-800 transition-colors">Events</span>
   </Link>
   <Link
     to="/give"
-    className="col-span-2 md:col-span-1 p-5 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 transition-colors group"
+    className="col-span-2 md:col-span-1 p-5 flex flex-col items-center justify-center gap-3 hover:bg-emerald-50 transition-colors group"
   >
-    <Heart className="w-4 h-4 text-brand-500" />
-    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600 group-hover:text-brand-600">Give</span>
+    <Heart className="w-4 h-4 text-emerald-600 group-hover:text-emerald-600 transition-colors" />
+    <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 group-hover:text-emerald-700 transition-colors">Give</span>
   </Link>
   <Link
     to="/counselling"
-    className="col-span-2 md:col-span-1 p-5 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 transition-colors group"
+    className="col-span-2 md:col-span-1 p-5 flex flex-col items-center justify-center gap-3 hover:bg-orange-50 transition-colors group"
   >
-    <HeartHandshake className="w-4 h-4 text-brand-500" />
-    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600 group-hover:text-brand-600">Counselling</span>
+    <HeartHandshake className="w-4 h-4 text-orange-500 group-hover:text-orange-600 transition-colors" />
+    <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500 group-hover:text-orange-600 transition-colors">Counselling</span>
   </Link>
   <button
     onClick={() => navigate('/prayer-request')}
     className="col-span-3 md:col-span-1 p-5 flex flex-col items-center justify-center gap-3 hover:bg-fuchsia-50 transition-colors group"
   >
-    <HandHeart className="w-4 h-4 text-fuchsia-500" />
-    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600 group-hover:text-fuchsia-600">Prayer</span>
+    <HandHeart className="w-4 h-4 text-fuchsia-700 group-hover:text-fuchsia-600 transition-colors" />
+    <span className="text-[10px] font-bold uppercase tracking-widest text-fuchsia-700 group-hover:text-fuchsia-700 transition-colors">Prayer</span>
   </button>
   <button
     onClick={() => setShowTestimonyModal(true)}
     className="col-span-3 md:col-span-1 p-5 flex flex-col items-center justify-center gap-3 hover:bg-amber-50 transition-colors group"
   >
-    <Star className="w-4 h-4 text-amber-500" />
-    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600 group-hover:text-amber-600">Testimony</span>
+    <Star className="w-4 h-4 text-amber-500 group-hover:text-amber-600 transition-colors" />
+    <span className="text-[10px] font-bold uppercase tracking-widest text-amber-600 group-hover:text-amber-800 transition-colors">Testimony</span>
   </button>
 </div>
       </AnimatedDiv>
@@ -508,7 +508,7 @@ const Home: React.FC = () => {
         <div className="relative z-10 max-w-7xl mx-auto px-4 w-full">
           <AnimatedDiv direction="left" delay={200}>
             <div className="max-w-2xl">
-              <p className="text-[10px] font-black text-brand-400 uppercase
+              <p className="text-[10px] font-black text-white uppercase
                 tracking-[0.4em] mb-4">
                 Every Tuesday
               </p>
@@ -525,33 +525,15 @@ const Home: React.FC = () => {
               <div className="flex flex-wrap lg:flex-nowrap items-center gap-3">
                 {/* CHANGED FROM LINK TO TRIGGER POPUP FORM (merged from updated version) */}
                 <button
-                  onClick={() => setShowVisitModal(true)}
-                  className="px-6 py-3.5 bg-white text-slate-900 font-bold
-                    uppercase tracking-widest text-[11px]
-                    hover:bg-brand-600 hover:text-white transition-all
-                    shadow-xl whitespace-nowrap"
+                  onClick={() => navigate('/plan-your-visit')}
+                  className="px-8 py-4 sm:px-10 sm:py-5 bg-[#7C3AED] text-white font-black
+                    uppercase tracking-widest text-[11px] sm:text-[13px]
+                    hover:bg-[#6D28D9] hover:scale-105
+                    transition-all duration-200 shadow-2xl
+                    whitespace-nowrap border-b-4 border-[#5B21B6] active:scale-95
+                    active:border-b-2"
                 >
                   Plan Your Visit
-                </button>
-                <button
-                  onClick={() => navigate('/prayer-request')}
-                  className="px-6 py-3.5 bg-fuchsia-600 text-white font-bold
-                    uppercase tracking-widest text-[11px]
-                    hover:bg-fuchsia-500 transition-all shadow-xl
-                    flex items-center gap-2 whitespace-nowrap"
-                >
-                  <HandHeart className="w-3.5 h-3.5" />
-                  Prayer Request
-                </button>
-                <button
-                  onClick={() => setShowTestimonyModal(true)}
-                  className="px-6 py-3.5 bg-amber-500 text-white font-bold
-                    uppercase tracking-widest text-[11px]
-                    hover:bg-amber-400 transition-all shadow-xl
-                    flex items-center gap-2 whitespace-nowrap"
-                >
-                  <Star className="w-3.5 h-3.5" />
-                  Share Testimony
                 </button>
               </div>
             </div>
@@ -609,11 +591,11 @@ const Home: React.FC = () => {
               <div className="space-y-6">
                 <blockquote className="border-l-4 border-brand-500 pl-6 py-1
                   italic text-xl text-slate-700 font-serif leading-relaxed">
-                  "Personal altar sustains your victory - Apostle Danjuma Musa."
+                  "The strength of your victory is tied to the strength of your personal altar. — Apostle Danjuma Musa."
                 </blockquote>
                 <p className="text-slate-600 text-base leading-relaxed">
                   Inspired by a commitment to spiritual growth and community,
-                  Global Flame Ministries provides a sanctuary for those seeking
+                  Global Flame Ministry provides a sanctuary for those seeking
                   purpose and igniting the passion of Christ in the hearts of
                   men and women worldwide. Like a world-class hotel, we believe
                   in radical hospitality.

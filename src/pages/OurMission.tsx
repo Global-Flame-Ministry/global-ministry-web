@@ -1,6 +1,7 @@
 import React from 'react';
 import SEO from '../components/SEO';
-import { Globe, Eye } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Globe, Eye, ArrowLeft, ArrowRight } from 'lucide-react';
 import work3 from '../assets/auditoruim outside.bmp';
 
 const OurMission: React.FC = () => {
@@ -95,6 +96,15 @@ const OurMission: React.FC = () => {
         </p>
       </div>
 
+      {/* Navigation Buttons */}
+      <div className="max-w-6xl mx-auto px-6 mt-16 pt-10 border-t border-slate-100 flex flex-wrap gap-4">
+        <Link to="/our-story" className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg">
+          <ArrowLeft className="w-3.5 h-3.5" /> Our Story
+        </Link>
+        <Link to="/senior-pastor" className="inline-flex items-center gap-2 px-8 py-4 bg-fuchsia-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-fuchsia-700 transition-all duration-200 hover:scale-[1.02] shadow-lg shadow-fuchsia-200 rounded-lg">
+          Meet Senior Pastor <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
     </div>
   );
 };

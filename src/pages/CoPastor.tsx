@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import mummy from '../assets/mummy.jpg';
 
 const useReveal = (delay = 0) => {
@@ -89,7 +89,7 @@ const CoPastor: React.FC = () => {
               </p>
 
               <blockquote className="my-10 p-6 bg-fuchsia-50 rounded-2xl italic font-semibold border-l-4 border-fuchsia-500 not-prose text-fuchsia-900">
-                "Your level of thirst will determine the level of water that you will drink."
+                "Your level of thirst will determine the level of water you drink."
               </blockquote>
 
               <p className="mb-6 text-justify">
@@ -111,20 +111,15 @@ const CoPastor: React.FC = () => {
           <div className="mt-12 pt-10 border-t border-slate-100 flex flex-wrap gap-4">
             <Link
               to="/senior-pastor"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-fuchsia-600
-                text-white font-bold uppercase tracking-widest text-xs
-                hover:bg-fuchsia-700 transition-all duration-200 hover:scale-[1.02]
-                shadow-lg shadow-fuchsia-200 rounded-lg"
+              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg"
             >
-              Senior Pastor <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowLeft className="w-3.5 h-3.5" /> Senior Pastor
             </Link>
             <Link
-              to="/our-story"
-              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200
-                text-slate-700 font-bold uppercase tracking-widest text-xs
-                hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg"
+              to="/core-beliefs"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-fuchsia-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-fuchsia-700 transition-all duration-200 hover:scale-[1.02] shadow-lg shadow-fuchsia-200 rounded-lg"
             >
-              Our Story <ArrowRight className="w-3.5 h-3.5" />
+              Our Core Beliefs <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>

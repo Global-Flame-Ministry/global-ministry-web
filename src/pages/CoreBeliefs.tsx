@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
-import { ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ShieldCheck, ArrowLeft } from 'lucide-react';
 
 const beliefs = [
   {
@@ -120,6 +121,13 @@ const CoreBeliefs: React.FC = () => {
             </div>
             </div>
         ))}
+        </div>
+
+        {/* Navigation Buttons */}
+        <div className="mt-16 pt-10 border-t border-slate-100 flex flex-wrap gap-4">
+          <Link to="/our-story" className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg">
+            <ArrowLeft className="w-3.5 h-3.5" /> Our Story
+          </Link>
         </div>
 
       </div>
