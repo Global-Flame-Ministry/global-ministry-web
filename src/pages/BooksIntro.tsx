@@ -5,7 +5,7 @@ const BooksIntro = () => {
 
         {/* Eyebrow label */}
         <p className="text-fuchsia-600 font-semibold uppercase tracking-widest text-sm">
-          Global Flame Ministry
+          Global Flame Book Store
         </p>
 
         {/* Main heading */}

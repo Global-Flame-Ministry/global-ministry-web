@@ -157,7 +157,7 @@ const BookCard: React.FC<{ book: BookDto; onSelect: (book: BookDto) => void }> =
   return (
     <div className="flex flex-col w-36 shrink-0">
       <div
-        className="relative w-36 h-52 rounded-lg overflow-hidden bg-slate-100 mb-2 cursor-pointer group shadow-sm hover:shadow-md transition-shadow duration-300"
+        className="relative w-full aspect-[2/3] rounded-lg overflow-hidden bg-slate-100 mb-2 cursor-pointer group shadow-sm hover:shadow-md transition-shadow duration-300"
         onClick={() => onSelect(book)}
       >
         {book.coverImageUrl ? (
