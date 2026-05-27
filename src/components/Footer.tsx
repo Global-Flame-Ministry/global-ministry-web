@@ -308,7 +308,7 @@ const Footer: React.FC = () => {
               <div className="space-y-2">
                 {[
                   { day: 'Tuesday',  service: 'Power Service', Time: '3pm' },
-                  { day: 'Saturday', service: 'Morning Glory', Time: '7am'},
+                  { day: 'Saturday', service: 'Morning Glory', Time: '6:30am'},
                   {day: 'Thursday', service: 'Counselling', Time: '10am'},
                 ].map(s => (
                   <div key={s.day} className="flex justify-between items-center">

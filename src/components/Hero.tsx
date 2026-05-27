@@ -39,10 +39,15 @@ const Hero: React.FC = () => {
             </span>
 
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-white tracking-tight leading-snug max-w-4xl mx-auto">
-              Raising a people of power who will manifest the kingdom{' '}
-              <span className="text-transparent bg-clip-text bg-linear-to-r from-fuchsia-300 via-white to-white">
-                and the realities of the fullness of Christ through the Spirit.
-              </span>
+              Raising a people of{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-purple-400">power</span>
+              {' '}who will{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-purple-400">manifest</span>
+              {' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-purple-400">the kingdom</span>
+              {' '}and the realities of the{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-purple-400">fullness</span>
+              {' '}of Christ through the Spirit.
             </h1>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
