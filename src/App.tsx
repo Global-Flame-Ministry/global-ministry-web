@@ -22,6 +22,7 @@ import Contact           from './pages/Contact';
 import PrayerRequestPage from './pages/PrayerRequestPage';
 import MinistryDetail    from './pages/MinistryDetail';
 import CounsellingPage   from './pages/CounsellingPage';
+import PlanYourVisit from './pages/PlanYourVisit';
 
 // ABOUT PAGES 
 import OurStory    from './pages/OurStory';
@@ -162,6 +163,8 @@ const App: React.FC = () => {
               element={<PublicLayout><CoPastor /></PublicLayout>} />
             <Route path="/core-beliefs"
               element={<PublicLayout><CoreBeliefs /></PublicLayout>} />
+
+              <Route path="/plan-your-visit" element={<PublicLayout><PlanYourVisit /></PublicLayout>} />
 
             <Route path="/prayer-request"
               element={<PublicLayout><PrayerRequestPage /></PublicLayout>} />
