@@ -48,4 +48,7 @@ export const blogApi = {
 
   getBlogPostBySlug: (slug: string) =>
     api.get<ApiResponse<BlogPostResponseDto>>(`/api/blog/${slug}`),
+
+  getDepartments: () =>
+    api.get<ApiResponse<string[]>>('/api/blog/departments'),
 };

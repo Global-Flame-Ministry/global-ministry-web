@@ -5,10 +5,6 @@ import { Search, Flame } from 'lucide-react';
 import { blogApi } from '../api/blogApi';
 import type { BlogPostResponseDto, BlogQueryObject } from '../types';
 
-const DEPARTMENTS = ['All', 'Royal Priesthood', 'House of Opera', 'Home of Love', 'Flame Stars'] as const;
-
-type DepartmentFilter = (typeof DEPARTMENTS)[number];
-
 const BlogPage: React.FC = () => {
   const [posts, setPosts] = useState<BlogPostResponseDto[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -16,7 +12,8 @@ const BlogPage: React.FC = () => {
   const [pageSize] = useState(9);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [activeDepartment, setActiveDepartment] = useState<DepartmentFilter>('All');
+  const [activeDepartment, setActiveDepartment] = useState<string>('All');
+  const [departments, setDepartments] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,6 +24,14 @@ const BlogPage: React.FC = () => {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchTerm]);
+
+  useEffect(() => {
+    blogApi.getDepartments().then(response => {
+      if (response.data.isSuccess && response.data.data) {
+        setDepartments(response.data.data);
+      }
+    });
+  }, []);
 
   const fetchPosts = useCallback(async () => {
     setIsLoading(true);
@@ -95,7 +100,21 @@ const BlogPage: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {DEPARTMENTS.map((dept) => (
+            <button
+              type="button"
+              onClick={() => {
+                setActiveDepartment('All');
+                setPageNumber(1);
+              }}
+              className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                activeDepartment === 'All'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'bg-white text-gray-700 border border-gray-200 hover:border-purple-300 hover:text-purple-700'
+              }`}
+            >
+              All
+            </button>
+            {departments.map((dept) => (
               <button
                 key={dept}
                 type="button"

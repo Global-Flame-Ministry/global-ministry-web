@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import {
   Plus, Trash2, RefreshCw, Search, Pencil,
   X, Eye, EyeOff, ChevronUp, ChevronDown,
@@ -27,13 +27,16 @@ const defaultPostForm = (): CreateBlogPostDto => ({
   excerpt: '',
   coverImageUrl: undefined,
   videoUrl: undefined,
-  department: 'Royal Priesthood',
+  department: 'Daughters of honour',
   isPublished: false,
   blocks: [],
+  conferenceTheme: undefined,
+  themeScripture: undefined,
 });
 
 const AdminBlog: React.FC = () => {
   const { isDark } = useAdminTheme();
+  const blocksScrollRef = useRef<HTMLDivElement>(null);
   const [posts, setPosts] = useState<BlogPostResponseDto[]>([]);
   const [pageNumber, setPageNumber] = useState(1);
   const pageSize = 10;
@@ -94,9 +97,11 @@ const AdminBlog: React.FC = () => {
         excerpt: post.excerpt ?? '',
         coverImageUrl: post.coverImageUrl ?? undefined,
         videoUrl: post.videoUrl ?? undefined,
-        department: post.department ?? 'Royal Priesthood',
+        department: post.department ?? 'Daughters of honour',
         isPublished: post.isPublished,
         blocks: mappedBlocks,
+        conferenceTheme: post.conferenceTheme ?? undefined,
+        themeScripture: post.themeScripture ?? undefined,
       });
       setBlocks(mappedBlocks);
     } else {
@@ -118,6 +123,12 @@ const AdminBlog: React.FC = () => {
         displayOrder: prev.length + 1,
       },
     ]);
+    setTimeout(() => {
+      blocksScrollRef.current?.scrollTo({
+        top: blocksScrollRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }, 50);
   };
 
   const moveBlock = (index: number, direction: 'up' | 'down') => {
@@ -161,6 +172,8 @@ const AdminBlog: React.FC = () => {
       department: form.department,
       isPublished: form.isPublished,
       blocks: sortedBlocks,
+      conferenceTheme: form.conferenceTheme?.trim() || undefined,
+      themeScripture: form.themeScripture?.trim() || undefined,
     };
 
     setIsSaving(true);
@@ -361,6 +374,38 @@ const AdminBlog: React.FC = () => {
                   </datalist>
                 </label>
               </div>
+
+                {/* Conference Theme */}
+              <label className="space-y-2 text-sm text-slate-700 block">
+                Conference Theme
+                <input
+                  value={form.conferenceTheme ?? ''}
+                  onChange={e => setForm(prev => ({
+                    ...prev,
+                    conferenceTheme: e.target.value || undefined
+                  }))}
+                  className={`w-full rounded-2xl border px-4 py-3 text-sm 
+                    outline-none transition ${style.input}`}
+                  placeholder="e.g. Rivers of Living Water"
+                />
+              </label>
+
+              {/* Theme Scripture — only shown when conferenceTheme has a value */}
+              {form.conferenceTheme && (
+                <label className="space-y-2 text-sm text-slate-700 block">
+                  Anchor Scripture
+                  <input
+                    value={form.themeScripture ?? ''}
+                    onChange={e => setForm(prev => ({
+                      ...prev,
+                      themeScripture: e.target.value || undefined
+                    }))}
+                    className={`w-full rounded-2xl border px-4 py-3 text-sm 
+                      outline-none transition ${style.input}`}
+                    placeholder="e.g. John 7:37 — If anyone thirsts, let him come to me and drink."
+                  />
+                </label>
+              )}
 
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="space-y-2 text-sm text-slate-700">

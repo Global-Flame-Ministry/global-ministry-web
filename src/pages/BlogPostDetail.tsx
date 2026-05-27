@@ -144,6 +144,9 @@ export default function BlogPostDetail() {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&display=swap');
+      `}</style>
       <SEO
         title={post?.title ?? 'Blog Post'}
         description={post?.excerpt || post?.title || 'Discover spiritual insights from Global Flame Ministry.'}
@@ -203,13 +206,32 @@ export default function BlogPostDetail() {
               </div>
             )}
 
-            <div className="mb-4">
+            <div className="mb-2">
               <DepartmentBadge department={post.department} />
             </div>
 
-            <h1 className="w-full text-2xl md:text-3xl font-bold text-gray-900 mt-4 mb-4">
+            <h1
+              className="w-full text-3xl md:text-5xl font-black uppercase 
+                tracking-tight text-[#111827] mt-3 mb-2"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
               {post.title}
             </h1>
+
+                {post.conferenceTheme && (
+                  <div className="mt-1 mb-4">
+                    <p className="text-sm font-bold uppercase tracking-widest text-fuchsia-400">
+                      Theme: {post.conferenceTheme}
+                    </p>
+                    {post.themeScripture && (
+                      <blockquote className="mt-3 border-l-4 border-fuchsia-300 pl-4">
+                        <p className="text-base italic text-gray-600 leading-relaxed">
+                          "{post.themeScripture}"
+                        </p>
+                      </blockquote>
+                    )}
+                  </div>
+                )}
 
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-8 pb-8 border-b border-gray-200">
               <div className="inline-flex items-center gap-2">

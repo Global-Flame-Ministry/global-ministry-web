@@ -284,6 +284,8 @@ export interface BlogPostResponseDto {
   createdOn: string;
   updatedOn: string | null;
   department: string;
+  conferenceTheme: string | null;
+  themeScripture: string | null;
   videoUrl: string | null;
   blocks: BlogBlockDto[];
 }
@@ -301,6 +303,8 @@ export interface CreateBlogPostDto {
   coverImageUrl?: string;
   isPublished: boolean;
   department: string;
+  conferenceTheme?: string;
+  themeScripture?: string;
   videoUrl?: string;
   blocks: CreateBlogBlockDto[];
 }
