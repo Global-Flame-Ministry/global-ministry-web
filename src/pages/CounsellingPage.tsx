@@ -49,6 +49,10 @@ const CounsellingPage: React.FC = () => {
 
     if (!form.fullName.trim()) { toast.error('Full name is required'); return; }
     if (!form.email.trim())    { toast.error('Email is required');     return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
     if (!form.topic)           { toast.error('Please select a topic'); return; }
     if (form.message.trim().length < 20) {
       toast.error('Please write at least 20 characters in your message');

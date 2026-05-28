@@ -116,19 +116,35 @@ const AdminBulkEmail = () => {
   const handleSend = async () => {
     if (!form.subject.trim())  { toast.error('Subject is required');       return; }
     if (!form.htmlBody.trim()) { toast.error('Message body is required');   return; }
-    if (form.targetGroup === 'Custom' && !form.customEmails?.trim()) {
-      toast.error('Please enter at least one email address');
-      return;
+    if (form.targetGroup === 'Custom') {
+      if (!form.customEmails?.trim()) {
+        toast.error('Please enter at least one email address');
+        return;
+      }
+      const rawEmails = form.customEmails.split(',').map(e => e.trim()).filter(Boolean);
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const invalid = rawEmails.filter(e => !emailRegex.test(e));
+      if (invalid.length > 0) {
+        toast.error(`Invalid email(s): ${invalid.join(', ')}`);
+        return;
+      }
     }
     if (isScheduled && !form.scheduledAt) {
       toast.error('Please select a scheduled date and time');
       return;
     }
 
+    // Strip empty imageUrl to undefined so it's omitted from the payload
+    const payload: SendBulkEmailDto = {
+      ...form,
+      imageUrl: form.imageUrl || undefined,
+      scheduledAt: isScheduled ? form.scheduledAt : null,
+    };
+
     setIsSending(true);
     try {
       if (isScheduled) {
-        const res = await bulkEmailApi.schedule(form);
+        const res = await bulkEmailApi.schedule(payload);
         if (res.data.isSuccess) {
           toast.success('Email scheduled successfully');
           setShowCompose(false);
@@ -136,15 +152,19 @@ const AdminBulkEmail = () => {
           setIsScheduled(false);
           fetchHistory();
           fetchStats();
+        } else {
+          toast.error(res.data.message || 'Failed to schedule email');
         }
       } else {
-        const res = await bulkEmailApi.sendNow({ ...form, scheduledAt: null });
+        const res = await bulkEmailApi.sendNow(payload);
         if (res.data.isSuccess) {
           toast.success('Email is being sent to recipients');
           setShowCompose(false);
           setForm(emptyForm());
           fetchHistory();
           fetchStats();
+        } else {
+          toast.error(res.data.message || 'Failed to send email');
         }
       }
     } catch {

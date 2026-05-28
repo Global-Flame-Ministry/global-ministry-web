@@ -117,6 +117,10 @@ const PrayerRequestPage: React.FC = () => {
       toast.error('Please enter your email address.');
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      toast.error('Please enter a valid email address.');
+      return;
+    }
     if (!content.trim() || content.trim().length < 5) {
       toast.error('Please enter a valid prayer request (at least 5 characters).');
       return;

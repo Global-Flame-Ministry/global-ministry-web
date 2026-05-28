@@ -140,6 +140,12 @@ const EventCard: React.FC<{
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedEvent) return;
+    if (!regForm.fullName.trim()) { toast.error('Full name is required'); return; }
+    if (!regForm.email.trim())    { toast.error('Email is required');     return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(regForm.email.trim())) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
     setIsSubmitting(true);
     try {
       const response = await fetch(
