@@ -143,6 +143,9 @@ const Footer: React.FC = () => {
               <p className="text-white/40 text-sm">
                 &copy; {year} Global Flame Ministry. All rights reserved. Designed for Excellence.
               </p>
+              <p className="text-white/40 text-xs mt-3">
+                Zarmaganda, Diye, Off Rayfield Road, Jos, Plateau State, Nigeria
+              </p>
         </div>
       </div>
 

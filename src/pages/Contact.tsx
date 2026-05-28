@@ -295,23 +295,25 @@ const Contact: React.FC = () => {
           </div>
 
           {/* Map */}
-          
-            <a href="https://maps.google.com/?cid=4884970073081691653"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 min-h-64 bg-slate-200 w-full relative group overflow-hidden block"
-          >
-            <img
-              src="https://picsum.photos/id/1043/800/600"
-              alt="Global Flame Ministry Location"
-              className="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-500"
-            />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="bg-white px-4 py-2 rounded-lg shadow-md font-semibold text-slate-800 group-hover:bg-fuchsia-600 group-hover:text-white transition-colors">
-                View our location on Google Maps
-              </span>
+          <div className="px-6 pb-6 lg:px-0 lg:pb-0">
+            <h3 className="text-[9px] font-black uppercase tracking-[0.4em] text-fuchsia-500 mb-4 px-6 lg:px-0">
+              Find Us
+            </h3>
+            <div className="rounded-2xl overflow-hidden shadow-xl mx-6 lg:mx-0">
+              <iframe
+                src="https://www.google.com/maps?q=Zarmaganda,+Diye,+Off+Rayfield+Road,+Jos,+Plateau+State,+Nigeria&output=embed"
+                width="100%"
+                height="100%"
+                className="h-[280px] md:h-[450px] w-full"
+                loading="lazy"
+                allowFullScreen
+                title="Global Flame Ministry Location"
+              />
             </div>
-          </a>
+            <p className="text-slate-500 text-sm mt-4 px-6 lg:px-0">
+              Zarmaganda, Diye, Off Rayfield Road, Jos, Plateau State, Nigeria
+            </p>
+          </div>
         </div>
       </div>
     </div>
