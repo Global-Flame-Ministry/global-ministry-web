@@ -6,7 +6,7 @@ import {
   Users, MapPin, HandHeart, Globe,
   Flame, ArrowRight, Phone, MessageCircleHeart,
 } from 'lucide-react';
-import logo from '../assets/flames.jpg';
+import logo from '../assets/Logoo.jpg';
 import { ministryApi } from '../api/ministryApi';
 import { accountApi } from '../api/accountApi';
 import type { MinistryResponseDto } from '../types';
@@ -243,7 +243,7 @@ const Navbar: React.FC = () => {
                       <img
                         src={logo}
                         alt="GFM"
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover object-center scale-[1.15]"
                       />
                     </div>
                     <span className={`font-serif font-bold text-[#111827] tracking-tight

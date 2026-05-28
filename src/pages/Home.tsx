@@ -602,7 +602,7 @@ const Home: React.FC = () => {
           <AnimatedDiv direction="left" delay={200}>
             <div className="max-w-2xl">
               <p className="text-[10px] font-black text-white uppercase tracking-[0.4em] mb-4 animate-bob">
-                Every Tuesday
+                Every Tuesday <span className="text-fuchsia-300">• 3:00 PM</span>
               </p>
               <h2 className="text-white text-4xl md:text-6xl font-serif mb-6 leading-snug">
                 Experience the <br />
