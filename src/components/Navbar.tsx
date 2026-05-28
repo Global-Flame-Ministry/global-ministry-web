@@ -98,8 +98,8 @@ const Dropdown: React.FC<DropdownProps> = ({ label, children, isActive }) => {
       onMouseLeave={handleMouseLeave}
       onClick={() => setOpen(false)}
     >
-      <button className={`flex items-center gap-1.5 text-[11px] font-black
-        uppercase tracking-widest transition-colors whitespace-nowrap py-2 px-1
+      <button className={`flex items-center gap-1.5 font-semibold text-sm
+        tracking-wide transition-colors whitespace-nowrap py-2 px-1
         ${isActive || open
           ? 'text-fuchsia-600'
           : 'text-slate-700 hover:text-fuchsia-600'
@@ -256,10 +256,10 @@ const Navbar: React.FC = () => {
               <div className="hidden lg:flex items-center gap-8">
 
                 <NavLink to="/" className={({ isActive }) =>
-                  `text-[11px] font-black uppercase tracking-widest transition-colors
+                  `font-semibold text-sm tracking-wide transition-colors
                   py-2 px-1 ${
                     isActive
-                      ? 'text-[#a21caf]'
+                      ? 'text-[#a21caf] border-b-2 border-[#a21caf] pb-0.5'
                       : 'text-[#111827] hover:text-[#a21caf]'
                   }`}>
                   Home
@@ -298,8 +298,8 @@ const Navbar: React.FC = () => {
                   onMouseEnter={handleMegaEnter}
                   onMouseLeave={handleMegaLeave}
                 >
-                  <button className={`flex items-center gap-1.5 text-[11px]
-                    font-black uppercase tracking-widest transition-colors
+                  <button className={`flex items-center gap-1.5 font-semibold text-sm
+                    tracking-wide transition-colors
                     whitespace-nowrap py-2 px-1 ${
                       isExploreActive || megaOpen
                         ? 'text-[#a21caf]'
@@ -338,19 +338,18 @@ const Navbar: React.FC = () => {
                 </Dropdown>
 
                 <NavLink to="/blog" className={({ isActive }) =>
-                  `text-[11px] font-black uppercase tracking-widest transition-colors py-2 px-1 ${
-                    isActive ? 'text-[#a21caf]' : 'text-[#111827] hover:text-[#a21caf]'
+                  `font-semibold text-sm tracking-wide transition-colors py-2 px-1 ${
+                    isActive ? 'text-[#a21caf] border-b-2 border-[#a21caf] pb-0.5' : 'text-[#111827] hover:text-[#a21caf]'
                   }`}>
                   Blog
                 </NavLink>
 
                 <button
                   onClick={handleGiveClick}
-                  className="flex items-center gap-1.5 text-[11px] font-black
-                    uppercase tracking-widest text-[#a21caf]
-                    bg-white border border-[#a21caf] hover:border-[#a21caf]
-                    hover:text-white hover:bg-[#a21caf] focus-visible:outline-none
-                    px-4 py-2 rounded-full whitespace-nowrap transition-all"
+                  className="flex items-center gap-1.5 font-semibold text-sm
+                    tracking-wide text-white bg-gradient-to-r from-[#a21caf] to-[#712ae2]
+                    hover:opacity-90 focus-visible:outline-none px-4 py-2 rounded-full
+                    whitespace-nowrap transition-all"
                 >
                   <Heart className="w-3 h-3 fill-current" /> Give
                 </button>
