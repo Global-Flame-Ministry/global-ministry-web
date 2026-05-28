@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Youtube, ArrowUp } from 'lucide-react';
 import { ministryApi } from '../api/ministryApi';
-import logo from '../assets/logoo.jpg';
+import logo from '../assets/Logoo.jpg';
 import type { MinistryResponseDto } from '../types';
 
 const Footer: React.FC = () => {
