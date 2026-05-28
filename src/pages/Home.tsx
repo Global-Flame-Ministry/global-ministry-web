@@ -399,11 +399,11 @@ const Home: React.FC = () => {
             <Heart className="w-7 h-7 text-[#7c3aed]" />
             <span className="text-sm font-semibold text-slate-700">Give</span>
           </Link>
-          <Link to="/counselling" className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all group min-h-[120px]">
+          <Link to="/counselling" className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all group min-h-[120px] cursor-pointer">
             <HeartHandshake className="w-7 h-7 text-[#7c3aed]" />
             <span className="text-sm font-semibold text-slate-700">Counselling</span>
           </Link>
-          <button onClick={() => navigate('/prayer-request')} className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all group min-h-[120px]">
+          <button onClick={() => navigate('/prayer-request')} className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all group min-h-[120px] cursor-pointer">
             <HandHeart className="w-7 h-7 text-[#7c3aed]" />
             <span className="text-sm font-semibold text-slate-700">Prayer</span>
           </button>

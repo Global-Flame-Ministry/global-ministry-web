@@ -31,6 +31,7 @@ const Footer: React.FC = () => {
   const supportLinks = [
     { label: 'Contact',        path: '/contact' },
     { label: 'Prayer Request', path: '/prayer-request' },
+    { label: 'Counselling',    path: '/counselling' },
     { label: 'Privacy Policy', path: '/privacy' },
     { label: 'Terms of Service', path: '/terms' },
   ];
