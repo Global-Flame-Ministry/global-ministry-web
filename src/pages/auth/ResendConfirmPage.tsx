@@ -1,9 +1,10 @@
 ﻿import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FiMail } from 'react-icons/fi';
+import { ArrowLeft } from 'lucide-react';
 import { authApi } from '../../api/authApi';
 import logo from '../../assets/flames.jpg';
 
@@ -14,6 +15,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const ResendConfirmPage = () => {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -36,8 +38,11 @@ const ResendConfirmPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+        <div className="w-full max-w-md">
+          <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg cursor-pointer mb-6">
+            <ArrowLeft className="w-4 h-4" /> Back to Home
+          </button>
+          <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
 
           {/* Logo + Title */}
           <div className="flex flex-col items-center mb-8">
@@ -122,11 +127,6 @@ const ResendConfirmPage = () => {
           )}
         </div>
 
-        <p className="text-center mt-6 text-sm text-gray-400">
-          <Link to="/" className="hover:text-fuchsia-600 transition">
-            ← Back to Home
-          </Link>
-        </p>
       </div>
     </div>
   );

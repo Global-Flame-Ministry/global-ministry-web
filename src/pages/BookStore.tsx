@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
-import { Library, Loader, X, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Library, Loader, X, ExternalLink, ArrowLeft } from 'lucide-react';
 import { bookApi } from '../api/bookApi';
 import type { BookDto } from '../types';
 
@@ -189,6 +190,7 @@ const BookCard: React.FC<{ book: BookDto; onSelect: (book: BookDto) => void }> =
 
 /* ── Main Bookstore Page ───────────────────────────────────────────── */
 const Bookstore: React.FC = () => {
+  const navigate = useNavigate();
   const [books, setBooks]               = useState<BookDto[]>([]);
   const [isLoading, setIsLoading]       = useState(true);
   const [error, setError]               = useState<string | null>(null);
@@ -228,6 +230,12 @@ const Bookstore: React.FC = () => {
       />
 
       <BooksIntro />
+
+      <div className="max-w-[1280px] mx-auto px-6 mb-6">
+        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg cursor-pointer">
+          <ArrowLeft className="w-4 h-4" /> Back
+        </button>
+      </div>
 
       {/* Loading */}
       {isLoading && (

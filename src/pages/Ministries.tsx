@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Loader, Users, Flame } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, ArrowLeft, Loader, Users, Flame } from 'lucide-react';
 import { ministryApi } from '../api/ministryApi';
 import type { MinistryResponseDto } from '../types';
 
@@ -178,6 +178,7 @@ const MinistriesComingSoon: React.FC = () => (
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 
 const Ministries: React.FC = () => {
+  const navigate = useNavigate();
   const [ministries, setMinistries] = useState<MinistryResponseDto[]>([]);
   const [isLoading, setIsLoading]   = useState(true);
 
@@ -225,6 +226,11 @@ const Ministries: React.FC = () => {
             Discover where you belong in the Global Flame family. Every arm
             is a vital part of our mission.
           </p>
+          <div className="mt-8">
+            <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white/20 text-white/80 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-400 hover:text-fuchsia-400 transition-all duration-200 rounded-lg cursor-pointer bg-black/20 backdrop-blur-sm">
+              <ArrowLeft className="w-4 h-4" /> Back
+            </button>
+          </div>
         </div>
       </section>
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Heart, Phone, Mail, MessageSquare, ChevronDown, Check, Loader } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Heart, Phone, Mail, MessageSquare, ChevronDown, Check, Loader, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { counsellingApi } from '../api/counsellingApi';
 import { useAuth } from '../context/useAuthContext';
@@ -17,6 +18,7 @@ const TOPICS = [
 ];
 
 const CounsellingPage: React.FC = () => {
+  const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
 
   const [form, setForm] = useState({
@@ -120,9 +122,14 @@ const CounsellingPage: React.FC = () => {
             Counselling
           </h1>
           <p className="text-slate-400 text-lg leading-relaxed max-w-xl mx-auto">
-            You don't have to carry it alone. Our pastoral team is here to walk
-            with you through whatever you're facing - in complete confidence.
+            Your request is received with care and taken before God by our
+            prayer team. Everything shared here is fully confidential.
           </p>
+          <div className="mt-8">
+            <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white/20 text-white/80 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-400 hover:text-fuchsia-400 transition-all duration-200 rounded-lg cursor-pointer bg-black/20 backdrop-blur-sm">
+              <ArrowLeft className="w-4 h-4" /> Back
+            </button>
+          </div>
         </div>
       </div>
 

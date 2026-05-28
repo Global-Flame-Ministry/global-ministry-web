@@ -63,7 +63,7 @@ const Footer: React.FC = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
             {/* Ministries */}
             <div>
-              <h4 className="font-bold mb-6 text-[#ffd6fa] uppercase tracking-widest text-sm">Ministries</h4>
+              <h4 className="font-bold mb-6 text-[#ffd6fa] uppercase tracking-widest text-sm">Departments</h4>
               <ul className="space-y-4 text-white/60">
                 {ministries.map(m => (
                   <li key={m.id}>

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import SEO from '../components/SEO';
+import { useNavigate } from 'react-router-dom';
 import {
-  Bell, Search, Calendar, Tag, ArrowRight,
+  Bell, Search, Calendar, Tag, ArrowRight, ArrowLeft,
   X, AlertCircle, Link as LinkIcon, ExternalLink
 } from 'lucide-react';
 import { announcementApi } from '../api/announcementApi';
@@ -88,6 +89,7 @@ const SkeletonCard = () => (
 
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────────
 const AnnouncementsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [announcements, setAnnouncements] = useState<AnnouncementDto[]>([]);
   const [isLoading, setIsLoading]         = useState(true);
   const [error, setError]                 = useState<string | null>(null);
@@ -168,6 +170,13 @@ const AnnouncementsPage: React.FC = () => {
           <p className="text-white/40 text-base mb-8 max-w-lg mx-auto">
             Stay informed with the latest news, events, and updates from Global Flame Ministries.
           </p>
+
+          <div className="flex justify-center mb-6">
+            <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white/20 text-white/80 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-400 hover:text-fuchsia-400 transition-all duration-200 rounded-lg cursor-pointer bg-black/20 backdrop-blur-sm">
+              <ArrowLeft className="w-4 h-4" /> Back
+            </button>
+          </div>
+
           {/* Search */}
           <div className="max-w-2xl mx-auto relative group">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30 w-5 h-5

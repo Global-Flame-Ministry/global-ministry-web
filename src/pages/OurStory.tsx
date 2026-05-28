@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
-import { Link } from 'react-router-dom';
-import { ArrowRight} from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, ArrowLeft } from 'lucide-react';
 import daddyandmum from '../assets/daddyandmum.jpeg';
 
 const useReveal = (delay = 0) => {
@@ -28,6 +28,7 @@ const useReveal = (delay = 0) => {
 };
 
 const OurStory: React.FC = () => {
+  const navigate = useNavigate();
   const r0 = useReveal(0);
   const r1 = useReveal(100);
   const r2 = useReveal(150);
@@ -54,6 +55,11 @@ const OurStory: React.FC = () => {
 
         {/* Label */}
         <div ref={r0} style={fadeStyle}>
+          <div className="mb-6">
+            <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg cursor-pointer">
+              <ArrowLeft className="w-4 h-4" /> Back
+            </button>
+          </div>
           <p className="text-[9px] font-black uppercase tracking-[0.4em] text-fuchsia-500 mb-3">
             Our History
           </p>

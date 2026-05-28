@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
-import { ArrowRight, X, Calendar, MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowRight, X, Calendar, MapPin, ArrowLeft } from 'lucide-react';
 import { eventApi } from '../api/eventApi';
 import type { EventDto } from '../types';
 import toast from 'react-hot-toast';
@@ -154,6 +155,7 @@ const EventCard: React.FC<{
 
 /* ── Main Events Page ──────────────────────────────────────────────── */
 const Events: React.FC = () => {
+  const navigate = useNavigate();
   const [upcomingEvents, setUpcomingEvents] = useState<EventDto[]>([]);
   const [ongoingEvents,  setOngoingEvents]  = useState<EventDto[]>([]);
   const [pastEvents,     setPastEvents]     = useState<EventDto[]>([]);
@@ -292,6 +294,11 @@ const Events: React.FC = () => {
             Events
           </h1>
           <div className="w-20 h-1 bg-fuchsia-500 mx-auto" />
+        </div>
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 mt-6">
+          <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white/20 text-white/80 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-400 hover:text-fuchsia-400 transition-all duration-200 rounded-lg cursor-pointer bg-black/20 backdrop-blur-sm">
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { ArrowLeft, Clock, MapPin, Phone, ChevronDown, CheckCircle2 } from 'lucide-react';
 import auditorium from '../assets/auditorium.jpg';
@@ -77,6 +77,7 @@ interface FormData {
 // ── Main Component ────────────────────────────────────────────────────────────
 const PlanYourVisit: React.FC = () => {
   const [locationType, setLocationType] = useState<LocationType>(null);
+  const navigate = useNavigate();
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState<FormData>({
     fullName: '',
@@ -124,14 +125,13 @@ const PlanYourVisit: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-slate-900/20" />
 
         {/* Back nav */}
-        <div className="absolute top-8 left-6 z-20">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-white/70 hover:text-white
-              text-xs font-bold uppercase tracking-widest transition-colors"
+        <div className="absolute top-28 left-6 z-20">
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white/20 text-white/80 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-400 hover:text-fuchsia-400 transition-all duration-200 rounded-lg cursor-pointer bg-black/20 backdrop-blur-sm"
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to Home
-          </Link>
+            <ArrowLeft className="w-3.5 h-3.5" /> Back
+          </button>
         </div>
 
         {/* Hero text */}

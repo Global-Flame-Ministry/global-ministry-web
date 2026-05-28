@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { Check, X, Loader, Mail } from 'lucide-react';
+import { Check, X, Loader, Mail, ArrowLeft } from 'lucide-react';
 import { accountApi } from '../../api/accountApi';
 import { useAuth } from '../../context/useAuthContext';
 
@@ -111,14 +111,9 @@ const ConfirmEmailChange: React.FC = () => {
             <p className="text-slate-500 text-sm leading-relaxed mb-8">
               {message}
             </p>
-            <Link
-              to="/dashboard"
-              className="block w-full py-3 bg-slate-900 text-white
-                font-black uppercase tracking-widest text-xs rounded-xl
-                hover:bg-fuchsia-600 transition-all"
-            >
-              Back to Dashboard
-            </Link>
+            <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg cursor-pointer">
+              <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+            </button>
           </>
         )}
 

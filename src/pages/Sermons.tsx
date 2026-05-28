@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import SEO from '../components/SEO';
-import { Search, Library, ChevronRight, Home, Clapperboard, User } from 'lucide-react';
+import { Search, Library, ChevronRight, Home, Clapperboard, User, ArrowLeft } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
 import type { SermonDto } from '../types';
 
@@ -25,6 +25,7 @@ const getBadgeStyle = (name: string) => {
 };
 
 const Sermons: React.FC = () => {
+  const navigate = useNavigate();
   const [allSermons, setAllSermons] = useState<SermonDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -78,8 +79,14 @@ const Sermons: React.FC = () => {
   }, [seriesGroups, activeFilter]);
 
   const searched = useMemo(() => {
+    if (!searchQuery.trim()) return filtered;
+    const q = searchQuery.toLowerCase();
     return filtered.filter(g =>
-      g.name.toLowerCase().includes(searchQuery.toLowerCase())
+      g.name.toLowerCase().includes(q) ||
+      g.sermons.some(s =>
+        s.speaker?.toLowerCase().includes(q) ||
+        s.title?.toLowerCase().includes(q)
+      )
     );
   }, [filtered, searchQuery]);
 
@@ -121,21 +128,21 @@ const Sermons: React.FC = () => {
 
       {/* ─── FILTER + GRID ─── */}
       <section className="bg-[#f9f9ff] flex-1 max-w-[1280px] mx-auto px-4 sm:px-8 -mt-12 relative z-20 pb-32">
-        {/* Filter Bar */}
-        <div className="flex flex-wrap items-center justify-center gap-4 mb-20">
-          {departmentNames.map(name => (
-            <button
-              key={name}
-              onClick={() => { setActiveFilter(name); setVisibleCount(6); }}
-              className={`px-8 py-3 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all ${
-                activeFilter === name
-                  ? 'bg-[#5b0064] text-white shadow-lg'
-                  : 'bg-white text-[#51424f] border border-[#d5c0d1]/30 hover:border-[#5b0064] hover:text-[#5b0064]'
-              }`}
-            >
-              {name}
-            </button>
-          ))}
+        {/* Filter + Back row */}
+        <div className="flex items-center justify-between gap-4 mb-20">
+          <select
+            value={activeFilter}
+            onChange={(e) => { setActiveFilter(e.target.value); setVisibleCount(6); }}
+            className="px-6 py-3 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] bg-white text-[#51424f] border border-[#d5c0d1]/30 focus:border-[#5b0064] focus:outline-none focus:ring-1 focus:ring-[#5b0064] cursor-pointer pr-10"
+            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235b0064' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 16px center', backgroundSize: '12px' }}
+          >
+            {departmentNames.map(name => (
+              <option key={name} value={name}>{name}</option>
+            ))}
+          </select>
+          <button onClick={() => navigate(-1)} className="text-[#51424f] hover:text-[#5b0064] transition-colors p-2">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Loading */}

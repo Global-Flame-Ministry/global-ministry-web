@@ -90,12 +90,6 @@ const SeriesDetail: React.FC = () => {
               Explore the complete collection of teachings from this series.
             </p>
           </div>
-          <div>
-            <Link to="/sermons" className="inline-flex items-center gap-2 px-6 py-3 border-2 border-[#5b0064] text-[#5b0064] text-[10px] font-bold uppercase tracking-[0.2em] rounded-full hover:bg-[#5b0064] hover:text-white transition-all group">
-              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-              Back to Archive
-            </Link>
-          </div>
         </div>
       </header>
 

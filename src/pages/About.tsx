@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import SEO from '../components/SEO';
+import { useNavigate } from 'react-router-dom';
 import { CHURCH_NAME } from '../constants';
-import { Globe, Anchor, Compass, ShieldCheck } from 'lucide-react';
+import { Globe, Anchor, Compass, ShieldCheck, ArrowLeft } from 'lucide-react';
 
 // Assets
 import preach from '../assets/preach.jpg';
@@ -12,6 +13,7 @@ import auditorium from '../assets/auditorium.jpg';
 import cong from '../assets/cong.jpg';
 
 const About: React.FC = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('danjuma');
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -64,6 +66,12 @@ const About: React.FC = () => {
         {/* Floating Scroll Indicator */}
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
             <div className="w-px h-16 bg-linear-to-b from-white to-transparent"></div>
+        </div>
+
+        <div className="absolute top-32 left-6 z-20">
+          <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white/20 text-white/80 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-400 hover:text-fuchsia-400 transition-all duration-200 rounded-lg cursor-pointer bg-black/20 backdrop-blur-sm">
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
         </div>
       </section>
 

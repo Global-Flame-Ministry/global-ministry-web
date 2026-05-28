@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import SEO from '../components/SEO';
 import {
   Play, Share2, PlusCircle, Music, Download,
@@ -12,6 +12,7 @@ const slugify = (s: string) => s.toLowerCase().replace(/\s+/g, '-');
 
 const SermonDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [activeSermon, setActiveSermon] = useState<SermonDto | null>(null);
   const [seriesSermons, setSeriesSermons] = useState<SermonDto[]>([]);
   const [allSeriesSermons, setAllSeriesSermons] = useState<SermonDto[]>([]);
@@ -114,10 +115,10 @@ const getEmbedUrl = (url: string): string => {
         <div className="text-center p-12 bg-white rounded-3xl shadow-xl max-w-md">
           <h2 className="font-serif text-3xl font-bold text-[#1a1c20] mb-4">Sermon Not Found</h2>
           <p className="text-[#51424f] mb-8">The message you are looking for might have been moved or archived.</p>
-          <Link to="/sermons" className="inline-flex items-center gap-2 px-6 py-3 bg-[#5b0064] text-white rounded-full text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-[#712ae2] transition-all">
+          <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg cursor-pointer">
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to Archive
-          </Link>
+          </button>
         </div>
       </div>
     );

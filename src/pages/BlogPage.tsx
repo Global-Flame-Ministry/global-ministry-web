@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import SEO from '../components/SEO';
-import { Link } from 'react-router-dom';
-import { Search, Flame } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Search, Flame, ArrowLeft } from 'lucide-react';
 import { blogApi } from '../api/blogApi';
 import type { BlogPostResponseDto, BlogQueryObject } from '../types';
 
 const BlogPage: React.FC = () => {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<BlogPostResponseDto[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
@@ -85,6 +86,12 @@ const BlogPage: React.FC = () => {
           <p className="text-xs uppercase tracking-widest text-[#a21caf] font-bold mb-2">Blog</p>
           <h1 className="text-4xl font-bold text-[#111827] mb-3">Stories & Insights</h1>
           <p className="text-slate-500">Discover inspiring stories, spiritual insights, and community updates from our ministry family.</p>
+        </div>
+
+        <div className="mb-8">
+          <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg cursor-pointer">
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
         </div>
 
         <div className="mb-8 space-y-4">

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import SEO from '../components/SEO';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Mail, Phone, MapPin, ArrowLeft } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,6 +27,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const Contact: React.FC = () => {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -77,6 +79,11 @@ const Contact: React.FC = () => {
         description="Get in touch with Global Flame Ministry. Find us at Zarmaganda, Diye, Off Rayfield Road, Jos, Plateau State, Nigeria."
         url="https://globalflameministry.org/contact"
       />
+      <div className="px-8 pt-8">
+        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg cursor-pointer">
+          <ArrowLeft className="w-4 h-4" /> Back
+        </button>
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-2">
 
         {/* Contact Form */}

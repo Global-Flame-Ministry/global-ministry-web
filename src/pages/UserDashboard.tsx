@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   User, Calendar, Heart, HandHeart, Camera,
-  Edit3, Check, X, Loader, ArrowRight,
+  Edit3, Check, X, Loader, ArrowRight, ArrowLeft,
   MapPin, CheckCircle2, Clock, AlertCircle,
   ShieldCheck, Mail, KeyRound, Upload
 } from 'lucide-react';
@@ -297,6 +297,12 @@ const UserDashboard: React.FC = () => {
               title="Change profile picture"
             >
               <Camera className="w-3.5 h-3.5 text-white" />
+            </button>
+          </div>
+
+          <div className="md:ml-6">
+            <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white/20 text-white/80 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-400 hover:text-fuchsia-400 transition-all duration-200 rounded-lg cursor-pointer bg-black/20 backdrop-blur-sm">
+              <ArrowLeft className="w-4 h-4" /> Back
             </button>
           </div>
 

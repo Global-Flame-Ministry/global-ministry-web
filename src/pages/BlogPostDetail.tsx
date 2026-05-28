@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import SEO from '../components/SEO';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Flame, Calendar, User } from 'lucide-react';
 import { blogApi } from '../api/blogApi';
 import type { BlogBlockDto, BlogPostResponseDto } from '../types';
@@ -68,6 +68,7 @@ function ContentBlock({ block }: { block: BlogBlockDto }) {
 
 export default function BlogPostDetail() {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [post, setPost] = useState<BlogPostResponseDto | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPostResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -130,13 +131,10 @@ export default function BlogPostDetail() {
               ? "The post you're looking for doesn't exist or has been removed."
               : error}
           </p>
-          <Link
-            to="/blog"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 transition-colors"
-          >
+          <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg cursor-pointer">
             <ArrowLeft className="w-4 h-4" />
             Back to Blog
-          </Link>
+          </button>
         </div>
       </div>
     );
@@ -155,13 +153,10 @@ export default function BlogPostDetail() {
         type="article"
       />
       <main className="max-w-4xl mx-auto px-4 py-8 sm:py-12 text-left">
-        <Link
-          to="/blog"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-[#a21caf] hover:text-[#7c3aed] mb-6"
-        >
-          <span>←</span>
+        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg cursor-pointer mb-6">
+          <ArrowLeft className="w-4 h-4" />
           Back to Blog
-        </Link>
+        </button>
 
         {isLoading ? (
           <div className="animate-pulse">
@@ -308,6 +303,7 @@ export default function BlogPostDetail() {
           </section>
         )}
       </main>
+
     </div>
   );
 }
