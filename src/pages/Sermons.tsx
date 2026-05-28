@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
-import { Search, Library, ChevronRight, Home, Clapperboard, Radio, User } from 'lucide-react';
+import { Search, Library, ChevronRight, Home, Clapperboard, User } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
 import type { SermonDto } from '../types';
 
@@ -239,10 +239,6 @@ const Sermons: React.FC = () => {
         <Link to="/sermons" className="flex flex-col items-center justify-center text-[#5b0064] bg-[#5b0064]/10 rounded-full p-2">
           <Clapperboard className="w-5 h-5" />
           <span className="text-[10px] font-bold uppercase tracking-[0.1em] mt-1">Series</span>
-        </Link>
-        <Link to="/events" className="flex flex-col items-center justify-center text-[#e2e2e8]">
-          <Radio className="w-5 h-5" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.1em] mt-1">Live</span>
         </Link>
         <Link to="/dashboard" className="flex flex-col items-center justify-center text-[#e2e2e8]">
           <User className="w-5 h-5" />
