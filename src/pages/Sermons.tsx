@@ -1,5 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import SEO from '../components/SEO';
 import { Search, Library, ChevronRight, Home, Clapperboard, User, ArrowLeft } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
@@ -26,28 +27,14 @@ const getBadgeStyle = (name: string) => {
 
 const Sermons: React.FC = () => {
   const navigate = useNavigate();
-  const [allSermons, setAllSermons] = useState<SermonDto[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: allSermonsData, isLoading } = useQuery({
+    queryKey: ['publishedSermons'],
+    queryFn: () => sermonApi.getAll({ pageSize: 100 }).then(res => res.data.data?.items ?? []),
+  });
+  const allSermons = useMemo(() => allSermonsData ?? [], [allSermonsData]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
   const [visibleCount, setVisibleCount] = useState(6);
-
-  useEffect(() => {
-    const fetchSermons = async () => {
-      setIsLoading(true);
-      try {
-        const response = await sermonApi.getAll({ pageSize: 100 });
-        if (response.data.isSuccess && response.data.data) {
-          setAllSermons(response.data.data.items);
-        }
-      } catch (error) {
-        console.error('Failed to fetch sermons:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchSermons();
-  }, []);
 
   const seriesGroups = useMemo(() => {
     const map = new Map<string, SermonDto[]>();

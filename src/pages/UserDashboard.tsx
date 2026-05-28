@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   User, Calendar, Heart, HandHeart, Camera,
   Edit3, Check, X, Loader, ArrowRight, ArrowLeft,
@@ -9,10 +10,6 @@ import {
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/useAuthContext';
 import { accountApi } from '../api/accountApi';
-import type {
-  MyProfileDto, MyRegistrationDto,
-  MyDonationDto, MyPrayerRequestDto
-} from '../types';
 
 type Tab = 'profile' | 'registrations' | 'givings' | 'prayers';
 
@@ -75,21 +72,45 @@ const UserDashboard: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab]         = useState<Tab>('profile');
-  const [profile, setProfile]             = useState<MyProfileDto | null>(null);
-  const [registrations, setRegistrations] = useState<MyRegistrationDto[]>([]);
-  const [donations, setDonations]         = useState<MyDonationDto[]>([]);
-  const [prayers, setPrayers]             = useState<MyPrayerRequestDto[]>([]);
+  const [activeTab, setActiveTab] = useState<Tab>('profile');
 
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
-  const [isLoadingTab, setIsLoadingTab]         = useState(false);
+  const { data: profile, isLoading: isLoadingProfile } = useQuery({
+    queryKey: ['myProfile'],
+    queryFn: async () => {
+      const res = await accountApi.getProfile();
+      if (!res.data.isSuccess || !res.data.data) throw new Error('Could not load profile');
+      return res.data.data;
+    },
+  });
+
+  const { data: registrationsData } = useQuery({
+    queryKey: ['myRegistrations'],
+    queryFn: () => accountApi.getMyRegistrations().then(res => res.data.data ?? []),
+    enabled: activeTab === 'registrations',
+  });
+  const registrations = registrationsData ?? [];
+
+  const { data: donationsData } = useQuery({
+    queryKey: ['myDonations'],
+    queryFn: () => accountApi.getMyDonations().then(res => res.data.data ?? []),
+    enabled: activeTab === 'givings',
+  });
+  const donations = donationsData ?? [];
+
+  const { data: prayersData, isLoading: isLoadingTab } = useQuery({
+    queryKey: ['myPrayers'],
+    queryFn: () => accountApi.getMyPrayerRequests().then(res => res.data.data ?? []),
+    enabled: activeTab === 'prayers',
+  });
+  const prayers = prayersData ?? [];
+
+  const [editForm, setEditForm] = useState({
+    firstName: profile?.firstName ?? '', lastName: profile?.lastName ?? '', userName: profile?.userName ?? ''
+  });
 
   // Profile edit state
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving]   = useState(false);
-  const [editForm, setEditForm]   = useState({
-    firstName: '', lastName: '', userName: ''
-  });
 
   // Profile picture state
   const [showPicInput, setShowPicInput] = useState(false);
@@ -109,53 +130,18 @@ const UserDashboard: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        setIsLoadingProfile(true);
-        const res = await accountApi.getProfile();
-        if (res.data.isSuccess && res.data.data) {
-          setProfile(res.data.data);
-          setEditForm({
-            firstName: res.data.data.firstName,
-            lastName: res.data.data.lastName,
-            userName: res.data.data.userName,
-          });
-        }
-      } catch {
-        toast.error('Could not load profile');
-      } finally {
-        setIsLoadingProfile(false);
-      }
-    };
-    load();
-  }, []);
+  const queryClient = useQueryClient();
 
+  // Sync editForm when profile loads
   useEffect(() => {
-    const load = async () => {
-      setIsLoadingTab(true);
-      try {
-        if (activeTab === 'registrations' && registrations.length === 0) {
-          const res = await accountApi.getMyRegistrations();
-          if (res.data.isSuccess && res.data.data)
-            setRegistrations(res.data.data);
-        }
-        if (activeTab === 'givings' && donations.length === 0) {
-          const res = await accountApi.getMyDonations();
-          if (res.data.isSuccess && res.data.data) setDonations(res.data.data);
-        }
-        if (activeTab === 'prayers' && prayers.length === 0) {
-          const res = await accountApi.getMyPrayerRequests();
-          if (res.data.isSuccess && res.data.data) setPrayers(res.data.data);
-        }
-      } catch {
-        toast.error('Could not load data');
-      } finally {
-        setIsLoadingTab(false);
-      }
-    };
-    if (activeTab !== 'profile') load();
-  }, [activeTab]);
+    if (profile) {
+      setEditForm({
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        userName: profile.userName,
+      });
+    }
+  }, [profile]);
 
   const handleSaveProfile = async () => {
     if (!editForm.firstName.trim() || !editForm.lastName.trim()) {
@@ -166,7 +152,7 @@ const UserDashboard: React.FC = () => {
     try {
       const res = await accountApi.updateProfile(editForm);
       if (res.data.isSuccess && res.data.data) {
-        setProfile(res.data.data);
+        queryClient.invalidateQueries({ queryKey: ['myProfile'] });
         setIsEditing(false);
         toast.success('Profile updated');
       }
@@ -208,9 +194,7 @@ const UserDashboard: React.FC = () => {
 
       const res = await accountApi.updateProfilePicture(cloudinaryUrl);
       if (res.data.isSuccess && res.data.data) {
-        setProfile(p => p
-          ? { ...p, profilePictureUrl: res.data.data!.profilePictureUrl }
-          : p);
+        queryClient.invalidateQueries({ queryKey: ['myProfile'] });
         setShowPicInput(false);
         toast.success('Profile picture updated');
       }

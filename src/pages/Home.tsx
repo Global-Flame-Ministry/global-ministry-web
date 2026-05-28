@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import SEO from '../components/SEO';
 import { Link, useNavigate } from 'react-router-dom';
 import { announcementApi } from '../api/announcementApi';
@@ -7,7 +8,6 @@ import { sermonApi } from '../api/sermonApi';
 import { eventApi } from '../api/eventApi';
 import { bookApi } from '../api/bookApi';
 import { blogApi } from '../api/blogApi';
-import type { SermonDto, EventDto, AnnouncementDto, BookDto, BlogPostResponseDto } from '../types';
 import dddPreaching from '../assets/ddd-preaching.jpeg';
 import daddandmumm from '../assets/dadandmum.jpg';
 import auditorium from '../assets/auditorium.jpg';
@@ -192,13 +192,33 @@ const Home: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // ── Data state ───────────────────────────────────────────────────────────
-  const [latestSermons, setLatestSermons]             = useState<SermonDto[]>([]);
-  const [upcomingEvents, setUpcomingEvents]           = useState<EventDto[]>([]);
-  const [latestAnnouncements, setLatestAnnouncements] = useState<AnnouncementDto[]>([]);
-  const [featuredBooks, setFeaturedBooks]             = useState<BookDto[]>([]);
-  const [latestBlogPosts, setLatestBlogPosts]         = useState<BlogPostResponseDto[]>([]);
-  const [showTestimonyModal, setShowTestimonyModal]   = useState(false);
+  const { data: latestSermonsData } = useQuery({
+    queryKey: ['featuredSermons'],
+    queryFn: () => sermonApi.getAll({ pageSize: 3, isFeatured: true }).then(res => res.data.data?.items ?? []),
+  });
+  const { data: upcomingEventsData } = useQuery({
+    queryKey: ['upcomingEvents'],
+    queryFn: () => eventApi.getUpcoming({ pageSize: 3 }).then(res => res.data.data?.items ?? []),
+  });
+  const { data: latestAnnouncementsData } = useQuery({
+    queryKey: ['homeAnnouncements'],
+    queryFn: () => announcementApi.getAll({ pageSize: 3, module: 'Ministry' }).then(res => res.data.data?.items ?? []),
+  });
+  const { data: featuredBooksData } = useQuery({
+    queryKey: ['featuredBooks'],
+    queryFn: () => bookApi.getPublished({ pageSize: 10, pageNumber: 1 }).then(res => res.data.data?.items ?? []),
+  });
+  const { data: latestBlogPostsData } = useQuery({
+    queryKey: ['homeBlogPosts'],
+    queryFn: () => blogApi.getPublishedPosts({ pageSize: 3, pageNumber: 1 }).then(res => res.data.data?.items ?? []),
+  });
+
+  const latestSermons = latestSermonsData ?? [];
+  const upcomingEvents = upcomingEventsData ?? [];
+  const latestAnnouncements = latestAnnouncementsData ?? [];
+  const featuredBooks = featuredBooksData ?? [];
+  const latestBlogPosts = latestBlogPostsData ?? [];
+  const [showTestimonyModal, setShowTestimonyModal] = useState(false);
 
   // ── Sign-up bar state ─────────────────────────────────────────────────────
   const [signUpFirstName, setSignUpFirstName] = useState('');
@@ -211,26 +231,7 @@ const Home: React.FC = () => {
   const [needsBus, setNeedsBus]               = useState<boolean | null>(null);
   const [pickupLocation, setPickupLocation]   = useState('');
 
-  // ── Data fetching ─────────────────────────────────────────────────────────
-  useEffect(() => {
-    sermonApi.getAll({ pageSize: 3, isFeatured: true }).then(res => {
-      if (res.data.isSuccess && res.data.data) setLatestSermons(res.data.data.items);
-    });
-    eventApi.getUpcoming({ pageSize: 3 }).then(res => {
-      if (res.data.isSuccess && res.data.data) setUpcomingEvents(res.data.data.items);
-    });
-    announcementApi.getAll({ pageSize: 3, module: 'Ministry' }).then(res => {
-      if (res.data.isSuccess && res.data.data) setLatestAnnouncements(res.data.data.items);
-    });
-    bookApi.getPublished({ pageSize: 10, pageNumber: 1 }).then(res => {
-      if (res.data.isSuccess && res.data.data) setFeaturedBooks(res.data.data.items);
-    });
-    blogApi.getPublishedPosts({ pageSize: 3, pageNumber: 1 }).then(res => {
-      if (res.data.isSuccess && res.data.data) setLatestBlogPosts(res.data.data.items);
-    });
-  }, []);
-
-  // ── Handlers ──────────────────────────────────────────────────────────────
+  // ── Sign-up bar state
   const handleSignUp = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
@@ -541,12 +542,12 @@ const Home: React.FC = () => {
               <p className="text-base md:text-lg text-slate-500 max-w-2xl mx-auto">Foundational texts for the modern believer seeking dominion and deep spiritual intelligence.</p>
             </AnimatedDiv>
 
-            <div className="flex flex-nowrap md:grid md:grid-cols-4 gap-8 overflow-x-auto pb-8 snap-x scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8">
               {featuredBooks.map((book, idx) => (
                 <div
                   key={book.id}
-                  className="min-w-[280px] snap-center animate-fadeUp"
-                  style={{ animationDelay: `${idx * 100}ms`, animationFillMode: 'both' }}
+                  className="animate-fadeUp"
+                  style={{ animationDelay: `${idx * 60}ms`, animationFillMode: 'both' }}
                 >
                   <Link to="/books" className="group block">
                     <div className="perspective-[1000px]">
@@ -564,9 +565,10 @@ const Home: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    <div className="mt-6 text-center">
+                    <div className="mt-4 text-center">
                       <h4 className="text-sm font-semibold text-slate-900 mb-1 line-clamp-2">{book.title}</h4>
-                      <p className="text-xs uppercase tracking-widest text-fuchsia-600">{book.author}</p>
+                      <p className="text-xs uppercase tracking-widest text-fuchsia-600 mb-1">{book.author}</p>
+                      <span className="text-xs font-black text-slate-900">{book.price ? `${book.currency} ${book.price.toLocaleString()}` : 'Free'}</span>
                     </div>
                   </Link>
                 </div>

@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import React, { useState, useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
 import { useNavigate } from 'react-router-dom';
@@ -191,32 +192,17 @@ const BookCard: React.FC<{ book: BookDto; onSelect: (book: BookDto) => void }> =
 /* ── Main Bookstore Page ───────────────────────────────────────────── */
 const Bookstore: React.FC = () => {
   const navigate = useNavigate();
-  const [books, setBooks]               = useState<BookDto[]>([]);
-  const [isLoading, setIsLoading]       = useState(true);
-  const [error, setError]               = useState<string | null>(null);
+  const { data: booksData, isLoading, error } = useQuery({
+    queryKey: ['publishedBooks'],
+    queryFn: () => bookApi.getPublished({ pageSize: 50, pageNumber: 1 }).then(res => {
+      if (!res.data.isSuccess) throw new Error('Could not load books right now.');
+      return res.data.data?.items ?? [];
+    }),
+  });
+  const books = booksData ?? [];
   const [selectedBook, setSelectedBook] = useState<BookDto | null>(null);
   const [visibleCount, setVisibleCount] = useState(10);
   const increment = 10;
-
-  useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const res = await bookApi.getPublished({ pageSize: 50, pageNumber: 1 });
-        if (res.data.isSuccess && res.data.data) {
-          setBooks(res.data.data.items);
-        } else {
-          setError('Could not load books right now.');
-        }
-      } catch {
-        setError('Could not reach the server.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchBooks();
-  }, []);
 
   const displayedBooks = books.slice(0, visibleCount);
   const hasMore = visibleCount < books.length;
@@ -248,7 +234,7 @@ const Bookstore: React.FC = () => {
       {error && !isLoading && (
         <div className="max-w-[1280px] mx-auto px-6 mt-8">
           <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
-            ⚠️ {error}
+            ⚠️ {error instanceof Error ? error.message : 'An unexpected error occurred'}
           </div>
         </div>
       )}

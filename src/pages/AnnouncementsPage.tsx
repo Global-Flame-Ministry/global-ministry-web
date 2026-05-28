@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import SEO from '../components/SEO';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   Bell, Search, Calendar, Tag, ArrowRight, ArrowLeft,
   X, AlertCircle, Link as LinkIcon, ExternalLink
@@ -90,13 +91,9 @@ const SkeletonCard = () => (
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────────
 const AnnouncementsPage: React.FC = () => {
   const navigate = useNavigate();
-  const [announcements, setAnnouncements] = useState<AnnouncementDto[]>([]);
-  const [isLoading, setIsLoading]         = useState(true);
-  const [error, setError]                 = useState<string | null>(null);
   const [searchQuery, setSearchQuery]     = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<AnnouncementDto | null>(null);
-  const [totalCount, setTotalCount] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
   const pageSize = 9;
 
@@ -104,38 +101,27 @@ const AnnouncementsPage: React.FC = () => {
   const rFilters = useReveal(100);
   const rGrid    = useReveal(200);
 
+  const { data: queryData, isLoading, error } = useQuery({
+    queryKey: ['announcements', pageNumber, searchQuery, selectedCategory],
+    queryFn: () => announcementApi.getAll({
+      pageNumber,
+      pageSize,
+      title: searchQuery || undefined,
+      category: selectedCategory || undefined,
+      module: 'Ministry',
+    }).then(res => ({
+      items: res.data.data?.items ?? [],
+      totalCount: res.data.data?.totalCount ?? 0,
+    })),
+  });
+
+  const announcements = queryData?.items ?? [];
+  const totalCount = queryData?.totalCount ?? 0;
+
   // ── DERIVE CATEGORIES FROM FETCHED DATA (same as old code) ─────────────────
   const categories = useMemo(() => {
     return [...new Set(announcements.map(a => a.category).filter(Boolean))] as string[];
   }, [announcements]);
-
-  // ── FETCH ──────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    const fetchAnnouncements = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await announcementApi.getAll({
-          pageNumber,
-          pageSize,
-          title: searchQuery || undefined,
-          category: selectedCategory || undefined,
-          module: 'Ministry',
-        });
-        if (response.data.isSuccess && response.data.data) {
-          setAnnouncements(response.data.data.items);
-          setTotalCount(response.data.data.totalCount);
-        }
-      } catch (err) {
-        setError("We couldn't load the announcements. Please try again later.");
-        console.error('Fetch error:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    const timeout = setTimeout(fetchAnnouncements, 400);
-    return () => clearTimeout(timeout);
-  }, [pageNumber, searchQuery, selectedCategory]);
 
   const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString('en-US', {
@@ -254,7 +240,7 @@ const AnnouncementsPage: React.FC = () => {
             <div className="text-center py-20 bg-white rounded-3xl border border-red-50">
               <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
               <h3 className="text-xl font-bold text-slate-800 mb-2">Something went wrong</h3>
-              <p className="text-slate-500 mb-6">{error}</p>
+              <p className="text-slate-500 mb-6">{error instanceof Error ? error.message : 'An unexpected error occurred'}</p>
               <button
                 onClick={() => window.location.reload()}
                 className="px-6 py-2 bg-slate-900 text-white rounded-lg font-bold

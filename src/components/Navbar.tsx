@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Menu, X, Heart, ChevronDown, ShieldCheck,
   UserCircle, Play, Calendar, BookOpen, Bell,
@@ -9,7 +10,11 @@ import {
 import logo from '../assets/Logoo.jpg';
 import { ministryApi } from '../api/ministryApi';
 import { accountApi } from '../api/accountApi';
-import type { MinistryResponseDto } from '../types';
+import { sermonApi } from '../api/sermonApi';
+import { eventApi } from '../api/eventApi';
+import { announcementApi } from '../api/announcementApi';
+import { blogApi } from '../api/blogApi';
+import { bookApi } from '../api/bookApi';
 import { useAuth } from '../context/useAuthContext';
 
 // ─── STATIC NAV DATA ──────────────────────────────────────────────────────────
@@ -127,46 +132,35 @@ const Navbar: React.FC = () => {
   const [mobileOpen, setMobileOpen]       = useState(false);
   const [mobileSection, setMobileSection] = useState<string | null>(null);
   const [megaOpen, setMegaOpen]           = useState(false);
-  const [navMinistries, setNavMinistries] = useState<MinistryResponseDto[]>([]);
-  const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
 
   const megaTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const { isAuthenticated, isAdmin, user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
+
+  const { data: navMinistries = [] } = useQuery({
+    queryKey: ['navMinistries'],
+    queryFn: () => ministryApi.getAll({ pageSize: 20 }).then(res => {
+      if (res.data.isSuccess && res.data.data) return res.data.data.items;
+      return [];
+    }),
+  });
+
+  const { data: profilePicUrl = null } = useQuery({
+    queryKey: ['myProfile'],
+    queryFn: () => accountApi.getProfile().then(res => {
+      if (res.data.isSuccess && res.data.data) return res.data.data.profilePictureUrl ?? null;
+      return null;
+    }),
+    enabled: isAuthenticated,
+  });
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  useEffect(() => {
-    ministryApi.getAll({ pageSize: 20 })
-      .then(res => {
-        if (res.data.isSuccess && res.data.data)
-          setNavMinistries(res.data.data.items);
-      })
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    const loadProfile = async () => {
-      if (!isAuthenticated) {
-        setProfilePicUrl(null);
-        return;
-      }
-      try {
-        const res = await accountApi.getProfile();
-        if (res.data.isSuccess && res.data.data) {
-          setProfilePicUrl(res.data.data.profilePictureUrl ?? null);
-        }
-      } catch {
-        setProfilePicUrl(null);
-      }
-    };
-    loadProfile();
-  }, [isAuthenticated]);
 
   useEffect(() => {
     const resetMenu = () => {
@@ -185,6 +179,29 @@ const Navbar: React.FC = () => {
   const handleGiveClick = () => {
     if (!isAuthenticated) navigate('/login', { state: { from: '/give' } });
     else navigate('/give');
+  };
+
+  const prefetchPage = (path: string) => {
+    switch (path) {
+      case '/sermons':
+        queryClient.prefetchQuery({ queryKey: ['publishedSermons'], queryFn: () => sermonApi.getAll({ pageSize: 10 }).then(r => r.data) });
+        break;
+      case '/events':
+        queryClient.prefetchQuery({ queryKey: ['upcomingEvents'], queryFn: () => eventApi.getUpcoming({ pageSize: 6 }).then(r => r.data) });
+        break;
+      case '/announcements':
+        queryClient.prefetchQuery({ queryKey: ['announcements', 1, '', ''], queryFn: () => announcementApi.getAll({ pageSize: 10 }).then(r => r.data) });
+        break;
+      case '/blog':
+        queryClient.prefetchQuery({ queryKey: ['publishedBlogPosts', 1, 10, '', ''], queryFn: () => blogApi.getPublishedPosts({ pageNumber: 1, pageSize: 10 }).then(r => r.data) });
+        break;
+      case '/ministries':
+        queryClient.prefetchQuery({ queryKey: ['ministries'], queryFn: () => ministryApi.getAll({ pageSize: 50 }).then(r => r.data) });
+        break;
+      case '/books':
+        queryClient.prefetchQuery({ queryKey: ['publishedBooks'], queryFn: () => bookApi.getPublished({ pageSize: 10 }).then(r => r.data) });
+        break;
+    }
   };
 
   const handleMegaEnter = () => { clearTimeout(megaTimeoutRef.current); setMegaOpen(true); };
@@ -255,7 +272,7 @@ const Navbar: React.FC = () => {
               {/* DESKTOP NAV */}
               <div className="hidden lg:flex items-center gap-8">
 
-                <NavLink to="/" className={({ isActive }) =>
+                <NavLink to="/" onMouseEnter={() => prefetchPage('/sermons')} className={({ isActive }) =>
                   `font-semibold text-sm tracking-wide transition-colors
                   py-2 px-1 ${
                     isActive
@@ -317,6 +334,7 @@ const Navbar: React.FC = () => {
                     <div className="p-2">
                       {MEDIA_LINKS.map(item => (
                         <Link key={item.label} to={item.path}
+                          onMouseEnter={() => prefetchPage(item.path)}
                           className="flex items-center gap-3 p-3 rounded-lg
                             hover:bg-[#f3e8ff] group transition-colors">
                           <span className="text-[#a21caf] group-hover:text-[#7c3aed] transition-colors">
@@ -337,7 +355,7 @@ const Navbar: React.FC = () => {
                   </div>
                 </Dropdown>
 
-                <NavLink to="/blog" className={({ isActive }) =>
+                <NavLink to="/blog" onMouseEnter={() => prefetchPage('/blog')} className={({ isActive }) =>
                   `font-semibold text-sm tracking-wide transition-colors py-2 px-1 ${
                     isActive ? 'text-[#a21caf] border-b-2 border-[#a21caf] pb-0.5' : 'text-[#111827] hover:text-[#a21caf]'
                   }`}>
@@ -442,6 +460,7 @@ const Navbar: React.FC = () => {
                     <ul className="space-y-1">
                       <li>
                         <Link to="/ministries"
+                          onMouseEnter={() => prefetchPage('/ministries')}
                           className="group flex items-start gap-3 p-2.5
                             rounded-lg hover:bg-fuchsia-50 transition-colors">
                           <ArrowRight className="w-3 h-3 text-fuchsia-300
@@ -493,6 +512,7 @@ const Navbar: React.FC = () => {
                       {EXPLORE_CHURCH_LIFE.map(item => (
                         <li key={item.label}>
                           <Link to={item.path}
+                            onMouseEnter={() => prefetchPage(item.path)}
                             className="group flex items-center gap-3 p-2.5
                               rounded-lg hover:bg-fuchsia-50 transition-colors">
                             <span className="text-fuchsia-300
@@ -522,6 +542,7 @@ const Navbar: React.FC = () => {
                         </span>
                       </p>
                       <Link to="/events"
+                        onMouseEnter={() => prefetchPage('/events')}
                         className="inline-flex items-center gap-1.5 text-[10px]
                           font-black uppercase tracking-widest text-fuchsia-600
                           hover:text-fuchsia-800 transition-colors group">

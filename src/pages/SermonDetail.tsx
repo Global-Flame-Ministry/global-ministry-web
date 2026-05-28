@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import SEO from '../components/SEO';
 import {
   Play, Share2, PlusCircle, Music, Download,
@@ -14,46 +15,37 @@ const SermonDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [activeSermon, setActiveSermon] = useState<SermonDto | null>(null);
-  const [seriesSermons, setSeriesSermons] = useState<SermonDto[]>([]);
-  const [allSeriesSermons, setAllSeriesSermons] = useState<SermonDto[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [shareCopied, setShareCopied] = useState(false);
 
+  const { data: queryData, isLoading } = useQuery({
+    queryKey: ['sermonDetail', slug],
+    queryFn: async () => {
+      const response = await sermonApi.getBySlug(slug!);
+      if (!response.data.isSuccess || !response.data.data) return null;
+      const sermonData = response.data.data;
+      const allResponse = await sermonApi.getAll({ pageSize: 50, series: sermonData.series });
+      const all = (allResponse.data.data?.items ?? [])
+        .slice()
+        .sort((a, b) => new Date(a.sermonDate).getTime() - new Date(b.sermonDate).getTime());
+      return { activeSermon: sermonData, allSeriesSermons: all };
+    },
+    enabled: !!slug,
+  });
+
+  // Sync activeSermon when query data loads or slug changes
   useEffect(() => {
-    const fetchSermon = async () => {
-      if (!slug) return;
-      setIsLoading(true);
-      try {
-        const response = await sermonApi.getBySlug(slug);
-        if (response.data.isSuccess && response.data.data) {
-          const sermonData = response.data.data;
-          setActiveSermon(sermonData);
-          const allResponse = await sermonApi.getAll({
-            pageSize: 50,
-            series: sermonData.series,
-          });
-          if (allResponse.data.isSuccess && allResponse.data.data) {
-            const all = allResponse.data.data.items
-              .slice()
-              .sort((a, b) => new Date(a.sermonDate).getTime() - new Date(b.sermonDate).getTime());
-            setAllSeriesSermons(all);
-            const others = all.filter(s => s.id !== sermonData.id).slice(0, 6);
-            setSeriesSermons(others);
-          }
-        }
-      } catch (error) {
-        console.error('Failed to fetch sermon:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchSermon();
-  }, [slug]);
+    if (queryData) setActiveSermon(queryData.activeSermon);
+  }, [queryData]);
+
+  const allSeriesSermons = queryData?.allSeriesSermons ?? [];
+
+  const seriesSermons = useMemo(() => {
+    if (!activeSermon) return [];
+    return allSeriesSermons.filter(x => x.id !== activeSermon.id).slice(0, 6);
+  }, [activeSermon, allSeriesSermons]);
 
   const handleSermonSwap = (s: SermonDto) => {
     setActiveSermon(s);
-    const remaining = allSeriesSermons.filter(x => x.id !== s.id).slice(0, 6);
-    setSeriesSermons(remaining);
   };
 
   const handleShare = async () => {

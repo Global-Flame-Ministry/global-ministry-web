@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import SEO from '../components/SEO';
 import {
   ArrowLeft, Loader, Users, Calendar, MapPin,
@@ -7,7 +8,7 @@ import {
   Sparkles, Lock, ChevronRight, Image as ImageIcon,
 } from 'lucide-react';
 import { ministryApi } from '../api/ministryApi';
-import type { MinistryResponseDto, EventDto } from '../types';
+import type { EventDto } from '../types';
 import { useAuth } from '../context/useAuthContext';
 
 // The slug must match exactly what the admin entered in the dashboard.
@@ -237,52 +238,27 @@ const YouthCommunityGateway: React.FC = () => {
 const MinistryDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
 
-  const [ministry, setMinistry]           = useState<MinistryResponseDto | null>(null);
-  const [events, setEvents]               = useState<EventDto[]>([]);
-  const [isLoading, setIsLoading]         = useState(true);
-  const [eventsLoading, setEventsLoading] = useState(true);
-  const [error, setError]                 = useState<string | null>(null);
-  const [activeTab, setActiveTab]         = useState<'upcoming' | 'ongoing' | 'past'>('upcoming');
+  const { data: ministry, isLoading, error } = useQuery({
+    queryKey: ['ministry', slug],
+    queryFn: async () => {
+      const res = await ministryApi.getBySlug(slug!);
+      if (!res.data.isSuccess || !res.data.data) throw new Error(res.data.message || 'Ministry not found.');
+      return res.data.data;
+    },
+    enabled: !!slug,
+  });
+
+  const { data: events = [], isLoading: eventsLoading } = useQuery({
+    queryKey: ['ministryEvents', slug],
+    queryFn: () => ministryApi.getMinistryEvents(slug!, { pageSize: 50 })
+      .then(res => res.data.data?.items ?? []),
+    enabled: !!slug,
+  });
+
+  const [activeTab, setActiveTab] = useState<'upcoming' | 'ongoing' | 'past'>('upcoming');
 
   const isHouseOfOpera = slug === HOUSE_OF_OPERA_SLUG;
   const isRoyalPriesthood = slug === ROYAL_PRIESTHOOD_SLUG;
-
-  useEffect(() => {
-    if (!slug) return;
-
-    const fetchMinistry = async () => {
-      try {
-        setIsLoading(true);
-        const res = await ministryApi.getBySlug(slug);
-        if (res.data.isSuccess && res.data.data) {
-          setMinistry(res.data.data);
-        } else {
-          setError('Ministry not found.');
-        }
-      } catch {
-        setError('Could not load this ministry.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    const fetchEvents = async () => {
-      try {
-        setEventsLoading(true);
-        const res = await ministryApi.getMinistryEvents(slug, { pageSize: 50 });
-        if (res.data.isSuccess && res.data.data) {
-          setEvents(res.data.data.items);
-        }
-      } catch {
-        // silent — events are supplementary
-      } finally {
-        setEventsLoading(false);
-      }
-    };
-
-    fetchMinistry();
-    fetchEvents();
-  }, [slug]);
 
   const upcomingEvents = events.filter(e => getEventStatus(e) === 'upcoming');
   const ongoingEvents  = events.filter(e => getEventStatus(e) === 'ongoing');
@@ -358,7 +334,7 @@ const MinistryDetail: React.FC = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center
         text-center px-6">
-        <p className="text-slate-500 text-lg mb-4">{error || 'Ministry not found.'}</p>
+        <p className="text-slate-500 text-lg mb-4">{error instanceof Error ? error.message : error || 'Ministry not found.'}</p>
         <Link
           to="/ministries"
           className="flex items-center gap-2 text-fuchsia-600 font-bold uppercase

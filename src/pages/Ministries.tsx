@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
 import { Link, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, ArrowLeft, Loader, Users, Flame } from 'lucide-react';
 import { ministryApi } from '../api/ministryApi';
 import type { MinistryResponseDto } from '../types';
@@ -179,27 +180,13 @@ const MinistriesComingSoon: React.FC = () => (
 
 const Ministries: React.FC = () => {
   const navigate = useNavigate();
-  const [ministries, setMinistries] = useState<MinistryResponseDto[]>([]);
-  const [isLoading, setIsLoading]   = useState(true);
+  const { data: ministriesData, isLoading } = useQuery({
+    queryKey: ['ministries'],
+    queryFn: () => ministryApi.getAll({ pageSize: 50 }).then(res => res.data.data?.items ?? []),
+  });
+  const ministries = ministriesData ?? [];
 
   const rHero = useReveal(0);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const res = await ministryApi.getAll({ pageSize: 50 });
-        if (res.data.isSuccess && res.data.data) {
-          setMinistries(res.data.data.items);
-        }
-      } catch {
-        // Server unreachable — silently fall through to empty state
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
 
   return (
     <div className="bg-white relative animate-in fade-in duration-700">

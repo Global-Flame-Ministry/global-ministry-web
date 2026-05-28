@@ -1,9 +1,9 @@
-import { useEffect, useState, useCallback } from 'react';
 import SEO from '../components/SEO';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Flame, Calendar, User } from 'lucide-react';
 import { blogApi } from '../api/blogApi';
-import type { BlogBlockDto, BlogPostResponseDto } from '../types';
+import type { BlogBlockDto } from '../types';
 
 function AuthorAvatar({ name, size = 'md' }: { name: string; size?: 'md' | 'lg' }) {
   const initials = name
@@ -69,43 +69,27 @@ function ContentBlock({ block }: { block: BlogBlockDto }) {
 export default function BlogPostDetail() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const [post, setPost] = useState<BlogPostResponseDto | null>(null);
-  const [relatedPosts, setRelatedPosts] = useState<BlogPostResponseDto[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  const fetchPost = useCallback(async () => {
-    if (!slug) return;
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await blogApi.getBlogPostBySlug(slug);
-      if (response.data.isSuccess && response.data.data) {
-        setPost(response.data.data);
-        const relatedResponse = await blogApi.getPublishedPosts({
-          department: response.data.data.department,
-          pageSize: 4,
-        });
-        if (relatedResponse.data.isSuccess && relatedResponse.data.data) {
-          setRelatedPosts(
-            relatedResponse.data.data.items
-              .filter((item) => item.slug !== slug)
-              .slice(0, 3)
-          );
-        }
-      } else {
-        throw new Error(response.data.message || 'Post not found');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred while loading the post.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [slug]);
+  const { data: queryData, isLoading, error } = useQuery({
+    queryKey: ['blogPost', slug],
+    queryFn: async () => {
+      const response = await blogApi.getBlogPostBySlug(slug!);
+      if (!response.data.isSuccess || !response.data.data) throw new Error(response.data.message || 'Post not found');
+      const postData = response.data.data;
+      const relatedResponse = await blogApi.getPublishedPosts({
+        department: postData.department,
+        pageSize: 4,
+      });
+      const relatedPosts = (relatedResponse.data.data?.items ?? [])
+        .filter((item) => item.slug !== slug)
+        .slice(0, 3);
+      return { post: postData, relatedPosts };
+    },
+    enabled: !!slug,
+  });
 
-  useEffect(() => {
-    fetchPost();
-  }, [fetchPost]);
+  const post = queryData?.post ?? null;
+  const relatedPosts = queryData?.relatedPosts ?? [];
 
   const formattedDate = post
     ? new Date(post.createdOn).toLocaleDateString('en-US', {
@@ -117,6 +101,7 @@ export default function BlogPostDetail() {
     : '';
 
   if (error) {
+    const errorMsg = error instanceof Error ? error.message : 'An error occurred while loading the post.';
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
@@ -124,12 +109,12 @@ export default function BlogPostDetail() {
             <Flame className="w-10 h-10 text-purple-400" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {error === 'Post not found' ? 'Post Not Found' : 'Something went wrong'}
+            {errorMsg === 'Post not found' ? 'Post Not Found' : 'Something went wrong'}
           </h1>
           <p className="text-gray-600 mb-6">
-            {error === 'Post not found'
+            {errorMsg === 'Post not found'
               ? "The post you're looking for doesn't exist or has been removed."
-              : error}
+              : errorMsg}
           </p>
           <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg cursor-pointer">
             <ArrowLeft className="w-4 h-4" />

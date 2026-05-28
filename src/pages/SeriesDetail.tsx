@@ -1,5 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import SEO from '../components/SEO';
 import { Play, Headphones, Film, ArrowLeft, Home, Clapperboard, User } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
@@ -12,26 +13,12 @@ const formatDate = (dateString: string) =>
 
 const SeriesDetail: React.FC = () => {
   const { seriesSlug } = useParams<{ seriesSlug: string }>();
-  const [allSermons, setAllSermons] = useState<SermonDto[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: allSermonsData, isLoading } = useQuery({
+    queryKey: ['seriesDetailSermons'],
+    queryFn: () => sermonApi.getAll({ pageSize: 100 }).then(res => res.data.data?.items ?? []),
+  });
+  const allSermons = allSermonsData ?? [];
   const [visibleCount, setVisibleCount] = useState(6);
-
-  useEffect(() => {
-    const fetchSermons = async () => {
-      setIsLoading(true);
-      try {
-        const response = await sermonApi.getAll({ pageSize: 100 });
-        if (response.data.isSuccess && response.data.data) {
-          setAllSermons(response.data.data.items);
-        }
-      } catch (error) {
-        console.error('Failed to fetch sermons:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchSermons();
-  }, []);
 
   const matchedSeries = useMemo(() => {
     if (!seriesSlug) return null;

@@ -1,22 +1,18 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import SEO from '../components/SEO';
 import { Link, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Search, Flame, ArrowLeft } from 'lucide-react';
 import { blogApi } from '../api/blogApi';
-import type { BlogPostResponseDto, BlogQueryObject } from '../types';
+import type { BlogQueryObject } from '../types';
 
 const BlogPage: React.FC = () => {
   const navigate = useNavigate();
-  const [posts, setPosts] = useState<BlogPostResponseDto[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize] = useState(9);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [activeDepartment, setActiveDepartment] = useState<string>('All');
-  const [departments, setDepartments] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -26,52 +22,26 @@ const BlogPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  useEffect(() => {
-    blogApi.getDepartments().then(response => {
-      if (response.data.isSuccess && response.data.data) {
-        setDepartments(response.data.data);
-      }
-    });
-  }, []);
+  const { data: departmentsData } = useQuery({
+    queryKey: ['blogDepartments'],
+    queryFn: () => blogApi.getDepartments().then(res => res.data.data ?? []),
+  });
+  const departments = departmentsData ?? [];
 
-  const fetchPosts = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const query: BlogQueryObject = {
-        pageNumber,
-        pageSize,
-      };
-
-      if (activeDepartment !== 'All') {
-        query.department = activeDepartment;
-      }
-
-      if (debouncedSearch) {
-        query.searchTerm = debouncedSearch;
-      }
-
+  const { data: queryData, isLoading, error, refetch } = useQuery({
+    queryKey: ['publishedBlogPosts', pageNumber, pageSize, activeDepartment, debouncedSearch],
+    queryFn: async () => {
+      const query: BlogQueryObject = { pageNumber, pageSize };
+      if (activeDepartment !== 'All') query.department = activeDepartment;
+      if (debouncedSearch) query.searchTerm = debouncedSearch;
       const response = await blogApi.getPublishedPosts(query);
+      if (!response.data.isSuccess) throw new Error(response.data.message || 'Failed to load posts');
+      return { items: response.data.data?.items ?? [], totalCount: response.data.data?.totalCount ?? 0 };
+    },
+  });
 
-      if (response.data.isSuccess && response.data.data) {
-        setPosts(response.data.data.items);
-        setTotalCount(response.data.data.totalCount);
-      } else {
-        throw new Error(response.data.message || 'Failed to load posts');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      setPosts([]);
-      setTotalCount(0);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [pageNumber, pageSize, activeDepartment, debouncedSearch]);
-
-  useEffect(() => {
-    fetchPosts();
-  }, [fetchPosts]);
-
+  const posts = queryData?.items ?? [];
+  const totalCount = queryData?.totalCount ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   return (
@@ -144,10 +114,10 @@ const BlogPage: React.FC = () => {
         {error && (
           <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
             <p className="font-medium">Something went wrong</p>
-            <p className="text-sm">{error}</p>
+            <p className="text-sm">{error instanceof Error ? error.message : 'An error occurred'}</p>
             <button
               type="button"
-              onClick={fetchPosts}
+              onClick={() => refetch()}
               className="mt-2 text-sm font-medium text-red-800 hover:underline"
             >
               Try again

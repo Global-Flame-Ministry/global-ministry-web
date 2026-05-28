@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import SEO from '../components/SEO';
 import {
   Play, Share2, PlusCircle, Music, Download,
@@ -7,45 +8,32 @@ import {
   PlayCircle,
 } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
-import type { SermonDto } from '../types';
 
 const SermonPlayer: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const [sermon, setSermon] = useState<SermonDto | null>(null);
-  const [seriesSermons, setSeriesSermons] = useState<SermonDto[]>([]);
-  const [allSeriesSermons, setAllSeriesSermons] = useState<SermonDto[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [shareCopied, setShareCopied] = useState(false);
 
-  useEffect(() => {
-    const fetchSermon = async () => {
-      if (!slug) return;
-      setIsLoading(true);
-      try {
-        const response = await sermonApi.getBySlug(slug);
-        if (response.data.isSuccess && response.data.data) {
-          const sermonData = response.data.data;
-          setSermon(sermonData);
-          const allResponse = await sermonApi.getAll({
-            pageSize: 20,
-            series: sermonData.series,
-          });
-          if (allResponse.data.isSuccess && allResponse.data.data) {
-            const all = allResponse.data.data.items;
-            setAllSeriesSermons(all);
-            const others = all.filter(s => s.id !== sermonData.id).slice(0, 6);
-            setSeriesSermons(others);
-          }
-        }
-      } catch (error) {
-        console.error('Failed to fetch sermon:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchSermon();
-  }, [slug]);
+  const { data: queryData, isLoading } = useQuery({
+    queryKey: ['sermonPlayer', slug],
+    queryFn: async () => {
+      const response = await sermonApi.getBySlug(slug!);
+      if (!response.data.isSuccess || !response.data.data) return null;
+      const sermonData = response.data.data;
+      const allResponse = await sermonApi.getAll({ pageSize: 20, series: sermonData.series });
+      const all = allResponse.data.data?.items ?? [];
+      return { sermon: sermonData, allSeriesSermons: all };
+    },
+    enabled: !!slug,
+  });
+
+  const sermon = queryData?.sermon ?? null;
+  const allSeriesSermons = queryData?.allSeriesSermons ?? [];
+
+  const seriesSermons = useMemo(() => {
+    if (!sermon) return [];
+    return allSeriesSermons.filter(s => s.id !== sermon.id).slice(0, 6);
+  }, [sermon, allSeriesSermons]);
 
   const handleShare = async () => {
     if (!sermon) return;
