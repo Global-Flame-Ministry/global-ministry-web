@@ -11,7 +11,7 @@ const services = [
   {
     id: 'tuesday',
     day: 'Tuesday',
-    name: 'Atmosphere of Divine Presence',
+    name: 'Power Service',
     time: '3:00 PM',
     description: 'A powerful midweek service filled with worship, the Word, and the tangible presence of God.',
     color: 'from-purple-600 to-fuchsia-600',
@@ -35,7 +35,7 @@ const services = [
     day: 'Saturday',
     name: 'Discipleship Class',
     time: '8:00 AM',
-    description: 'Immediately following Morning Glory — a structured teaching session for intentional growth in the Word.',
+    description: 'Immediately after Morning Glory — a structured teaching session for intentional growth in the Word.',
     color: 'from-sky-500 to-blue-600',
     accent: 'text-sky-600',
     bg: 'bg-sky-50',
@@ -56,8 +56,8 @@ const services = [
 
 // ── Gallery Images ────────────────────────────────────────────────────────────
 const galleryImages = [
-  { src: auditorium, label: 'Main Auditorium' },
-  { src: dddPreaching, label: 'Worship Service' },
+  { src: auditorium, label: 'Church' },
+  { src: dddPreaching, label: 'Worship Moment' },
   { src: daddandmumm, label: 'Pastoral Leadership' },
 ];
 
@@ -115,7 +115,7 @@ const PlanYourVisit: React.FC = () => {
       />
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <div className="relative h-[70vh] flex items-end overflow-hidden">
+      <div className="relative min-h-[60vh] md:min-h-[70vh] flex items-end overflow-hidden">
         <img
           src={auditorium}
           alt="Global Flame Ministry Auditorium"
@@ -202,7 +202,7 @@ const PlanYourVisit: React.FC = () => {
               Let's Get You Ready
             </p>
             <h2 className="font-serif text-3xl md:text-4xl text-slate-900 mb-3">
-              Tell Us You're Coming
+              Tell Us Where You're Coming From
             </h2>
             <p className="text-slate-400 text-sm max-w-md mx-auto">
               Select your location so we can prepare the best experience for you.
@@ -246,7 +246,7 @@ const PlanYourVisit: React.FC = () => {
 
               {/* Step 2 — Form (appears after location selected) */}
               {locationType && (
-                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 md:p-8
                   animate-[fadeIn_0.4s_ease-out]">
 
                   <h3 className="font-serif text-xl text-slate-900 mb-6">
@@ -347,30 +347,45 @@ const PlanYourVisit: React.FC = () => {
                       </select>
                     </div>
 
-                    {/* Bus transport (only for outside) */}
-                    {locationType === 'outside' && (
-                      <div>
-                        <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5">
-                          Do You Need Ministry Bus Transport? *
-                        </label>
-                        <div className="grid grid-cols-2 gap-3">
-                          {['Yes, please arrange transport', 'No, I will self-drive'].map((opt) => (
-                            <button
-                              key={opt}
-                              type="button"
-                              onClick={() => setForm(prev => ({ ...prev, needsBus: opt }))}
-                              className={`py-3 px-4 text-xs font-semibold rounded-xl border transition-all text-left
-                                ${form.needsBus === opt
-                                  ? 'border-fuchsia-500 bg-fuchsia-50 text-fuchsia-700'
-                                  : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                                }`}
-                            >
-                              {opt}
-                            </button>
-                          ))}
-                        </div>
+                    {/* Bus transport */}
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5">
+                        {locationType === 'outside'
+                          ? 'Do You Need Ministry Bus Transport? *'
+                          : 'Do You Need a Pickup Within Jos? *'}
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {locationType === 'outside'
+                          ? ['Yes, please arrange transport', 'No, I will self-drive'].map((opt) => (
+                              <button
+                                key={opt}
+                                type="button"
+                                onClick={() => setForm(prev => ({ ...prev, needsBus: opt }))}
+                                className={`py-3 px-4 text-xs font-semibold rounded-xl border transition-all text-left
+                                  ${form.needsBus === opt
+                                    ? 'border-fuchsia-500 bg-fuchsia-50 text-fuchsia-700'
+                                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                                  }`}
+                              >
+                                {opt}
+                              </button>
+                            ))
+                          : ['Yes, please pick me up', 'No, I will make my own way'].map((opt) => (
+                              <button
+                                key={opt}
+                                type="button"
+                                onClick={() => setForm(prev => ({ ...prev, needsBus: opt }))}
+                                className={`py-3 px-4 text-xs font-semibold rounded-xl border transition-all text-left
+                                  ${form.needsBus === opt
+                                    ? 'border-fuchsia-500 bg-fuchsia-50 text-fuchsia-700'
+                                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                                  }`}
+                              >
+                                {opt}
+                              </button>
+                            ))}
                       </div>
-                    )}
+                    </div>
 
                     {/* Message */}
                     <div>
@@ -474,7 +489,7 @@ const PlanYourVisit: React.FC = () => {
                 <div
                   key={i}
                   className={`relative overflow-hidden rounded-xl shadow-sm
-                    ${i === 0 ? 'col-span-2 h-48' : 'h-36'}`}
+                    ${i === 0 ? 'col-span-2 h-40 sm:h-48' : 'h-28 sm:h-36'}`}
                 >
                   <img
                     src={img.src}
