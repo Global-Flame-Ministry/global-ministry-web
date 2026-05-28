@@ -28,12 +28,14 @@ const SermonPlayer: React.FC = () => {
   });
 
   const sermon = queryData?.sermon ?? null;
-  const allSeriesSermons = queryData?.allSeriesSermons ?? [];
 
   const seriesSermons = useMemo(() => {
+    const allSeriesSermons = queryData?.allSeriesSermons ?? [];
     if (!sermon) return [];
     return allSeriesSermons.filter(s => s.id !== sermon.id).slice(0, 6);
-  }, [sermon, allSeriesSermons]);
+  }, [queryData, sermon]);
+
+  const allSeriesSermons = queryData?.allSeriesSermons ?? [];
 
   const handleShare = async () => {
     if (!sermon) return;
@@ -60,28 +62,21 @@ const SermonPlayer: React.FC = () => {
     });
 
   const getEmbedUrl = (url: string): string => {
-  if (!url) return '';
-
-  // Already an embed URL — just append params
-  if (url.includes('/embed/')) {
-    const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}rel=0&modestbranding=1&iv_load_policy=3`;
-  }
-
-  // Handle youtu.be short links
-  const shortMatch = url.match(/youtu\.be\/([^?&]+)/);
-  if (shortMatch) {
-    return `https://www.youtube.com/embed/${shortMatch[1]}?rel=0&modestbranding=1&iv_load_policy=3`;
-  }
-
-  // Handle standard watch URLs
-  const watchMatch = url.match(/[?&]v=([^?&]+)/);
-  if (watchMatch) {
-    return `https://www.youtube.com/embed/${watchMatch[1]}?rel=0&modestbranding=1&iv_load_policy=3`;
-  }
-
-  return url;
-};
+    if (!url) return '';
+    if (url.includes('/embed/')) {
+      const separator = url.includes('?') ? '&' : '?';
+      return `${url}${separator}rel=0&modestbranding=1&iv_load_policy=3`;
+    }
+    const shortMatch = url.match(/youtu\.be\/([^?&]+)/);
+    if (shortMatch) {
+      return `https://www.youtube.com/embed/${shortMatch[1]}?rel=0&modestbranding=1&iv_load_policy=3`;
+    }
+    const watchMatch = url.match(/[?&]v=([^?&]+)/);
+    if (watchMatch) {
+      return `https://www.youtube.com/embed/${watchMatch[1]}?rel=0&modestbranding=1&iv_load_policy=3`;
+    }
+    return url;
+  };
 
   if (isLoading) {
     return (
@@ -341,7 +336,6 @@ const SermonPlayer: React.FC = () => {
 
         </div>
       </main>
-
     </>
   );
 };
