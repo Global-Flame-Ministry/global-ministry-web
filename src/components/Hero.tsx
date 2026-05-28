@@ -71,46 +71,42 @@ const Hero: React.FC = () => {
       </div>
 
       {!user && (
-        <section className="bg-slate-700 py-12 px-4 border-t border-slate-600">
-          <div className="max-w-7xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-serif text-white mb-2">
-              Sign up to receive life changing hope and encouragement!
-            </h2>
-            <p className="text-white/70 text-sm mb-8">
-              Join our community today — it only takes a minute.
-            </p>
-            <form
-              onSubmit={handleSignUp}
-              className="flex flex-col md:flex-row items-center justify-center gap-4 max-w-5xl mx-auto"
-            >
-              <input
-                type="text"
-                placeholder="First Name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="w-full md:flex-1 bg-white rounded-sm py-3 px-4 text-slate-900 focus:ring-2 focus:ring-fuchsia-400 outline-none transition-all shadow-sm"
-              />
-              <input
-                type="text"
-                placeholder="Last Name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="w-full md:flex-1 bg-white rounded-sm py-3 px-4 text-slate-900 focus:ring-2 focus:ring-fuchsia-400 outline-none transition-all shadow-sm"
-              />
-              <input
-                type="email"
-                placeholder="Email Address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full md:flex-1 bg-white rounded-sm py-3 px-4 text-slate-900 focus:ring-2 focus:ring-fuchsia-400 outline-none transition-all shadow-sm"
-              />
-              <button
-                type="submit"
-                className="w-full md:w-auto bg-[#0071bc] hover:bg-[#005a96] text-white font-bold uppercase tracking-widest px-10 py-3 rounded-sm shadow-lg transition-colors"
-              >
-                Sign Up
-              </button>
-            </form>
+<section className="bg-[#2d2d3a] py-12 px-6 border-t border-white/10">
+  <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-8">
+    <div className="md:w-64 shrink-0 text-left">
+      <h2 className="text-xl md:text-2xl font-serif text-white font-bold leading-snug">
+        Sign up to receive life changing hope and encouragement
+      </h2>
+    </div>
+    <form onSubmit={handleSignUp} className="flex-1 w-full flex flex-col sm:flex-row gap-3">
+      <input
+        type="text"
+        placeholder="First Name"
+        value={firstName}
+        onChange={(e) => setFirstName(e.target.value)}
+        className="flex-1 bg-white/10 border border-white/20 rounded-xl py-4 px-5 text-white placeholder:text-white/40 focus:ring-2 focus:ring-fuchsia-400 outline-none transition-all"
+      />
+      <input
+        type="text"
+        placeholder="Last Name"
+        value={lastName}
+        onChange={(e) => setLastName(e.target.value)}
+        className="flex-1 bg-white/10 border border-white/20 rounded-xl py-4 px-5 text-white placeholder:text-white/40 focus:ring-2 focus:ring-fuchsia-400 outline-none transition-all"
+      />
+      <input
+        type="email"
+        placeholder="Email Address"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="flex-1 bg-white/10 border border-white/20 rounded-xl py-4 px-5 text-white placeholder:text-white/40 focus:ring-2 focus:ring-fuchsia-400 outline-none transition-all"
+      />
+      <button
+        type="submit"
+        className="bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold uppercase tracking-widest px-8 py-4 rounded-xl shadow-lg transition-all whitespace-nowrap"
+      >
+        Sign Up
+      </button>
+    </form>
             <p className="mt-6 text-xs text-white/70 max-w-3xl mx-auto leading-relaxed">
               *By submitting this form you will be taken to our registration page to complete your account setup.
               We respect your privacy and will never share your information.

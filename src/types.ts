@@ -125,6 +125,7 @@ export interface SermonDto {
   title: string;
   speaker: string;
   series: string;
+  theme?: string | null;
   description: string;
   speakerImageUrl: string | null;
   imageUrl: string | null;

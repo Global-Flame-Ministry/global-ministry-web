@@ -5,6 +5,7 @@ export interface CreateSermonDto {
   title: string;
   speaker: string;
   series: string;
+  theme?: string; 
   description: string;
   speakerImageUrl?: string;
   imageUrl?: string;
@@ -19,6 +20,7 @@ export interface UpdateSermonDto {
   title: string;
   speaker: string;
   series: string;
+   theme?: string; 
   description: string;
   speakerImageUrl?: string;
   imageUrl?: string;

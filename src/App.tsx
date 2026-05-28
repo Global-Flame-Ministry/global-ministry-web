@@ -14,6 +14,7 @@ import ConfirmEmailChange from './pages/auth/ConfirmEmailChange';
 import Home              from './pages/Home';
 import Sermons           from './pages/Sermons';
 import SermonDetail      from './pages/SermonDetail';
+import SeriesDetail      from './pages/SeriesDetail';
 import Events            from './pages/Events';
 import Ministries        from './pages/Ministries';
 import Give              from './pages/Give';
@@ -81,17 +82,30 @@ const ScrollToTop = () => {
 };
 
 // LAYOUTS 
-const PublicLayout = ({ children }: { children: React.ReactNode }) => (
-  <>
-    <Navbar />
-    <main className="grow bg-white text-[#111827]">
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
-        {children}
-      </div>
-    </main>
-    <Footer />
-  </>
-);
+const PublicLayout = ({ children, fullBleed }: { children: React.ReactNode; fullBleed?: boolean }) => {
+  if (fullBleed) {
+    return (
+      <>
+        <Navbar />
+        <main className="flex flex-col min-h-screen bg-[#f9f9ff]">
+          {children}
+        </main>
+        <Footer />
+      </>
+    );
+  }
+  return (
+    <>
+      <Navbar />
+      <main className="grow bg-white text-[#111827]">
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+          {children}
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
+};
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => (
   <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6">
@@ -171,9 +185,11 @@ const App: React.FC = () => {
             <Route path="/books"
               element={<PublicLayout><BookStore /></PublicLayout>} />
             <Route path="/sermons"
-              element={<PublicLayout><Sermons /></PublicLayout>} />
+              element={<PublicLayout fullBleed><Sermons /></PublicLayout>} />
+            <Route path="/sermons/series/:seriesSlug"
+              element={<PublicLayout fullBleed><SeriesDetail /></PublicLayout>} />
             <Route path="/sermons/:slug"
-              element={<PublicLayout><SermonDetail /></PublicLayout>} />
+              element={<PublicLayout fullBleed><SermonDetail /></PublicLayout>} />
             <Route path="/events"
               element={<PublicLayout><Events /></PublicLayout>} />
             <Route path="/ministries"

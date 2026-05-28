@@ -12,7 +12,7 @@ import AudioUpload from '../../components/AudioUpload';
 import ImageUpload from '../../components/ImageUpload';
 
 const emptyForm = (): CreateSermonDto => ({
-  title: '', speaker: '', series: '', description: '',
+  title: '', speaker: '', series: '', theme: '', description: '',
   speakerImageUrl: '',
   imageUrl: '', videoUrl: '', audioUrl: '', sermonDate: '', isPublished: false, isFeatured: false,
 });
@@ -80,6 +80,7 @@ const AdminSermons = () => {
       title:           s.title,
       speaker:         s.speaker,
       series:          s.series,
+      theme:           s.theme ?? '', 
       description:     s.description,
       speakerImageUrl: s.speakerImageUrl ?? '',
       imageUrl:        s.imageUrl ?? '',
@@ -436,6 +437,22 @@ const AdminSermons = () => {
                   />
                 </div>
               </div>
+
+              <div>
+  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
+    Series Theme <span className={t.mutedtext}>(optional)</span>
+  </label>
+  <input
+    type="text"
+    value={form.theme ?? ''}
+    onChange={e => setForm(p => ({ ...p, theme: e.target.value }))}
+    placeholder="e.g. Rivers of Living Water"
+    className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`}
+  />
+  <p className={`text-xs mt-1 ${t.mutedtext}`}>
+    Shown as a subtitle under the series name across the site.
+  </p>
+</div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
                 <div>

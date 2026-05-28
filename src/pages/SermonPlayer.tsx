@@ -3,16 +3,15 @@ import { useParams, Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import {
   Play, Share2, PlusCircle, Music, Download,
-  ArrowLeft, Home, Clapperboard, Radio, User,
+  Volume2, ArrowLeft,
+  PlayCircle,
 } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
 import type { SermonDto } from '../types';
 
-const slugify = (s: string) => s.toLowerCase().replace(/\s+/g, '-');
-
-const SermonDetail: React.FC = () => {
+const SermonPlayer: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [activeSermon, setActiveSermon] = useState<SermonDto | null>(null);
+  const [sermon, setSermon] = useState<SermonDto | null>(null);
   const [seriesSermons, setSeriesSermons] = useState<SermonDto[]>([]);
   const [allSeriesSermons, setAllSeriesSermons] = useState<SermonDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,9 +25,9 @@ const SermonDetail: React.FC = () => {
         const response = await sermonApi.getBySlug(slug);
         if (response.data.isSuccess && response.data.data) {
           const sermonData = response.data.data;
-          setActiveSermon(sermonData);
+          setSermon(sermonData);
           const allResponse = await sermonApi.getAll({
-            pageSize: 50,
+            pageSize: 20,
             series: sermonData.series,
           });
           if (allResponse.data.isSuccess && allResponse.data.data) {
@@ -47,19 +46,13 @@ const SermonDetail: React.FC = () => {
     fetchSermon();
   }, [slug]);
 
-  const handleSermonSwap = (s: SermonDto) => {
-    setActiveSermon(s);
-    const remaining = allSeriesSermons.filter(x => x.id !== s.id).slice(0, 6);
-    setSeriesSermons(remaining);
-  };
-
   const handleShare = async () => {
-    if (!activeSermon) return;
+    if (!sermon) return;
     try {
       if (navigator.share) {
         await navigator.share({
-          title: activeSermon.title,
-          text: `"${activeSermon.title}" — ${activeSermon.speaker}`,
+          title: sermon.title,
+          text: `"${sermon.title}" — ${sermon.speaker}`,
           url: window.location.href,
         });
       } else {
@@ -77,22 +70,25 @@ const SermonDetail: React.FC = () => {
       year: 'numeric', month: 'long', day: 'numeric',
     });
 
-const getEmbedUrl = (url: string): string => {
+  const getEmbedUrl = (url: string): string => {
   if (!url) return '';
 
+  // Already an embed URL — just append params
   if (url.includes('/embed/')) {
     const separator = url.includes('?') ? '&' : '?';
-    return `${url.replace('youtube.com', 'youtube-nocookie.com')}${separator}rel=0&modestbranding=1`;
+    return `${url}${separator}rel=0&modestbranding=1&iv_load_policy=3`;
   }
 
+  // Handle youtu.be short links
   const shortMatch = url.match(/youtu\.be\/([^?&]+)/);
   if (shortMatch) {
-    return `https://www.youtube-nocookie.com/embed/${shortMatch[1]}?rel=0&modestbranding=1`;
+    return `https://www.youtube.com/embed/${shortMatch[1]}?rel=0&modestbranding=1&iv_load_policy=3`;
   }
 
+  // Handle standard watch URLs
   const watchMatch = url.match(/[?&]v=([^?&]+)/);
   if (watchMatch) {
-    return `https://www.youtube-nocookie.com/embed/${watchMatch[1]}?rel=0&modestbranding=1`;
+    return `https://www.youtube.com/embed/${watchMatch[1]}?rel=0&modestbranding=1&iv_load_policy=3`;
   }
 
   return url;
@@ -106,7 +102,7 @@ const getEmbedUrl = (url: string): string => {
     );
   }
 
-  if (!activeSermon) {
+  if (!sermon) {
     return (
       <div className="min-h-screen bg-[#f9f9ff] flex flex-col items-center justify-center">
         <div className="text-center p-12 bg-white rounded-3xl shadow-xl max-w-md">
@@ -121,32 +117,32 @@ const getEmbedUrl = (url: string): string => {
     );
   }
 
-  const currentPart = allSeriesSermons.findIndex(s => s.id === activeSermon.id) + 1;
+  const currentPart = allSeriesSermons.findIndex(s => s.id === sermon.id) + 1;
   const totalParts = allSeriesSermons.length;
   const progressPercent = totalParts > 0 ? Math.round((currentPart / totalParts) * 100) : 0;
-  const seriesSlug = slugify(activeSermon.series);
 
   return (
     <>
       <SEO
-        title={`${activeSermon.title} — ${activeSermon.speaker}`}
-        description={activeSermon.description || `Watch "${activeSermon.title}" delivered by ${activeSermon.speaker}`}
-        image={activeSermon.imageUrl || undefined}
-        url={`https://globalflameministry.org/sermons/${activeSermon.slug || activeSermon.id}`}
+        title={`${sermon.title} — ${sermon.speaker}`}
+        description={sermon.description || `Watch "${sermon.title}" delivered by ${sermon.speaker}`}
+        image={sermon.imageUrl || undefined}
+        url={`https://globalflameministry.org/sermons/${sermon.slug || sermon.id}`}
         type="article"
       />
 
-      <main className="bg-[#f9f9ff] text-[#1a1c20] antialiased flex-1 pt-24 pb-16 px-4 sm:px-8 w-full min-h-[calc(100dvh-12rem)]">
+      <main className="bg-[#f9f9ff] text-[#1a1c20] antialiased flex-1 pt-24 pb-16 px-4 sm:px-8 max-w-[1280px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
           {/* ─── LEFT COLUMN: Player & Info ─── */}
           <div className="lg:col-span-8 space-y-8">
 
             {/* Video Player */}
             <div className="relative w-full rounded-xl overflow-hidden bg-black shadow-2xl" style={{ paddingTop: '56.25%' }}>
-              {activeSermon.videoUrl ? (
+              {sermon.videoUrl ? (
                 <iframe
-                  src={getEmbedUrl(activeSermon.videoUrl)}
-                  title={activeSermon.title}
+                  src={getEmbedUrl(sermon.videoUrl)}
+                  title={sermon.title}
                   className="absolute top-0 left-0 w-full h-full"
                   allowFullScreen
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -154,8 +150,8 @@ const getEmbedUrl = (url: string): string => {
               ) : (
                 <>
                   <img
-                    src={activeSermon.imageUrl || ''}
-                    alt={activeSermon.title}
+                    src={sermon.imageUrl || ''}
+                    alt={sermon.title}
                     className="absolute top-0 left-0 w-full h-full object-cover opacity-80 hover:scale-105 transition-transform duration-700"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent opacity-60" />
@@ -172,39 +168,34 @@ const getEmbedUrl = (url: string): string => {
             <div className="space-y-4">
               <div className="flex flex-wrap items-center gap-3">
                 <Link
-                  to={`/sermons/series/${seriesSlug}`}
+                  to={`/sermons/series/${encodeURIComponent(sermon.series)}`}
                   className="px-3 py-1 rounded-full bg-[#80008c] text-[#fffbff] text-[9px] font-bold uppercase tracking-[0.15em]"
                 >
-                  {activeSermon.series}
+                  {sermon.series}
                 </Link>
-                {activeSermon.theme && (
-                  <span className="text-[#712ae2] text-[10px] font-bold italic tracking-[0.1em]">
-                    {activeSermon.theme}
-                  </span>
-                )}
                 <span className="text-[#837280] text-[10px] font-bold uppercase tracking-[0.15em]">
-                  {formatDate(activeSermon.sermonDate)}
+                  {formatDate(sermon.sermonDate)}
                 </span>
               </div>
 
-              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl text-[#1a1c20] leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-                {activeSermon.title}
+              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl text-[#1a1c20] leading-tight">
+                {sermon.title}
               </h1>
 
               {/* Speaker Info + Actions */}
               <div className="flex flex-wrap items-center justify-between py-6 border-y border-[#d5c0d1]/10 gap-4">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-[#5b0064]/20 shrink-0 bg-gray-100 flex items-center justify-center">
-                    {activeSermon.speakerImageUrl ? (
-                      <img src={activeSermon.speakerImageUrl} alt={activeSermon.speaker} className="w-full h-full object-cover" />
+                    {sermon.speakerImageUrl ? (
+                      <img src={sermon.speakerImageUrl} alt={sermon.speaker} className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-lg font-bold text-[#712ae2] uppercase">
-                        {activeSermon.speaker?.charAt(0)}
+                        {sermon.speaker?.charAt(0)}
                       </span>
                     )}
                   </div>
                   <div>
-                    <p className="font-serif text-xl text-[#1a1c20]" style={{ fontFamily: "'Playfair Display', serif" }}>{activeSermon.speaker}</p>
+                    <p className="font-serif text-xl text-[#1a1c20]">{sermon.speaker}</p>
                     <p className="text-[#837280] text-sm">Lead Pastor, Global Flame Ministry</p>
                   </div>
                 </div>
@@ -225,32 +216,38 @@ const getEmbedUrl = (url: string): string => {
             </div>
 
             {/* Description */}
-            {activeSermon.description && (
+            {sermon.description && (
               <article className="max-w-none">
                 <p className="text-lg text-[#51424f] leading-relaxed">
-                  {activeSermon.description}
+                  {sermon.description}
                 </p>
               </article>
             )}
 
             {/* Audio Section */}
-            <section className="p-8 rounded-2xl bg-[#f3f3f9] border border-[#d5c0d1]/10 shadow-[0_4px_24px_-6px_rgba(91,0,100,0.2),0_10px_15px_-3px_rgba(113,42,226,0.1)]">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-[#ffb95f]/20 flex items-center justify-center">
-                  <Music className="w-6 h-6 text-[#ffb95f]" />
+            {sermon.audioUrl && (
+              <section className="p-8 rounded-2xl bg-[#f3f3f9] border border-[#d5c0d1]/10 shadow-[0_4px_24px_-6px_rgba(91,0,100,0.2),0_10px_15px_-3px_rgba(113,42,226,0.1)]">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-[#ffb95f]/20 flex items-center justify-center">
+                    <Music className="w-6 h-6 text-[#ffb95f]" />
+                  </div>
+                  <div>
+                    <h3 className="font-serif text-xl">Also available in audio</h3>
+                    <p className="text-[#837280] text-sm">Listen on the go or download for offline access</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-serif text-xl" style={{ fontFamily: "'Playfair Display', serif" }}>Also available in audio</h3>
-                  <p className="text-[#837280] text-sm">Listen on the go or download for offline access</p>
-                </div>
-              </div>
-              {activeSermon.audioUrl ? (
                 <div className="flex flex-col md:flex-row items-center gap-6">
-                  <audio controls className="flex-1 w-full h-14">
-                    <source src={activeSermon.audioUrl} type="audio/mpeg" />
-                  </audio>
+                  <div className="flex-1 w-full bg-white rounded-full h-14 flex items-center px-6 gap-4 shadow-sm border border-[#d5c0d1]/5">
+                    <PlayCircle className="w-6 h-6 text-[#5b0064] cursor-pointer shrink-0" />
+                    <div className="flex-1 h-1 bg-[#e2e2e8] rounded-full relative">
+                      <div className="absolute left-0 top-0 h-full w-1/3 bg-[#5b0064] rounded-full" />
+                      <div className="absolute left-1/3 top-1/2 -translate-y-1/2 w-3 h-3 bg-[#5b0064] rounded-full border-2 border-white shadow-md" />
+                    </div>
+                    <span className="text-[9px] font-bold uppercase tracking-[0.1em] text-[#837280] shrink-0 whitespace-nowrap">12:45 / 42:10</span>
+                    <Volume2 className="w-5 h-5 text-[#837280] cursor-pointer shrink-0" />
+                  </div>
                   <a
-                    href={activeSermon.audioUrl}
+                    href={sermon.audioUrl}
                     download
                     className="w-full md:w-auto flex items-center justify-center gap-2 px-8 h-14 rounded-full bg-gradient-to-r from-[#5b0064] to-[#712ae2] text-white font-bold hover:scale-[1.02] active:scale-95 transition-all shrink-0"
                   >
@@ -258,52 +255,46 @@ const getEmbedUrl = (url: string): string => {
                     <span className="text-[10px] font-bold uppercase tracking-[0.15em]">Download MP3</span>
                   </a>
                 </div>
-              ) : (
-                <div className="flex items-center justify-center h-14 bg-white/60 rounded-full border border-[#d5c0d1]/20">
-                  <Music className="w-4 h-4 text-[#837280] mr-2" />
-                  <span className="text-[#837280] text-sm italic">No audio available for this sermon</span>
-                </div>
-              )}
-            </section>
+              </section>
+            )}
           </div>
 
           {/* ─── RIGHT SIDEBAR: More From Series ─── */}
           <aside className="lg:col-span-4 h-fit sticky top-28 space-y-6">
             <div className="bg-[#09090b] rounded-2xl overflow-hidden shadow-2xl border border-[#d5c0d1]/10">
               <div className="p-6 border-b border-[#d5c0d1]/20">
-                <h2 className="font-serif text-xl text-white" style={{ fontFamily: "'Playfair Display', serif" }}>More from this series</h2>
+                <h2 className="font-serif text-xl text-white">More from this series</h2>
                 <p className="text-[#e2e2e8] text-[9px] font-bold uppercase tracking-[0.15em] mt-1">
-                  {activeSermon.series} &bull; {allSeriesSermons.length} EPISODES
+                  {sermon.series} &bull; {seriesSermons.length + 1} EPISODES
                 </p>
               </div>
-              <div className="max-h-[700px] overflow-y-auto p-2 space-y-2">
-                {/* Current Item */}
-                <div className="flex gap-4 p-3 rounded-xl bg-[#8b4bfc] text-[#fffbff] group border border-[#5b0064]/20">
+              <div className="max-h-[700px] overflow-y-auto p-2 space-y-2 scrollbar-thin">
+
+                {/* Currently Playing Item */}
+                <div className="flex gap-4 p-3 rounded-xl bg-[#8b4bfc] text-white group border border-[#5b0064]/20">
                   <div className="relative w-28 aspect-video rounded-lg overflow-hidden shrink-0">
                     <img
-                      src={activeSermon.imageUrl || ''}
-                      alt={activeSermon.title}
+                      src={sermon.imageUrl || ''}
+                      alt={sermon.title}
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-[#5b0064]/40 flex items-center justify-center">
-                      <div className="w-5 h-5 bg-white/80 rounded-sm" style={{ clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
+                      <BarChart3 className="w-5 h-5 text-white animate-pulse" />
                     </div>
                   </div>
                   <div className="flex flex-col justify-center min-w-0">
-                    <h4 className="text-xs font-bold line-clamp-2 leading-snug">{activeSermon.title}</h4>
+                    <h4 className="text-xs font-bold line-clamp-2 leading-snug">{sermon.title}</h4>
                     <div className="flex items-center gap-2 mt-1 opacity-80">
-                      <span className="text-[9px] font-bold uppercase tracking-tighter">Part {currentPart}</span>
-                      <span className="text-[9px]"> &bull; </span>
-                      <span className="text-[9px]">Playing</span>
+                      <span className="text-[9px] font-bold uppercase tracking-tighter">Playing</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Related Items */}
                 {seriesSermons.map((rel) => (
-                  <div
+                  <Link
                     key={rel.id}
-                    onClick={() => handleSermonSwap(rel)}
+                    to={`/sermons/player/${rel.slug || rel.id}`}
                     className="flex gap-4 p-3 rounded-xl hover:bg-white/5 group transition-all cursor-pointer"
                   >
                     <div className="relative w-28 aspect-video rounded-lg overflow-hidden shrink-0">
@@ -313,6 +304,7 @@ const getEmbedUrl = (url: string): string => {
                         className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity"
                         loading="lazy"
                       />
+                      <span className="absolute bottom-1 right-1 bg-black/80 text-[9px] px-1.5 py-0.5 rounded text-white font-bold">42:10</span>
                     </div>
                     <div className="flex flex-col justify-center min-w-0">
                       <h4 className="text-xs font-bold text-[#e2e2e8] group-hover:text-white line-clamp-2 leading-snug transition-colors">
@@ -320,12 +312,12 @@ const getEmbedUrl = (url: string): string => {
                       </h4>
                       <p className="text-[10px] text-[#837280] mt-1 font-medium">{rel.speaker}</p>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
               <div className="p-4 bg-white/5 text-center">
                 <Link
-                  to={`/sermons/series/${seriesSlug}`}
+                  to={`/sermons/series/${encodeURIComponent(sermon.series)}`}
                   className="text-[#5b0064] font-bold text-[10px] uppercase tracking-[0.15em] hover:text-[#fc8eff] transition-colors"
                 >
                   View All Series Content
@@ -337,12 +329,19 @@ const getEmbedUrl = (url: string): string => {
             <div className="p-6 rounded-2xl border-2 border-dashed border-[#d5c0d1]/20 bg-[#f3f3f9] flex items-center justify-between">
               <div>
                 <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-[#837280]">Series Progress</p>
-                <h4 className="font-serif text-xl" style={{ fontFamily: "'Playfair Display', serif" }}>{currentPart} of {totalParts} Sermons</h4>
+                <h4 className="font-serif text-xl">{currentPart} of {totalParts} Lessons</h4>
               </div>
               <div className="relative w-16 h-16">
                 <svg className="absolute inset-0 w-full h-full -rotate-90">
                   <circle cx="32" cy="32" fill="transparent" r="28" stroke="#e2e2e8" strokeWidth="4" />
-                  <circle cx="32" cy="32" fill="transparent" r="28" stroke="#5b0064" strokeDasharray={2 * Math.PI * 28} strokeDashoffset={2 * Math.PI * 28 * (1 - progressPercent / 100)} strokeWidth="4" strokeLinecap="round" />
+                  <circle
+                    cx="32" cy="32" fill="transparent" r="28"
+                    stroke="#5b0064"
+                    strokeDasharray={2 * Math.PI * 28}
+                    strokeDashoffset={2 * Math.PI * 28 * (1 - progressPercent / 100)}
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                  />
                 </svg>
                 <div className="w-full h-full flex items-center justify-center">
                   <span className="text-sm font-bold text-[#5b0064]">{progressPercent}%</span>
@@ -350,30 +349,21 @@ const getEmbedUrl = (url: string): string => {
               </div>
             </div>
           </aside>
+
         </div>
       </main>
-
-      {/* ─── MOBILE BOTTOM NAV ─── */}
-      <nav className="lg:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-5 py-3 bg-[#09090b]/95 backdrop-blur-lg border-t border-[#d5c0d1]/10 z-50 rounded-t-xl shadow-[0_-4px_16px_rgba(0,0,0,0.4)]">
-        <Link to="/" className="flex flex-col items-center justify-center text-[#e2e2e8]">
-          <Home className="w-5 h-5" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.1em] mt-1">Home</span>
-        </Link>
-        <Link to="/sermons" className="flex flex-col items-center justify-center text-[#e2e2e8]">
-          <Clapperboard className="w-5 h-5" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.1em] mt-1">Series</span>
-        </Link>
-        <Link to="/events" className="flex flex-col items-center justify-center text-[#e2e2e8]">
-          <Radio className="w-5 h-5" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.1em] mt-1">Live</span>
-        </Link>
-        <Link to="/dashboard" className="flex flex-col items-center justify-center text-[#e2e2e8]">
-          <User className="w-5 h-5" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.1em] mt-1">Profile</span>
-        </Link>
-      </nav>
     </>
   );
 };
 
-export default SermonDetail;
+export default SermonPlayer;
+
+function BarChart3(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="3" y="10" width="4" height="11" />
+      <rect x="10" y="6" width="4" height="15" />
+      <rect x="17" y="2" width="4" height="19" />
+    </svg>
+  );
+}
