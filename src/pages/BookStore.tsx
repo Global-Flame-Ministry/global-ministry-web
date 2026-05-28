@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
-import { Library, Loader, X, ShoppingBag, ExternalLink } from 'lucide-react';
+import { Library, Loader, X, ExternalLink } from 'lucide-react';
 import { bookApi } from '../api/bookApi';
 import type { BookDto } from '../types';
 
@@ -48,7 +48,7 @@ const BooksIntro: React.FC = () => {
 
         <div ref={rLabel} style={transitionStyle}>
           <p className="text-fuchsia-600 text-xs font-bold uppercase tracking-widest mb-3">
-            Global Flame Ministry
+            Global Flame Book Store
           </p>
         </div>
 
@@ -155,60 +155,32 @@ const BookCard: React.FC<{ book: BookDto; onSelect: (book: BookDto) => void }> =
     : 'Free';
 
   return (
-    <div className="flex flex-col w-36 shrink-0">
-      <div
-        className="relative w-full aspect-[2/3] rounded-lg overflow-hidden bg-slate-100 mb-2 cursor-pointer group shadow-sm hover:shadow-md transition-shadow duration-300"
-        onClick={() => onSelect(book)}
-      >
-        {book.coverImageUrl ? (
-          <img src={book.coverImageUrl} alt={book.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Library size={32} className="text-slate-300" />
-          </div>
-        )}
-        {book.isFeatured && (
-          <div className="absolute top-2 left-2 bg-fuchsia-600 text-white text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full">
-            Featured
-          </div>
-        )}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
-          <div className="bg-white rounded-full p-2">
-            <ShoppingBag size={16} className="text-fuchsia-600" />
+    <div className="animate-fadeUp">
+      <div className="group block cursor-pointer" onClick={() => onSelect(book)}>
+        <div className="perspective-[1000px]">
+          <div className="transition-all duration-500 hover:scale-[1.02] cursor-pointer">
+            {book.coverImageUrl ? (
+              <img
+                src={book.coverImageUrl}
+                alt={book.title}
+                className="w-full aspect-[2/3] object-cover rounded shadow-2xl"
+              />
+            ) : (
+              <div className="w-full aspect-[2/3] bg-slate-200 rounded flex items-center justify-center shadow-2xl">
+                <Library className="w-12 h-12 text-slate-400" />
+              </div>
+            )}
+            {book.isFeatured && (
+              <div className="absolute top-3 left-3 bg-fuchsia-600 text-white text-[9px] font-bold uppercase px-2 py-1 rounded-full">
+                Featured
+              </div>
+            )}
           </div>
         </div>
-      </div>
-      <div className="flex flex-col flex-1">
-        <h3
-          className="text-xs font-bold text-slate-800 leading-snug line-clamp-2 mb-0.5 cursor-pointer hover:text-fuchsia-600 transition-colors"
-          onClick={() => onSelect(book)}
-        >
-          {book.title}
-        </h3>
-        <p className="text-[11px] text-slate-400 mb-2 line-clamp-1">{book.author}</p>
-        {(book.amazonUrl || book.selarUrl) && (
-          <div className="flex gap-1 mb-2 flex-wrap">
-            {book.amazonUrl && (
-              <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded-full">
-                Amazon
-              </span>
-            )}
-            {book.selarUrl && (
-              <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 bg-fuchsia-100 text-fuchsia-700 rounded-full">
-                Selar
-              </span>
-            )}
-          </div>
-        )}
-        <div className="mt-auto flex items-center justify-between gap-1">
+        <div className="mt-4 text-center">
+          <h4 className="text-sm font-semibold text-slate-900 mb-1 line-clamp-2">{book.title}</h4>
+          <p className="text-xs uppercase tracking-widest text-fuchsia-600 mb-1">{book.author}</p>
           <span className="text-xs font-black text-slate-900">{displayPrice}</span>
-          <button
-            onClick={() => onSelect(book)}
-            className="text-[10px] font-bold px-2 py-1 bg-fuchsia-600 hover:bg-fuchsia-500 text-white rounded-lg transition shrink-0"
-          >
-            Buy
-          </button>
         </div>
       </div>
     </div>
@@ -221,9 +193,8 @@ const Bookstore: React.FC = () => {
   const [isLoading, setIsLoading]       = useState(true);
   const [error, setError]               = useState<string | null>(null);
   const [selectedBook, setSelectedBook] = useState<BookDto | null>(null);
-
-  // ✅ NO ref here — we use CSS animation triggered by data availability instead
-  const [booksLoaded, setBooksLoaded] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(10);
+  const increment = 10;
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -233,7 +204,6 @@ const Bookstore: React.FC = () => {
         const res = await bookApi.getPublished({ pageSize: 50, pageNumber: 1 });
         if (res.data.isSuccess && res.data.data) {
           setBooks(res.data.data.items);
-          setBooksLoaded(true);
         } else {
           setError('Could not load books right now.');
         }
@@ -246,11 +216,14 @@ const Bookstore: React.FC = () => {
     fetchBooks();
   }, []);
 
+  const displayedBooks = books.slice(0, visibleCount);
+  const hasMore = visibleCount < books.length;
+
   return (
     <div className="min-h-screen bg-slate-50 pt-24 pb-20">
       <SEO
         title="Books & Resources"
-        description="Kingdom literature and recommended books from Global Flame Ministry."
+        description="Kingdom literature and recommended books from Global Flame Book Store."
         url="https://globalflameministry.org/books"
       />
 
@@ -258,14 +231,14 @@ const Bookstore: React.FC = () => {
 
       {/* Loading */}
       {isLoading && (
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-center py-24">
+        <div className="max-w-[1280px] mx-auto px-6 flex items-center justify-center py-24">
           <Loader size={32} className="animate-spin text-fuchsia-600" />
         </div>
       )}
 
       {/* Error */}
       {error && !isLoading && (
-        <div className="max-w-7xl mx-auto px-6 mt-8">
+        <div className="max-w-[1280px] mx-auto px-6 mt-8">
           <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
             ⚠️ {error}
           </div>
@@ -274,35 +247,19 @@ const Bookstore: React.FC = () => {
 
       {/* Empty */}
       {!isLoading && !error && books.length === 0 && (
-        <div className="max-w-7xl mx-auto px-6 flex flex-col items-center justify-center py-24 text-center">
+        <div className="max-w-[1280px] mx-auto px-6 flex flex-col items-center justify-center py-24 text-center">
           <Library size={48} className="text-slate-300 mb-4" />
           <p className="text-slate-500 text-lg font-medium">No books available yet.</p>
           <p className="text-slate-400 text-sm mt-1">Check back soon.</p>
         </div>
       )}
 
-      {/* ✅ Book shelf — uses CSS class animation, not IntersectionObserver ref */}
+      {/* Book grid */}
       {!isLoading && !error && books.length > 0 && (
-        <div
-          className={`mt-10 transition-all duration-700 ease-out ${
-            booksLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-        >
-          {/* Divider label */}
-          <div className="max-w-7xl mx-auto px-6 mb-6">
-            <div className="flex items-center gap-4">
-              <div className="flex-1 h-px bg-slate-200" />
-              <span className="text-slate-400 font-bold uppercase tracking-widest text-[11px] whitespace-nowrap">
-                Recommended Reads for Transformation
-              </span>
-              <div className="flex-1 h-px bg-slate-200" />
-            </div>
-          </div>
-
-          {/* Horizontal scrollable shelf */}
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="flex gap-5 overflow-x-auto pb-6 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-              {books.map((book, idx) => (
+        <section className="py-16 bg-slate-50">
+          <div className="max-w-[1280px] mx-auto px-6 md:px-12">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8">
+              {displayedBooks.map((book, idx) => (
                 <div
                   key={book.id}
                   className="animate-fadeUp"
@@ -312,8 +269,29 @@ const Bookstore: React.FC = () => {
                 </div>
               ))}
             </div>
+
+            {/* Load More */}
+            {hasMore && (
+              <div className="flex flex-col items-center mt-14 gap-3">
+                <button
+                  onClick={() => setVisibleCount(prev => prev + increment)}
+                  className="px-10 py-3.5 border-2 border-fuchsia-600 text-fuchsia-600 font-bold uppercase tracking-widest text-xs rounded-full hover:bg-fuchsia-600 hover:text-white transition-all"
+                >
+                  Load More Books
+                </button>
+                <p className="text-xs text-slate-400">
+                  Showing {displayedBooks.length} of {books.length} books
+                </p>
+              </div>
+            )}
+
+            {!hasMore && books.length > increment && (
+              <p className="text-xs text-slate-400 text-center mt-14">
+                All {books.length} books loaded
+              </p>
+            )}
           </div>
-        </div>
+        </section>
       )}
 
       {selectedBook && (
