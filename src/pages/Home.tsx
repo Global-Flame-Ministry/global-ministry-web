@@ -2,13 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
 import { Link, useNavigate } from 'react-router-dom';
 import { announcementApi } from '../api/announcementApi';
-import { Calendar, Play, ArrowRight, Globe, Heart, HandHeart, Star, Library, ShieldCheck, Flame, HeartHandshake, Phone, Mail, MapPin, ChevronDown } from 'lucide-react';
+import { Calendar, Play, ArrowRight, Heart, HandHeart, Star, Library, ShieldCheck, Flame, HeartHandshake, Phone, Mail, MapPin, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
 import { eventApi } from '../api/eventApi';
 import { bookApi } from '../api/bookApi';
 import { blogApi } from '../api/blogApi';
-import { ministryApi } from '../api/ministryApi';
-import type { SermonDto, EventDto, AnnouncementDto, BookDto, BlogPostResponseDto, MinistryResponseDto } from '../types';
+import type { SermonDto, EventDto, AnnouncementDto, BookDto, BlogPostResponseDto } from '../types';
 import dddPreaching from '../assets/ddd-preaching.jpeg';
 import daddandmumm from '../assets/dadandmum.jpg';
 import auditorium from '../assets/auditorium.jpg';
@@ -199,7 +198,6 @@ const Home: React.FC = () => {
   const [latestAnnouncements, setLatestAnnouncements] = useState<AnnouncementDto[]>([]);
   const [featuredBooks, setFeaturedBooks]             = useState<BookDto[]>([]);
   const [latestBlogPosts, setLatestBlogPosts]         = useState<BlogPostResponseDto[]>([]);
-  const [ministries, setMinistries]                   = useState<MinistryResponseDto[]>([]);
   const [showTestimonyModal, setShowTestimonyModal]   = useState(false);
 
   // ── Sign-up bar state ─────────────────────────────────────────────────────
@@ -230,9 +228,6 @@ const Home: React.FC = () => {
     blogApi.getPublishedPosts({ pageSize: 3, pageNumber: 1 }).then(res => {
       if (res.data.isSuccess && res.data.data) setLatestBlogPosts(res.data.data.items);
     });
-    ministryApi.getAll({ pageSize: 10 }).then(res => {
-      if (res.data.isSuccess && res.data.data) setMinistries(res.data.data.items);
-    });
   }, []);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
@@ -262,11 +257,6 @@ const Home: React.FC = () => {
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString('en-US', {
       year: 'numeric', month: 'short', day: 'numeric'
-    });
-
-  const formatDateLong = (d: string) =>
-    new Date(d).toLocaleDateString('en-US', {
-      year: 'numeric', month: 'long', day: 'numeric'
     });
 
   return (
@@ -317,7 +307,7 @@ const Home: React.FC = () => {
               <span className="italic text-fuchsia-400 font-light">of Power.</span>
             </h1>
             <p className="text-white/70 text-lg md:text-xl font-light tracking-wide max-w-2xl mx-auto mb-10">
-              Who will manifest the Kingdom and the realities of the fullness of Christ through the Spirit
+              Who will <span className="text-fuchsia-400">manifest</span> <span className="text-fuchsia-400">the Kingdom</span> and the realities of the <span className="text-fuchsia-400">fullness</span> of Christ through the Spirit
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link to="/sermons" className="w-full sm:w-auto flex items-center justify-center px-10 py-4 bg-white text-slate-900 text-sm font-bold rounded-full transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 uppercase tracking-widest">
@@ -548,69 +538,52 @@ const Home: React.FC = () => {
 
       {/* ── BOOKS ────────────────────────────────────────────────────── */}
       {featuredBooks.length > 0 && (
-        <section className="py-24 md:py-40 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <AnimatedDiv className="flex flex-col md:flex-row justify-between items-end mb-10">
-              <div className="max-w-xl">
-                <p className="text-[10px] font-black text-fuchsia-600 uppercase tracking-[0.4em] mb-3">
-                  Kingdom Literature
-                </p>
-                <h2 className="text-4xl md:text-5xl font-serif font-medium text-slate-900 leading-snug">
-                  Transform Your Mind,{' '}
-                  <span className="italic text-fuchsia-600">Transform Your Life</span>
-                </h2>
-                <p className="text-slate-400 italic text-sm border-l-2 border-fuchsia-300 pl-4 mt-4 leading-relaxed">
-                  "Do not conform to the pattern of this world, but be transformed by the renewing of your mind." —{' '}
-                  <span className="text-fuchsia-500 font-semibold not-italic">Romans 12:2</span>
-                </p>
-              </div>
-              <Link
-                to="/books"
-                className="mt-6 md:mt-0 flex items-center gap-2 px-6 py-3 border-2 border-fuchsia-600
-                  text-fuchsia-600 font-bold uppercase tracking-widest text-[11px]
-                  hover:bg-fuchsia-600 hover:text-white transition-all rounded-full shrink-0"
-              >
-                Explore More <ArrowRight className="w-3 h-3" />
-              </Link>
+        <section className="py-24 md:py-32 bg-slate-50 overflow-hidden">
+          <div className="max-w-[1280px] mx-auto px-6 md:px-12">
+            <AnimatedDiv className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-serif text-slate-900 mb-4">Apostolic Wisdom</h2>
+              <p className="text-base md:text-lg text-slate-500 max-w-2xl mx-auto">Foundational texts for the modern believer seeking dominion and deep spiritual intelligence.</p>
             </AnimatedDiv>
 
-            <div className="flex items-center gap-4 mb-8">
-              <div className="flex-1 h-px bg-slate-200" />
-              <span className="text-slate-400 font-bold uppercase tracking-widest text-[10px] whitespace-nowrap">
-                Recommended Reads
-              </span>
-              <div className="flex-1 h-px bg-slate-200" />
+            <div className="flex flex-nowrap md:grid md:grid-cols-4 gap-8 overflow-x-auto pb-8 snap-x scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+              {featuredBooks.map((book, idx) => (
+                <div
+                  key={book.id}
+                  className="min-w-[280px] snap-center animate-fadeUp"
+                  style={{ animationDelay: `${idx * 100}ms`, animationFillMode: 'both' }}
+                >
+                  <Link to="/books" className="group block">
+                    <div className="perspective-[1000px]">
+                      <div className="transition-all duration-500 hover:scale-[1.02] cursor-pointer">
+                        {book.coverImageUrl ? (
+                          <img
+                            src={book.coverImageUrl}
+                            alt={book.title}
+                            className="w-full aspect-[2/3] object-cover rounded shadow-2xl"
+                          />
+                        ) : (
+                          <div className="w-full aspect-[2/3] bg-slate-200 rounded flex items-center justify-center shadow-2xl">
+                            <Library className="w-12 h-12 text-slate-400" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-6 text-center">
+                      <h4 className="text-sm font-semibold text-slate-900 mb-1 line-clamp-2">{book.title}</h4>
+                      <p className="text-xs uppercase tracking-widest text-fuchsia-600">{book.author}</p>
+                    </div>
+                  </Link>
+                </div>
+              ))}
             </div>
 
-            <div className="flex gap-8 overflow-x-auto pb-8 snap-x scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-              {featuredBooks.map((book, idx) => (
-                <AnimatedDiv key={book.id} delay={idx * 60} direction="up" className="snap-start min-w-[280px] shrink-0">
-                  <Link to="/books" className="group block cursor-pointer">
-                    <div className="aspect-[3/4] bg-slate-800 rounded-xl overflow-hidden mb-6 shadow-xl relative">
-                      {book.coverImageUrl ? (
-                        <img
-                          src={book.coverImageUrl}
-                          alt={book.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Library className="w-10 h-10 text-slate-400" />
-                        </div>
-                      )}
-                      {book.isFeatured && (
-                        <div className="absolute top-3 left-3 bg-fuchsia-600 text-white text-[9px] font-bold uppercase px-2 py-1 rounded-full">
-                          Featured
-                        </div>
-                      )}
-                    </div>
-                    <h4 className="font-bold text-lg text-slate-900 mb-1 leading-snug group-hover:text-fuchsia-600 transition-colors">
-                      {book.title}
-                    </h4>
-                    <p className="text-slate-400 text-sm">By {book.author}</p>
-                  </Link>
-                </AnimatedDiv>
-              ))}
+            <div className="text-center mt-12">
+              <Link
+                to="/books"
+                className="inline-flex items-center gap-2 px-8 py-3 border-2 border-fuchsia-600 text-fuchsia-600 font-bold uppercase tracking-widest text-xs hover:bg-fuchsia-600 hover:text-white transition-all rounded-full"
+              >
+                Explore Book Store <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
           </div>
         </section>
@@ -628,7 +601,7 @@ const Home: React.FC = () => {
         <div className="relative z-10 max-w-7xl mx-auto px-4 w-full">
           <AnimatedDiv direction="left" delay={200}>
             <div className="max-w-2xl">
-              <p className="text-[10px] font-black text-white uppercase tracking-[0.4em] mb-4">
+              <p className="text-[10px] font-black text-white uppercase tracking-[0.4em] mb-4 animate-bob">
                 Every Tuesday
               </p>
               <h2 className="text-white text-4xl md:text-6xl font-serif mb-6 leading-snug">
@@ -644,7 +617,7 @@ const Home: React.FC = () => {
                   className="px-8 py-4 sm:px-10 sm:py-5 bg-[#7C3AED] text-white font-black
                     uppercase tracking-widest text-[11px] sm:text-[13px] hover:bg-[#6D28D9]
                     hover:scale-105 rounded-full transition-all duration-200 shadow-2xl
-                    whitespace-nowrap active:scale-95"
+                    whitespace-nowrap active:scale-95 animate-bob-glow"
                 >
                   Plan Your Visit
                 </button>
@@ -664,50 +637,47 @@ const Home: React.FC = () => {
 
       {/* ── MISSION & VISION ─────────────────────────────────────────── */}
       <AnimatedSection direction="fade" className="py-24 md:py-40 bg-slate-50 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-<AnimatedDiv
-  className="lg:col-span-5"
-  direction="left"
-  delay={100}
->
-  <div className="rounded-2xl overflow-hidden shadow-2xl h-72 md:h-auto md:aspect-[3/4]">
-    <img
-      src={daddandmumm}
-      alt="Leadership"
-      className="w-full h-full object-cover transition-all duration-700"
-    />
-  </div>
-</AnimatedDiv>
-            <AnimatedDiv className="lg:col-span-7 lg:pl-12" direction="right" delay={200}>
-              <p className="text-brand-600 font-black tracking-[0.4em] uppercase text-[10px] mb-5">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <AnimatedDiv direction="up" delay={100}>
+            <div className="rounded-2xl overflow-hidden shadow-2xl mb-12">
+              <img
+                src={daddandmumm}
+                alt="Leadership"
+                className="w-full aspect-[4/3] object-cover"
+              />
+            </div>
+          </AnimatedDiv>
+
+          <AnimatedDiv direction="up" delay={200}>
+            <div>
+              <p className="text-[#a21caf] font-black tracking-[0.4em] uppercase text-[10px] mb-5">
                 Our History
               </p>
-              <h2 className="text-4xl md:text-6xl font-serif font-medium text-slate-900 mb-8 leading-snug">
-                Where Faith Meets{' '}<span className="italic">Excellence.</span>
+              <h2 className="text-4xl md:text-5xl font-serif font-semibold text-slate-900 mb-8 leading-snug">
+                A Global Mandate for{' '}
+                <span className="italic">Transformation.</span>
               </h2>
-              <div className="space-y-6">
-                <blockquote className="border-l-4 border-brand-500 pl-6 py-1 italic text-xl text-slate-700 font-serif leading-relaxed">
-                  "The strength of your victory is tied to the strength of your personal altar. — Apostle Danjuma Musa."
-                </blockquote>
-                <p className="text-slate-600 text-base leading-relaxed">
-                  Inspired by a commitment to spiritual growth and community, Global Flame Ministry provides
-                  a sanctuary for those seeking purpose and igniting the passion of Christ in the hearts of
-                  men and women worldwide. Like a world-class hotel, we believe in radical hospitality.
+              <blockquote className="border-l-4 border-[#a21caf] pl-6 py-1 mb-8">
+                <p className="font-serif italic text-xl text-slate-600 leading-relaxed">
+                  "The strength of your victory is tied to the strength of your personal
+                  altar. — Apostle Danjuma Musa."
                 </p>
-                <div className="pt-2">
-                  <Link
-                    to="/our-story"
-                    className="px-8 py-3.5 border-2 border-slate-900 text-slate-900 font-black
-                      uppercase tracking-widest text-[11px] hover:bg-slate-900 hover:text-white
-                      transition-all inline-block rounded-full"
-                  >
-                    Explore Heritage
-                  </Link>
-                </div>
-              </div>
-            </AnimatedDiv>
-          </div>
+              </blockquote>
+              <p className="text-slate-500 text-base leading-relaxed mb-8">
+                Inspired by a commitment to spiritual growth and community, Global Flame
+                Ministry provides a sanctuary for those seeking purpose and igniting the
+                passion of Christ in the hearts of men and women worldwide.
+              </p>
+              <Link
+                to="/our-story"
+                className="px-8 py-3.5 border-2 border-slate-900 text-slate-900 font-black
+                  uppercase tracking-widest text-[11px] hover:bg-slate-900 hover:text-white
+                  transition-all inline-block rounded-full"
+              >
+                Explore Heritage
+              </Link>
+            </div>
+          </AnimatedDiv>
         </div>
       </AnimatedSection>
 
@@ -830,41 +800,56 @@ const Home: React.FC = () => {
       )}
 
       {/* ── EVENTS ───────────────────────────────────────────────────── */}
-      <section className="py-24 md:py-40 bg-[#0a0c10] text-white">
-        <div className="max-w-6xl mx-auto px-6">
-          <AnimatedDiv className="text-center mb-14" delay={100}>
-            <p className="text-[10px] font-black tracking-[0.5em] uppercase text-brand-500 mb-3">Itinerary</p>
-            <h2 className="text-3xl md:text-4xl font-serif">Upcoming Events &amp; Gatherings</h2>
-          </AnimatedDiv>
+      <section className="py-24 md:py-40 bg-[#09090b] text-white">
+        <div className="max-w-[1280px] mx-auto px-6 md:px-12">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-serif italic mb-4">Upcoming Encounters</h2>
+              <p className="text-base md:text-lg text-white/50">Mark your calendars for these transfigurative moments in His presence.</p>
+            </div>
+            <div className="mt-8 md:mt-0 flex gap-2">
+              <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 cursor-pointer transition-colors">
+                <ChevronLeft className="w-5 h-5" />
+              </div>
+              <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 cursor-pointer transition-colors">
+                <ChevronRight className="w-5 h-5" />
+              </div>
+            </div>
+          </div>
+
           {upcomingEvents.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {upcomingEvents.map((event, i) => (
-                <AnimatedDiv key={event.id} delay={i * 120} direction="up">
-                  <div className="bg-white/5 border border-white/10 p-10 hover:bg-white/10
-                    transition-all group h-full rounded-2xl backdrop-blur-sm">
-                    <p className="text-brand-500 text-[10px] font-black uppercase tracking-[0.3em] mb-6">
-                      {event.module}
-                    </p>
-                    <h3 className="text-xl font-serif mb-5 group-hover:translate-x-2 transition-transform leading-snug">
-                      {event.title}
-                    </h3>
-                    <div className="text-slate-500 text-xs space-y-2 mb-8 uppercase tracking-wider">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-3.5 h-3.5 shrink-0" />
-                        {formatDateLong(event.startDate)}
+            <div className="space-y-6">
+              {upcomingEvents.map((event, i) => {
+                const d = new Date(event.startDate);
+                const day = d.getDate();
+                const monthYear = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase();
+                return (
+                  <AnimatedDiv key={event.id} delay={i * 120} direction="up">
+                    <div
+                      className="flex flex-col md:flex-row items-center p-8 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 group hover:border-[#5b0064]/50 transition-all"
+                    >
+                      <div className="flex flex-col items-center md:items-start mb-6 md:mb-0 md:mr-12 w-32 shrink-0">
+                        <span className="text-5xl md:text-6xl font-bold text-[#ffb95f] leading-none">{day}</span>
+                        <span className="text-xs uppercase tracking-widest text-white/60 mt-2">{monthYear}</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Globe className="w-3.5 h-3.5 shrink-0" />
-                        {event.location}
+                      <div className="flex-1 text-center md:text-left">
+                        <h3 className="text-xl md:text-2xl font-serif mb-2 group-hover:text-[#ffb95f] transition-colors">
+                          {event.title}
+                        </h3>
+                        <p className="text-sm md:text-base text-white/40">{event.description}</p>
+                      </div>
+                      <div className="mt-6 md:mt-0 md:ml-6 shrink-0">
+                        <Link
+                          to={`/events/${event.slug}`}
+                          className="inline-block px-8 py-3 rounded-full border border-white/20 hover:bg-white hover:text-[#09090b] transition-all text-sm font-semibold"
+                        >
+                          Get Details
+                        </Link>
                       </div>
                     </div>
-                    <Link to="/events" className="inline-flex items-center text-[10px] font-bold
-                      uppercase tracking-[0.2em] text-white/70 group-hover:text-brand-400 transition-colors">
-                      Reservations <ArrowRight className="ml-2 w-3 h-3" />
-                    </Link>
-                  </div>
-                </AnimatedDiv>
-              ))}
+                  </AnimatedDiv>
+                );
+              })}
             </div>
           ) : (
             <AnimatedDiv className="text-center py-16 border border-slate-800 rounded-xl" delay={200}>
@@ -926,59 +911,6 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* ── FOOTER ───────────────────────────────────────────────────── */}
-      <footer className="bg-white pt-24 pb-12 border-t border-slate-100">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
-            <div className="lg:col-span-1">
-              <Link to="/" className="inline-block mb-6">
-                <h2 className="text-2xl font-serif font-black shimmer-text uppercase tracking-tighter">Global Flame</h2>
-              </Link>
-              <p className="text-slate-400 text-sm leading-relaxed mb-6">
-                Raising leaders who will manifest the kingdom. Transforming lives through the fire of the Holy Spirit.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-xs font-black uppercase tracking-[0.3em] text-slate-900 mb-8">Our Departments</h4>
-              <ul className="space-y-4">
-                {ministries.map(m => (
-                  <li key={m.id}>
-                    <Link to={`/ministries/${m.slug}`} className="text-slate-500 hover:text-fuchsia-600 text-sm transition-colors">
-                      {m.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-xs font-black uppercase tracking-[0.3em] text-slate-900 mb-8">Resources</h4>
-              <ul className="space-y-4 text-slate-500 text-sm">
-                <li><Link to="/sermons" className="hover:text-fuchsia-600 transition-colors">Sermon Archive</Link></li>
-                <li><Link to="/blog"    className="hover:text-fuchsia-600 transition-colors">Ministry Blog</Link></li>
-                <li><Link to="/books"   className="hover:text-fuchsia-600 transition-colors">Kingdom Books</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-xs font-black uppercase tracking-[0.3em] text-slate-900 mb-8">Connect</h4>
-              <ul className="space-y-4 text-slate-500 text-sm">
-                <li><Link to="/events"          className="hover:text-fuchsia-600 transition-colors">Upcoming Events</Link></li>
-                <li><Link to="/prayer-request"  className="hover:text-fuchsia-600 transition-colors">Prayer Request</Link></li>
-                <li><Link to="/give"            className="hover:text-fuchsia-600 transition-colors">Giving & Partnership</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="pt-12 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
-            <p className="text-slate-400 text-[10px] uppercase tracking-widest font-bold">
-              © {new Date().getFullYear()} Global Flame Ministry. Jos, Nigeria.
-            </p>
-            <div className="flex items-center gap-6">
-              <Link to="/privacy" className="text-slate-400 hover:text-slate-600 text-[10px] font-bold uppercase tracking-widest">Privacy Policy</Link>
-              <Link to="/terms"   className="text-slate-400 hover:text-slate-600 text-[10px] font-bold uppercase tracking-widest">Terms of Service</Link>
-            </div>
-          </div>
-        </div>
-      </footer>
 
       {/* ── TESTIMONY MODAL ──────────────────────────────────────────── */}
       <TestimonyModal
@@ -1095,34 +1027,9 @@ const Home: React.FC = () => {
           </div>
         </div>
       )}
-
-      <ScrollToTopButton />
     </div>
   );
 };
 
-// ─── SCROLL TO TOP ────────────────────────────────────────────────────────────
-
-const ScrollToTopButton: React.FC = () => {
-  const [visible, setVisible] = React.useState(false);
-  React.useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY > 400);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-  if (!visible) return null;
-  return (
-    <button
-      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-      className="fixed bottom-6 right-6 z-50 w-12 h-12 bg-[#a21caf] hover:bg-[#7c3aed]
-        text-white rounded-full shadow-lg flex items-center justify-center
-        transition-all hover:scale-110"
-    >
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-      </svg>
-    </button>
-  );
-};
 
 export default Home;
