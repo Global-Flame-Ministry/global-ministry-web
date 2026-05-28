@@ -54,6 +54,7 @@ const Sermons: React.FC = () => {
       if (!s.series) return;
       const list = map.get(s.series) || [];
       list.push(s);
+      list.sort((a, b) => new Date(a.sermonDate).getTime() - new Date(b.sermonDate).getTime());
       map.set(s.series, list);
     });
     return Array.from(map.entries()).map(([name, list]) => ({
@@ -61,6 +62,7 @@ const Sermons: React.FC = () => {
       sermons: list,
       messageCount: list.length,
       imageUrl: list.find(s => s.imageUrl)?.imageUrl || '',
+      firstSermonTitle: list[0]?.title || null,
       theme: list.find(s => s.theme)?.theme || null,
     }));
   }, [allSermons]);
@@ -184,7 +186,7 @@ const Sermons: React.FC = () => {
                       </span>
                     </div>
                     <h3 className="font-serif text-xl text-[#1a1c20] mb-1 leading-tight group-hover:text-[#5b0064] transition-colors" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      {group.name}
+                      {group.firstSermonTitle}
                     </h3>
                     {group.theme && (
                       <p className="text-[#712ae2] text-sm italic font-bold font-serif mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>

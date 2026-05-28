@@ -26,7 +26,10 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
 // Auto refresh token on 401
 api.interceptors.response.use(
-  (res: AxiosResponse) => res,
+  (res: AxiosResponse) => {
+    if (res.status === 204) return res;
+    return res;
+  },
   async (error: AxiosError) => {
     const original = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;

@@ -413,6 +413,52 @@ const Home: React.FC = () => {
         </div>
       </div>
 
+      {/* ── DIVINE PRESENCE ──────────────────────────────────────────── */}
+      <AnimatedSection direction="fade" className="relative h-[80vh] flex items-center overflow-hidden bg-slate-900">
+        <div className="absolute inset-0 z-0">
+          <video autoPlay muted loop playsInline poster={dddPreaching}
+            className="w-full h-full object-cover opacity-50 scale-110">
+            <source src="/assets/presence-bg.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-linear-to-r from-slate-900 via-slate-900/40 to-transparent" />
+        </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 w-full">
+          <AnimatedDiv direction="left" delay={200}>
+            <div className="max-w-2xl">
+              <p className="text-[10px] font-black text-white uppercase tracking-[0.4em] mb-4 animate-bob">
+                Every Tuesday <span className="text-fuchsia-300">• 3:00 PM</span>
+              </p>
+              <h2 className="text-white text-4xl md:text-6xl font-serif mb-6 leading-snug">
+                Experience the <br />
+                <span className="italic text-brand-300">Divine Presence</span>
+              </h2>
+              <p className="text-slate-400 text-base mb-8 max-w-md leading-relaxed">
+                Join us every Tuesday for an atmosphere of worship that transcends the ordinary.
+              </p>
+              <div className="flex flex-wrap lg:flex-nowrap items-center gap-3">
+                <button
+                  onClick={() => navigate('/plan-your-visit')}
+                  className="px-8 py-4 sm:px-10 sm:py-5 bg-[#7C3AED] text-white font-black
+                    uppercase tracking-widest text-[11px] sm:text-[13px] hover:bg-[#6D28D9]
+                    hover:scale-105 rounded-full transition-all duration-200 shadow-2xl
+                    whitespace-nowrap active:scale-95 animate-bob-glow"
+                >
+                  Plan Your Visit
+                </button>
+                <Link
+                  to="/events"
+                  className="px-8 py-4 sm:px-10 sm:py-5 bg-white/10 text-white font-black
+                    uppercase tracking-widest text-[11px] sm:text-[13px] hover:bg-white/20
+                    transition-all duration-200 backdrop-blur-md rounded-full border border-white/20"
+                >
+                  View All Events
+                </Link>
+              </div>
+            </div>
+          </AnimatedDiv>
+        </div>
+      </AnimatedSection>
+
       {/* ── SERMONS ──────────────────────────────────────────────────── */}
       <div className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -483,56 +529,6 @@ const Home: React.FC = () => {
             </AnimatedDiv>
           )}
 
-          {/* ── ANNOUNCEMENTS ─────────────────────────────────────────── */}
-          {latestAnnouncements.length > 0 && (
-            <div className="mt-32 pt-24 border-t border-slate-200">
-              <AnimatedDiv className="flex flex-col md:flex-row justify-between items-end mb-12">
-                <div>
-                  <p className="text-[10px] font-black text-fuchsia-600 uppercase tracking-[0.4em] mb-3">
-                    Ministry News
-                  </p>
-                  <h2 className="text-4xl font-serif font-medium text-slate-900">
-                    Announcements
-                  </h2>
-                </div>
-                <Link
-                  to="/announcements"
-                  className="mt-5 md:mt-0 flex items-center text-fuchsia-600 font-bold
-                    border-b-2 border-fuchsia-100 hover:border-fuchsia-600 transition-all
-                    pb-1 uppercase text-[11px] tracking-[0.2em]"
-                >
-                  View All <ArrowRight className="w-3 h-3 ml-2" />
-                </Link>
-              </AnimatedDiv>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-                {latestAnnouncements.map((a, i) => (
-                  <AnimatedDiv key={a.id} delay={i * 100} direction="up">
-                    <Link
-                      to="/announcements"
-                      className="group bg-white rounded-xl p-6 border border-slate-100
-                        hover:border-fuchsia-200 hover:shadow-md transition-all duration-300 block h-full"
-                    >
-                      <span className="text-[10px] font-black text-fuchsia-600 uppercase tracking-[0.3em] block mb-3">
-                        {a.category || 'General'}
-                      </span>
-                      <h3 className="text-base font-serif font-semibold text-slate-900 mb-2.5
-                        group-hover:text-fuchsia-700 transition-colors line-clamp-2 leading-snug">
-                        {a.title}
-                      </h3>
-                      <p className="text-slate-500 text-sm leading-relaxed line-clamp-2 mb-4">
-                        {a.content}
-                      </p>
-                      <span className="text-xs text-slate-400">
-                        {new Date(a.createdOn).toLocaleDateString('en-US', {
-                          year: 'numeric', month: 'long', day: 'numeric'
-                        })}
-                      </span>
-                    </Link>
-                  </AnimatedDiv>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -589,51 +585,58 @@ const Home: React.FC = () => {
         </section>
       )}
 
-      {/* ── DIVINE PRESENCE ──────────────────────────────────────────── */}
-      <AnimatedSection direction="fade" className="relative h-[80vh] flex items-center overflow-hidden bg-slate-900">
-        <div className="absolute inset-0 z-0">
-          <video autoPlay muted loop playsInline poster={dddPreaching}
-            className="w-full h-full object-cover opacity-50 scale-110">
-            <source src="/assets/presence-bg.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-linear-to-r from-slate-900 via-slate-900/40 to-transparent" />
-        </div>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 w-full">
-          <AnimatedDiv direction="left" delay={200}>
-            <div className="max-w-2xl">
-              <p className="text-[10px] font-black text-white uppercase tracking-[0.4em] mb-4 animate-bob">
-                Every Tuesday <span className="text-fuchsia-300">• 3:00 PM</span>
-              </p>
-              <h2 className="text-white text-4xl md:text-6xl font-serif mb-6 leading-snug">
-                Experience the <br />
-                <span className="italic text-brand-300">Divine Presence</span>
-              </h2>
-              <p className="text-slate-400 text-base mb-8 max-w-md leading-relaxed">
-                Join us every Tuesday for an atmosphere of worship that transcends the ordinary.
-              </p>
-              <div className="flex flex-wrap lg:flex-nowrap items-center gap-3">
-                <button
-                  onClick={() => navigate('/plan-your-visit')}
-                  className="px-8 py-4 sm:px-10 sm:py-5 bg-[#7C3AED] text-white font-black
-                    uppercase tracking-widest text-[11px] sm:text-[13px] hover:bg-[#6D28D9]
-                    hover:scale-105 rounded-full transition-all duration-200 shadow-2xl
-                    whitespace-nowrap active:scale-95 animate-bob-glow"
-                >
-                  Plan Your Visit
-                </button>
-                <Link
-                  to="/events"
-                  className="px-8 py-4 sm:px-10 sm:py-5 bg-white/10 text-white font-black
-                    uppercase tracking-widest text-[11px] sm:text-[13px] hover:bg-white/20
-                    transition-all duration-200 backdrop-blur-md rounded-full border border-white/20"
-                >
-                  View All Events
-                </Link>
+      {/* ── ANNOUNCEMENTS ──────────────────────────────────────────── */}
+      {latestAnnouncements.length > 0 && (
+        <section className="py-24 bg-white border-t border-slate-200">
+          <div className="max-w-7xl mx-auto px-6">
+            <AnimatedDiv className="flex flex-col md:flex-row justify-between items-end mb-12">
+              <div>
+                <p className="text-[10px] font-black text-fuchsia-600 uppercase tracking-[0.4em] mb-3">
+                  Ministry News
+                </p>
+                <h2 className="text-4xl font-serif font-medium text-slate-900">
+                  Announcements
+                </h2>
               </div>
+              <Link
+                to="/announcements"
+                className="mt-5 md:mt-0 flex items-center text-fuchsia-600 font-bold
+                  border-b-2 border-fuchsia-100 hover:border-fuchsia-600 transition-all
+                  pb-1 uppercase text-[11px] tracking-[0.2em]"
+              >
+                View All <ArrowRight className="w-3 h-3 ml-2" />
+              </Link>
+            </AnimatedDiv>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+              {latestAnnouncements.map((a, i) => (
+                <AnimatedDiv key={a.id} delay={i * 100} direction="up">
+                  <Link
+                    to="/announcements"
+                    className="group bg-white rounded-xl p-6 border border-slate-100
+                      hover:border-fuchsia-200 hover:shadow-md transition-all duration-300 block h-full"
+                  >
+                    <span className="text-[10px] font-black text-fuchsia-600 uppercase tracking-[0.3em] block mb-3">
+                      {a.category || 'General'}
+                    </span>
+                    <h3 className="text-base font-serif font-semibold text-slate-900 mb-2.5
+                      group-hover:text-fuchsia-700 transition-colors line-clamp-2 leading-snug">
+                      {a.title}
+                    </h3>
+                    <p className="text-slate-500 text-sm leading-relaxed line-clamp-2 mb-4">
+                      {a.content}
+                    </p>
+                    <span className="text-xs text-slate-400">
+                      {new Date(a.createdOn).toLocaleDateString('en-US', {
+                        year: 'numeric', month: 'long', day: 'numeric'
+                      })}
+                    </span>
+                  </Link>
+                </AnimatedDiv>
+              ))}
             </div>
-          </AnimatedDiv>
-        </div>
-      </AnimatedSection>
+          </div>
+        </section>
+      )}
 
       {/* ── MISSION & VISION ─────────────────────────────────────────── */}
       <AnimatedSection direction="fade" className="py-24 md:py-40 bg-slate-50 overflow-hidden">

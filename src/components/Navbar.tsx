@@ -243,7 +243,7 @@ const Navbar: React.FC = () => {
                       <img
                         src={logo}
                         alt="GFM"
-                        className="w-full h-full object-cover object-center scale-[1.15]"
+                        className="w-full h-full object-contain object-center p-1"
                       />
                     </div>
                     <span className={`font-serif font-bold text-[#111827] tracking-tight

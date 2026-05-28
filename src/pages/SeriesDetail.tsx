@@ -51,7 +51,9 @@ const SeriesDetail: React.FC = () => {
   }, [allSermons, seriesSlug]);
 
   const decodedSeries = matchedSeries?.name || '';
-  const allFetched = matchedSeries?.sermons || [];
+  const allFetched = (matchedSeries?.sermons || [])
+    .slice()
+    .sort((a, b) => new Date(a.sermonDate).getTime() - new Date(b.sermonDate).getTime());
   const seriesTheme = allFetched.find(s => s.theme)?.theme || null;
   const sermons = allFetched.slice(0, visibleCount);
   const hasMore = allFetched.length > visibleCount;

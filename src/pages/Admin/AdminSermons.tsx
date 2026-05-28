@@ -119,7 +119,17 @@ const AdminSermons = () => {
       setTotalCount(n => n - 1);
       setDeleteTarget(null);
       toast.success('Sermon deleted');
-    } catch { toast.error('Failed to delete sermon'); }
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 204 || status === 404) {
+        setSermons(prev => prev.filter(s => s.id !== deleteTarget!.id));
+        setTotalCount(n => n - 1);
+        setDeleteTarget(null);
+        toast.success('Sermon deleted');
+      } else {
+        toast.error('Failed to delete sermon');
+      }
+    }
     finally { setIsDeleting(false); }
   };
 

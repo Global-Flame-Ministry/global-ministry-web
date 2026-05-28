@@ -32,7 +32,9 @@ const SermonDetail: React.FC = () => {
             series: sermonData.series,
           });
           if (allResponse.data.isSuccess && allResponse.data.data) {
-            const all = allResponse.data.data.items;
+            const all = allResponse.data.data.items
+              .slice()
+              .sort((a, b) => new Date(a.sermonDate).getTime() - new Date(b.sermonDate).getTime());
             setAllSeriesSermons(all);
             const others = all.filter(s => s.id !== sermonData.id).slice(0, 6);
             setSeriesSermons(others);
