@@ -17,10 +17,10 @@ const SeriesDetail: React.FC = () => {
     queryKey: ['seriesDetailSermons'],
     queryFn: () => sermonApi.getAll({ pageSize: 100 }).then(res => res.data.data?.items ?? []),
   });
-  const allSermons = useMemo(() => allSermonsData ?? [], [allSermonsData]);
   const [visibleCount, setVisibleCount] = useState(6);
 
-  const seriesMap = useMemo(() => {
+  const seriesEntries = useMemo(() => {
+    const allSermons = allSermonsData ?? [];
     const map = new Map<string, SermonDto[]>();
     allSermons.forEach(s => {
       if (!s.series) return;
@@ -31,18 +31,18 @@ const SeriesDetail: React.FC = () => {
         map.set(s.series, [s]);
       }
     });
-    return map;
-  }, [allSermons]);
+    return Array.from(map.entries());
+  }, [allSermonsData]);
 
   const matchedSeries = useMemo(() => {
     if (!seriesSlug) return null;
-    for (const [name, sermons] of seriesMap.entries()) {
+    for (const [name, sermons] of seriesEntries) {
       if (slugify(name) === seriesSlug) {
         return { name, sermons };
       }
     }
     return null;
-  }, [seriesMap, seriesSlug]);
+  }, [seriesEntries, seriesSlug]);
 
   const decodedSeries = matchedSeries?.name || '';
   const allFetched = (matchedSeries?.sermons || [])
