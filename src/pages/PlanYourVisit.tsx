@@ -57,8 +57,8 @@ const services = [
 // ── Gallery Images ────────────────────────────────────────────────────────────
 const galleryImages = [
   { src: auditorium, label: 'Main Auditorium' },
-  { src: dddPreaching, label: 'Worship' },
-  { src: Reuben, label: 'The Word' },
+  { src: Reuben, label: 'Worship' },
+  { src: dddPreaching, label: 'The Word' },
 ];
 
 // ── Types ─────────────────────────────────────────────────────────────────────
