@@ -469,6 +469,7 @@ const PlanYourVisit: React.FC = () => {
                   <div>
                     <p className="font-bold text-slate-900 text-sm">Contact Us</p>
                     <p className="text-slate-500 text-sm">info@globalflameministry.org</p>
+                    <p className="text-slate-500 text-sm mt-1">(+234) 813 816 3685</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
