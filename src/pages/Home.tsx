@@ -407,7 +407,7 @@ const Home: React.FC = () => {
             <HandHeart className="w-7 h-7 text-[#7c3aed]" />
             <span className="text-sm font-semibold text-slate-700">Prayer</span>
           </button>
-          <button onClick={() => setShowTestimonyModal(true)} className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all group min-h-[120px] col-span-2 sm:col-span-1">
+          <button onClick={() => setShowTestimonyModal(true)} className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all group min-h-[120px] col-span-2 sm:col-span-1 cursor-pointer">
             <Star className="w-7 h-7 text-[#7c3aed]" />
             <span className="text-sm font-semibold text-slate-700">Testimony</span>
           </button>
