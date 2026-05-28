@@ -81,7 +81,7 @@ const EventCard: React.FC<{
 }> = ({ event, badge, index, onRegister, onDonate, formatDate, isOngoing: _isOngoing }) => {
   const rCard = useReveal(index * 100);
   return (
-    <div ref={rCard} style={{
+    <div id={`event-${event.id}`} ref={rCard} style={{
       opacity: 0,
       transform: 'translateY(32px)',
       transition: 'opacity 0.7s ease-out, transform 0.7s ease-out',
