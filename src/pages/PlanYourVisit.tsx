@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { ArrowLeft, Clock, MapPin, Phone, ChevronDown, CheckCircle2 } from 'lucide-react';
-import auditorium from '../assets/auditorium.jpg';
-import dddPreaching from '../assets/ddd-preaching.jpeg';
-import daddandmumm from '../assets/dadandmum.jpg';
+import auditorium from '../assets/auditoruimout.jpg';
+import Reuben from '../assets/Reuben.jpg';
+import dddPreaching from '../assets/Daddy-dpreaching.jpg';
 
 // ── Service Schedule Data ─────────────────────────────────────────────────────
 const services = [
@@ -56,9 +56,9 @@ const services = [
 
 // ── Gallery Images ────────────────────────────────────────────────────────────
 const galleryImages = [
-  { src: auditorium, label: 'Church' },
-  { src: dddPreaching, label: 'Worship Moment' },
-  { src: daddandmumm, label: 'Pastoral Leadership' },
+  { src: auditorium, label: 'Main Auditorium' },
+  { src: dddPreaching, label: 'Worship' },
+  { src: Reuben, label: 'The Word' },
 ];
 
 // ── Types ─────────────────────────────────────────────────────────────────────

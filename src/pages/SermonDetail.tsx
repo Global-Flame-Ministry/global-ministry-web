@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import SEO from '../components/SEO';
@@ -7,14 +7,12 @@ import {
   ArrowLeft, Home, Clapperboard, User,
 } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
-import type { SermonDto } from '../types';
 
 const slugify = (s: string) => s.toLowerCase().replace(/\s+/g, '-');
 
 const SermonDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const [activeSermon, setActiveSermon] = useState<SermonDto | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
 
   const { data: queryData, isLoading } = useQuery({
@@ -32,20 +30,17 @@ const SermonDetail: React.FC = () => {
     enabled: !!slug,
   });
 
-  // Sync activeSermon when query data loads or slug changes
-  useEffect(() => {
-    if (queryData) setActiveSermon(queryData.activeSermon);
-  }, [queryData]);
+  const activeSermon = queryData?.activeSermon ?? null;
 
-  const allSeriesSermons = queryData?.allSeriesSermons ?? [];
+  const allSeriesSermons = useMemo(() => queryData?.allSeriesSermons ?? [], [queryData?.allSeriesSermons]);
 
   const seriesSermons = useMemo(() => {
     if (!activeSermon) return [];
     return allSeriesSermons.filter(x => x.id !== activeSermon.id).slice(0, 6);
   }, [activeSermon, allSeriesSermons]);
 
-  const handleSermonSwap = (s: SermonDto) => {
-    setActiveSermon(s);
+  const handleSermonSwap = (s: { slug?: string; id: number }) => {
+    navigate(`/sermons/${s.slug || s.id}`);
   };
 
   const handleShare = async () => {
