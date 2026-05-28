@@ -239,7 +239,7 @@ const Navbar: React.FC = () => {
               {/* LOGO */}
                 {/* LOGO */}
                 <Link to="/" className="flex items-center gap-3 shrink-0 group">
-                  <div className={`${scrolled ? 'w-9 h-9' : 'w-11 h-11'} rounded-full border-2 border-[#a21caf] flex items-center justify-center transition-all duration-300 overflow-hidden`}>
+                  <div className={`${scrolled ? 'w-9 h-9' : 'w-11 h-11'} rounded-full border-2 border-[#a21caf] bg-black flex items-center justify-center transition-all duration-300 overflow-hidden`}>
                       <img
                         src={logo}
                         alt="GFM"
