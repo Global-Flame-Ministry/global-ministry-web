@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import mummy from '../assets/mummy.jpg';
 
@@ -28,6 +28,7 @@ const useReveal = (delay = 0) => {
 };
 
 const CoPastor: React.FC = () => {
+  const navigate = useNavigate();
   const r0 = useReveal(0);
   const r1 = useReveal(100);
   const r2 = useReveal(300);
@@ -109,12 +110,12 @@ const CoPastor: React.FC = () => {
         {/* Navigation Buttons */}
         <div ref={r2} style={fadeStyle}>
           <div className="mt-12 pt-10 border-t border-slate-100 flex flex-wrap gap-4">
-            <Link
-              to="/senior-pastor"
-              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg"
+            <button
+              onClick={() => navigate(-1)}
+              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" /> Senior Pastor
-            </Link>
+            </button>
             <Link
               to="/core-beliefs"
               className="inline-flex items-center gap-2 px-8 py-4 bg-fuchsia-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-fuchsia-700 transition-all duration-200 hover:scale-[1.02] shadow-lg shadow-fuchsia-200 rounded-lg"

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, ArrowLeft } from 'lucide-react';
 
 const beliefs = [
@@ -66,6 +66,7 @@ const useReveal = (delay = 0) => {
 };
 
 const CoreBeliefs: React.FC = () => {
+  const navigate = useNavigate();
   const rHeader = useReveal(0);
   const fadeStyle: React.CSSProperties = {
     opacity: 0,
@@ -125,9 +126,9 @@ const CoreBeliefs: React.FC = () => {
 
         {/* Navigation Buttons */}
         <div className="mt-16 pt-10 border-t border-slate-100 flex flex-wrap gap-4">
-          <Link to="/our-story" className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg">
+          <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg cursor-pointer">
             <ArrowLeft className="w-3.5 h-3.5" /> Our Story
-          </Link>
+          </button>
         </div>
 
       </div>
