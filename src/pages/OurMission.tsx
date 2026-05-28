@@ -1,10 +1,46 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Globe, Eye, ArrowLeft, ArrowRight } from 'lucide-react';
 import work3 from '../assets/auditorium.jpg';
 
+const useReveal = (delay = 0) => {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(32px)';
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+          }, delay);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.05, rootMargin: '0px 0px -30px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay]);
+  return ref;
+};
+
+const transitionStyle: React.CSSProperties = {
+  transition: 'opacity 0.7s ease-out, transform 0.7s ease-out',
+};
+
 const OurMission: React.FC = () => {
+  const navigate = useNavigate();
+  const rHeader = useReveal(0);
+  const rImage = useReveal(100);
+  const rMission = useReveal(200);
+  const rVision = useReveal(300);
+  const rFootnote = useReveal(400);
+  const rNav = useReveal(500);
   return (
     <div className="min-h-screen bg-white pt-28 pb-20">
       <SEO
@@ -14,7 +50,7 @@ const OurMission: React.FC = () => {
       />
 
       {/* ================= HEADER ================= */}
-      <div className="text-center max-w-3xl mx-auto px-6 mb-16">
+      <div ref={rHeader} style={transitionStyle} className="text-center max-w-3xl mx-auto px-6 mb-16">
         <div className="w-16 h-16 bg-fuchsia-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
           <Globe className="w-6 h-6 text-fuchsia-500" />
         </div>
@@ -33,7 +69,7 @@ const OurMission: React.FC = () => {
       </div>
 
       {/* ================= IMAGE SECTION ================= */}
-      <div className="max-w-6xl mx-auto px-6 mb-20">
+      <div ref={rImage} style={transitionStyle} className="max-w-6xl mx-auto px-6 mb-20">
         <div className="rounded-3xl overflow-hidden shadow-xl">
           <img
             src={work3}
@@ -47,7 +83,7 @@ const OurMission: React.FC = () => {
       <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-10">
 
         {/* -------- Mission -------- */}
-        <div className="bg-slate-50 rounded-3xl p-10 shadow-sm hover:shadow-md transition">
+        <div ref={rMission} style={transitionStyle} className="bg-slate-50 rounded-3xl p-10 shadow-sm hover:shadow-md transition">
           <div className="w-10 h-10 bg-fuchsia-100 rounded-xl flex items-center justify-center mb-6">
             <Globe className="w-5 h-5 text-fuchsia-600" />
           </div>
@@ -68,7 +104,7 @@ const OurMission: React.FC = () => {
         </div>
 
         {/* -------- Vision -------- */}
-        <div className="bg-slate-50 rounded-3xl p-10 shadow-sm hover:shadow-md transition">
+        <div ref={rVision} style={transitionStyle} className="bg-slate-50 rounded-3xl p-10 shadow-sm hover:shadow-md transition">
           <div className="w-10 h-10 bg-fuchsia-100 rounded-xl flex items-center justify-center mb-6">
             <Eye className="w-5 h-5 text-fuchsia-600" />
           </div>
@@ -90,17 +126,17 @@ const OurMission: React.FC = () => {
       </div>
 
       {/* ================= FOOT NOTE ================= */}
-      <div className="text-center mt-20 px-6">
+      <div ref={rFootnote} style={transitionStyle} className="text-center mt-20 px-6">
         <p className="text-slate-400 text-sm italic">
           “Impacting lives, transforming nations, advancing God's kingdom.”
         </p>
       </div>
 
       {/* Navigation Buttons */}
-      <div className="max-w-6xl mx-auto px-6 mt-16 pt-10 border-t border-slate-100 flex flex-wrap gap-4">
-        <Link to="/our-story" className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg">
+      <div ref={rNav} style={transitionStyle} className="max-w-6xl mx-auto px-6 mt-16 pt-10 border-t border-slate-100 flex flex-wrap gap-4">
+        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg cursor-pointer">
           <ArrowLeft className="w-3.5 h-3.5" /> Our Story
-        </Link>
+        </button>
         <Link to="/senior-pastor" className="inline-flex items-center gap-2 px-8 py-4 bg-fuchsia-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-fuchsia-700 transition-all duration-200 hover:scale-[1.02] shadow-lg shadow-fuchsia-200 rounded-lg">
           Meet Senior Pastor <ArrowRight className="w-3.5 h-3.5" />
         </Link>
