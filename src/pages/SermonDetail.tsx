@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import {
   Play, Share2, PlusCircle, Music, Download,
-  ArrowLeft, Home, Clapperboard, Radio, User,
+  ArrowLeft, Home, Clapperboard, User,
 } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
 import type { SermonDto } from '../types';
@@ -326,7 +326,7 @@ const getEmbedUrl = (url: string): string => {
               <div className="p-4 bg-white/5 text-center">
                 <Link
                   to={`/sermons/series/${seriesSlug}`}
-                  className="text-[#5b0064] font-bold text-[10px] uppercase tracking-[0.15em] hover:text-[#fc8eff] transition-colors"
+                  className="inline-block px-6 py-2.5 bg-[#5b0064] text-white font-bold text-[10px] uppercase tracking-[0.15em] rounded-full hover:bg-[#7a008a] transition-all shadow-md"
                 >
                   View All Series Content
                 </Link>
@@ -363,9 +363,9 @@ const getEmbedUrl = (url: string): string => {
           <Clapperboard className="w-5 h-5" />
           <span className="text-[10px] font-bold uppercase tracking-[0.1em] mt-1">Series</span>
         </Link>
-        <Link to="/events" className="flex flex-col items-center justify-center text-[#e2e2e8]">
-          <Radio className="w-5 h-5" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.1em] mt-1">Live</span>
+        <Link to="/sermons" className="flex flex-col items-center justify-center text-[#e2e2e8]">
+          <ArrowLeft className="w-5 h-5" />
+          <span className="text-[10px] font-bold uppercase tracking-[0.1em] mt-1">Back to archive</span>
         </Link>
         <Link to="/dashboard" className="flex flex-col items-center justify-center text-[#e2e2e8]">
           <User className="w-5 h-5" />
