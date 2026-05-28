@@ -32,7 +32,7 @@ const SermonDetail: React.FC = () => {
 
   const activeSermon = queryData?.activeSermon ?? null;
 
-  const allSeriesSermons = useMemo(() => queryData?.allSeriesSermons ?? [], [queryData?.allSeriesSermons]);
+  const allSeriesSermons = useMemo(() => queryData?.allSeriesSermons ?? [], [queryData]);
 
   const seriesSermons = useMemo(() => {
     if (!activeSermon) return [];
