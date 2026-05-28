@@ -20,22 +20,29 @@ const SeriesDetail: React.FC = () => {
   const allSermons = useMemo(() => allSermonsData ?? [], [allSermonsData]);
   const [visibleCount, setVisibleCount] = useState(6);
 
-  const matchedSeries = useMemo(() => {
-    if (!seriesSlug) return null;
+  const seriesMap = useMemo(() => {
     const map = new Map<string, SermonDto[]>();
     allSermons.forEach(s => {
       if (!s.series) return;
-      const list = map.get(s.series) || [];
-      list.push(s);
-      map.set(s.series, list);
+      const list = map.get(s.series);
+      if (list) {
+        list.push(s);
+      } else {
+        map.set(s.series, [s]);
+      }
     });
-    for (const [name, sermons] of map.entries()) {
+    return map;
+  }, [allSermons]);
+
+  const matchedSeries = useMemo(() => {
+    if (!seriesSlug) return null;
+    for (const [name, sermons] of seriesMap.entries()) {
       if (slugify(name) === seriesSlug) {
         return { name, sermons };
       }
     }
     return null;
-  }, [allSermons, seriesSlug]);
+  }, [seriesMap, seriesSlug]);
 
   const decodedSeries = matchedSeries?.name || '';
   const allFetched = (matchedSeries?.sermons || [])
