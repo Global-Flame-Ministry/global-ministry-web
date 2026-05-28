@@ -55,6 +55,7 @@ const SeriesDetail: React.FC = () => {
     .slice()
     .sort((a, b) => new Date(a.sermonDate).getTime() - new Date(b.sermonDate).getTime());
   const seriesTheme = allFetched.find(s => s.theme)?.theme || null;
+  const conferenceTitle = allFetched[0]?.title || decodedSeries;
   const sermons = allFetched.slice(0, visibleCount);
   const hasMore = allFetched.length > visibleCount;
 
@@ -78,7 +79,7 @@ const SeriesDetail: React.FC = () => {
               <span className="text-[#51424f] text-[10px] font-bold uppercase tracking-[0.15em]">{allFetched.length} Message{allFetched.length !== 1 ? 's' : ''}</span>
             </div>
             <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl text-[#1a1c20] tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-              {decodedSeries}
+              {conferenceTitle}
             </h1>
             {seriesTheme && (
               <p className="text-[#712ae2] font-serif text-xl italic font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
