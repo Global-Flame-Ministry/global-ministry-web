@@ -469,7 +469,7 @@ const Home: React.FC = () => {
                 Latest Messages
               </p>
               <h2 className="text-4xl md:text-5xl font-serif font-medium text-slate-900 leading-snug">
-                Spiritual Nourishment
+                Spiritual Insight for a Modern World
               </h2>
             </div>
           </AnimatedDiv>

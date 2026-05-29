@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { ArrowLeft, Clock, MapPin, Phone, ChevronDown, CheckCircle2 } from 'lucide-react';
 import auditorium from '../assets/auditoruimout.jpg';
+import insideAuditorium from '../assets/insideAuditorium.jpg';
 import Reuben from '../assets/Reuben.jpg';
 import dddPreaching from '../assets/Daddy-dpreaching.jpg';
 
@@ -118,7 +119,7 @@ const PlanYourVisit: React.FC = () => {
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <div className="relative min-h-[60vh] md:min-h-[70vh] flex items-end overflow-hidden">
         <img
-          src={auditorium}
+          src={insideAuditorium}
           alt="Global Flame Ministry Auditorium"
           className="absolute inset-0 w-full h-full object-cover scale-105"
         />
