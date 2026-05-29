@@ -5,6 +5,7 @@ import {
   ArrowRight, ArrowLeft, Check, ShieldCheck,
   ChevronRight, CreditCard, Building2, Smartphone,
   Globe, Hash, Sprout, Landmark, Info, UserCircle,
+  Heart, HeartHandshake,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { donationApi } from '../api/donationApi';
@@ -15,23 +16,38 @@ import { useAuth } from '../context/useAuthContext';
 const CATEGORIES = [
   {
     label: 'Tithe and Offering',
-    icon: <Landmark className="text-amber-600" />,
+    icon: <Landmark />,
     desc: 'Your tenth returned to God and thanksgiving to him'
   },
   {
     label: 'Building Projects',
-    icon: <Building2 className="text-blue-600" />,
+    icon: <Building2 />,
     desc: "Expanding God's house"
   },
   {
     label: 'Children & Youth',
-    icon: <Sprout className="text-green-500" />,
+    icon: <Sprout />,
     desc: 'Planting seeds in young hearts'
   },
   {
     label: 'Home of Love',
-    icon: <Globe className="text-red-500" />,
+    icon: <Globe />,
     desc: 'Serving our Society through love'
+  },
+];
+
+const HOME_OF_LOVE_SUBCATEGORIES = [
+  {
+    id: 'medi_plex',
+    label: 'Medi Plex',
+    desc: 'Medical missions and clinical facilities.',
+    icon: <Heart />,
+  },
+  {
+    id: 'outreach',
+    label: 'Outreach',
+    desc: 'Feeding, shelter, and community support.',
+    icon: <HeartHandshake />,
   },
 ];
 
@@ -260,6 +276,7 @@ const GivePage = () => {
 
   const [step, setStep]                 = useState<1 | 2 | 3>(1);
   const [category, setCategory]         = useState('');
+  const [subCategory, setSubCategory]   = useState('');
   const [frequency, setFrequency]       = useState('One-time');
   const [region, setRegion]             = useState(REGIONS[0]);
   const [amount, setAmount]             = useState<number | null>(null);
@@ -414,84 +431,136 @@ const GivePage = () => {
         description="Support the work of Global Flame Ministry through your generous giving and donations."
         url="https://globalflameministry.org/give"
       />
-      <StepLayout
-      step={1}
-      totalSteps={TOTAL_STEPS}
-      label="Initiate"
-      title="Select your purpose"
-      subtitle="How would you like to make an impact today?"
-      onExitBack={handleExitBack}
-      rightPanel={
-        <div className="space-y-8">
-          <div>
-            <p className="text-xs font-black uppercase tracking-widest
-              text-slate-400 mb-4">
+      <div className="min-h-screen bg-[#f9f9ff] pt-20 flex flex-col">
+        <div className="max-w-6xl mx-auto w-full px-4 md:px-8 py-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold tracking-wider text-[#5b0064]">Step 1 of 3</span>
+            <span className="text-[10px] text-[#51424f] font-medium">Choose Your Purpose</span>
+          </div>
+          <div className="h-1.5 w-full bg-[#e2e2e8] rounded-full overflow-hidden">
+            <div className="h-full w-1/3 rounded-full bg-gradient-to-r from-[#5b0064] to-[#712ae2]" />
+          </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto w-full px-4 md:px-8 flex-1 flex flex-col">
+          <header className="text-center mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold text-[#1a1c20] mb-2">
+              Where would you like to make an impact?
+            </h1>
+            <p className="text-sm text-[#51424f] max-w-2xl mx-auto">
+              Select a category below to direct your seeds of grace. Your generosity empowers our global mission and local outreaches.
+            </p>
+          </header>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat.label}
+                type="button"
+                onClick={() => { setCategory(cat.label); setSubCategory(''); }}
+                className={`relative flex flex-col items-center text-center p-4 rounded-2xl border-2 transition-all duration-200 ${
+                  category === cat.label
+                    ? 'border-[#5b0064] bg-white shadow-md'
+                    : 'border-[#e2e2e8] bg-white hover:border-[#712ae2] hover:shadow-sm'
+                }`}
+              >
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-colors ${
+                  category === cat.label
+                    ? 'bg-[#80008c] text-white'
+                    : 'bg-[#f3f3f8] text-[#5b0064]'
+                }`}>
+                  {cat.icon}
+                </div>
+                <h3 className="text-sm font-bold text-[#1a1c20] mb-1">{cat.label}</h3>
+                <p className="text-xs text-[#51424f] leading-relaxed">{cat.desc}</p>
+                {category === cat.label && (
+                  <span className="absolute top-2 right-2 text-[#5b0064]">
+                    <Check size={16} strokeWidth={3} />
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {category === 'Home of Love' && (
+            <div className="max-w-2xl mx-auto w-full mb-6 p-4 bg-[#f3f3f9] rounded-2xl border border-[#d5c0d1]/30">
+              <h4 className="text-sm font-bold text-[#1a1c20] mb-3 flex items-center gap-2">
+                <ChevronRight size={14} className="text-[#712ae2]" />
+                Choose a specific focus for Home of Love
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {HOME_OF_LOVE_SUBCATEGORIES.map(sub => (
+                  <button
+                    key={sub.id}
+                    type="button"
+                    onClick={() => setSubCategory(sub.id)}
+                    className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
+                      subCategory === sub.id
+                        ? 'border-[#712ae2] bg-white shadow-sm'
+                        : 'border-transparent bg-white hover:border-[#d5c0d1]'
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                      subCategory === sub.id
+                        ? 'bg-[#712ae2] text-white'
+                        : 'bg-[#712ae2]/10 text-[#712ae2]'
+                    }`}>
+                      {sub.icon}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-[#1a1c20]">{sub.label}</p>
+                      <p className="text-[10px] text-[#51424f]">{sub.desc}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="mb-6">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[#51424f] mb-2">
               Giving Frequency
             </p>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="flex gap-2">
               {FREQUENCIES.map(f => (
                 <button
                   key={f}
+                  type="button"
                   onClick={() => setFrequency(f)}
-                  className={`flex items-center justify-between px-5 py-4
-                    rounded-2xl border-2 transition-all duration-300 ${
-                      frequency === f
-                        ? 'border-black bg-black text-white'
-                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-                    }`}
+                  className={`px-4 py-2 rounded-full text-xs font-bold border-2 transition-all ${
+                    frequency === f
+                      ? 'border-[#5b0064] bg-[#5b0064] text-white'
+                      : 'border-[#d5c0d1] text-[#51424f] hover:border-[#712ae2]'
+                  }`}
                 >
-                  <span className="font-bold text-xs uppercase tracking-widest">{f}</span>
-                  {frequency === f && <Check size={16} />}
+                  {f}
                 </button>
               ))}
             </div>
           </div>
-          <button
-            onClick={() => next(() => {
-              if (!category) { toast.error('Please select a category'); return false; }
-              return true;
-            })}
-            className="w-full bg-slate-900 text-white py-5 rounded-2xl
-              font-bold uppercase tracking-widest text-sm flex items-center
-              justify-center gap-3 hover:bg-black hover:shadow-xl
-              hover:-translate-y-0.5 transition-all duration-300"
-          >
-            Continue <ArrowRight size={18} />
-          </button>
+
+          <div className="mt-auto pt-4 pb-8 border-t border-[#e2e2e8] flex items-center justify-between">
+            <button
+              type="button"
+              onClick={handleExitBack}
+              className="flex items-center gap-1 text-xs font-bold text-[#51424f] hover:text-[#5b0064] transition-colors"
+            >
+              <ArrowLeft size={14} /> Back
+            </button>
+            <button
+              type="button"
+              onClick={() => next(() => {
+                if (!category) { toast.error('Please select a category'); return false; }
+                if (category === 'Home of Love' && !subCategory) { toast.error('Please select a specific focus'); return false; }
+                return true;
+              })}
+              className="bg-gradient-to-r from-[#5b0064] to-[#712ae2] text-white px-6 py-3 rounded-full text-xs font-bold flex items-center gap-2 hover:scale-105 transition-all shadow-md"
+            >
+              Continue <ArrowRight size={14} />
+            </button>
+          </div>
         </div>
-      }
-    >
-      <div className="grid grid-cols-1 gap-3">
-        {CATEGORIES.map(cat => (
-          <button
-            key={cat.label}
-            onClick={() => setCategory(cat.label)}
-            className={`group relative flex items-center gap-5 p-5 rounded-2xl
-              border-2 text-left transition-all duration-300 ${
-                category === cat.label
-                  ? 'border-black bg-slate-50 ring-4 ring-slate-100'
-                  : 'border-slate-100 hover:border-slate-300 bg-white shadow-sm'
-              }`}
-          >
-            <div className={`w-14 h-14 rounded-xl flex items-center justify-center
-              transition-colors duration-300 ${
-                category === cat.label ? 'bg-white shadow-inner' : 'bg-slate-50 group-hover:bg-slate-100'
-              }`}>
-              {cat.icon}
-            </div>
-            <div className="flex-1">
-              <p className="font-bold text-slate-900">{cat.label}</p>
-              <p className="text-sm text-slate-500">{cat.desc}</p>
-            </div>
-            {category === cat.label && (
-              <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center">
-                <Check size={14} className="text-white" />
-              </div>
-            )}
-          </button>
-        ))}
       </div>
-    </StepLayout>
     </>
   );
 
