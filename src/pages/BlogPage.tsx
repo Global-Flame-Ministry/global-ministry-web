@@ -47,16 +47,16 @@ const BlogPage: React.FC = () => {
         url="https://globalflameministry.org/blog"
       />
 
-      <section className="max-w-[1280px] mx-auto px-5 md:px-16 pt-16 pb-12 text-center">
+      <section className="max-w-[1280px] mx-auto px-5 md:px-16 pt-8 pb-6 text-center">
         <p className="text-xs uppercase tracking-widest text-[#a21caf] font-bold mb-4">Blog</p>
-        <h1 className="font-serif text-[40px] md:text-[64px] font-bold text-[#1a1c20] mb-6 tracking-tight leading-[1.1]">
+        <h1 className="font-serif text-[40px] md:text-[64px] font-bold text-[#1a1c20] mb-3 tracking-tight leading-[1.1]">
           Stories <span className="italic font-normal">and</span> Insights
         </h1>
-        <p className="text-lg text-[#51424f] max-w-2xl mx-auto mb-12 leading-relaxed">
+        <p className="text-lg text-[#51424f] max-w-2xl mx-auto mb-6 leading-relaxed">
           Discover inspiring stories, spiritual insights, and community updates from our ministry family.
         </p>
 
-        <div className="max-w-3xl mx-auto space-y-8">
+        <div className="max-w-3xl mx-auto space-y-4">
           <div className="relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#837280] group-focus-within:text-[#5b0064] transition-colors" />
             <input
@@ -98,8 +98,8 @@ const BlogPage: React.FC = () => {
         </div>
       </section>
 
-      <main className="max-w-[1280px] mx-auto px-5 md:px-16 pb-32">
-        <div className="mb-8">
+      <main className="max-w-[1280px] mx-auto px-5 md:px-16 pb-16">
+        <div className="mb-4">
           <button
             onClick={() => navigate(-1)}
             className="inline-flex items-center gap-2 text-[#51424f] font-bold uppercase tracking-widest text-xs hover:text-[#5b0064] transition-all duration-200 cursor-pointer"
@@ -122,7 +122,7 @@ const BlogPage: React.FC = () => {
           </div>
         )}
 
-        <p className="text-sm text-[#51424f] mb-8">
+        <p className="text-sm text-[#51424f] mb-4">
           Showing {posts.length} of {totalCount} posts
         </p>
 

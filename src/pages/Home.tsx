@@ -210,7 +210,7 @@ const Home: React.FC = () => {
   });
   const { data: latestBlogPostsData } = useQuery({
     queryKey: ['homeBlogPosts'],
-    queryFn: () => blogApi.getPublishedPosts({ pageSize: 3, pageNumber: 1 }).then(res => res.data.data?.items ?? []),
+    queryFn: () => blogApi.getPublishedPosts({ pageSize: 3, pageNumber: 1, sortBy: 'createdOn', isDescending: true }).then(res => res.data.data?.items ?? []),
   });
 
   const latestSermons = latestSermonsData ?? [];
