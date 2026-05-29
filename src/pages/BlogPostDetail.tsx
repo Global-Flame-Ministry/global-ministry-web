@@ -48,7 +48,7 @@ function ContentBlock({ block }: { block: BlogBlockDto }) {
           <img
             src={block.imageUrl ?? ''}
             alt=""
-            className="w-full max-h-[470px] object-cover rounded-xl"
+            className="w-full max-h-[420px] md:max-h-[520px] object-cover rounded-xl"
           />
         </figure>
       );
@@ -170,7 +170,7 @@ export default function BlogPostDetail() {
                 <img
                   src={post.coverImageUrl}
                   alt={post.title}
-                  className="w-full h-[400px] sm:h-[500px] object-cover rounded-xl"
+                  className="w-full h-auto max-h-[65vh] object-cover rounded-xl"
                 />
               </div>
             )}
