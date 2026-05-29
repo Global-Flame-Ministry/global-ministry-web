@@ -48,9 +48,9 @@ const BlogPage: React.FC = () => {
       />
 
       <section className="max-w-[1280px] mx-auto px-5 md:px-16 pt-4 pb-4 text-center">
-        <p className="text-xs uppercase tracking-widest text-[#a21caf] font-bold mb-4">Blog</p>
+        <p className="text-sm uppercase tracking-widest font-black animate-shimmer mb-4">Blog</p>
         <h1 className="font-serif text-[28px] md:text-[44px] font-bold text-[#1a1c20] mb-2 tracking-tight leading-[1.1]">
-          Stories <span className="italic font-normal">and</span> Insights
+          Stories <span className="italic font-normal">and</span> <span className="animate-shimmer">Insights</span>
         </h1>
         <p className="text-sm text-[#51424f] max-w-2xl mx-auto mb-4 leading-relaxed">
           Discover inspiring stories, spiritual insights, and community updates from our ministry family.
