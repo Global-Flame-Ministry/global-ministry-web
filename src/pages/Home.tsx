@@ -881,7 +881,7 @@ const Home: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="font-bold text-slate-900 text-sm uppercase tracking-widest mb-1">Visit Us</h4>
-                    <p className="text-slate-500">Zarmaganda, Diye, Off Rayfield Road, Jos, Nigeria.</p>
+                    <p className="text-slate-500">Zarmaganda, Diye, Off Rayfield Road, Jos, Plateau State, Nigeria.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-6">
