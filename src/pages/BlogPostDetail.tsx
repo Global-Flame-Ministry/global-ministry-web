@@ -138,7 +138,7 @@ export default function BlogPostDetail() {
         type="article"
       />
       <main className="max-w-4xl mx-auto px-4 py-8 sm:py-12 text-left">
-        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg cursor-pointer mb-6">
+        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-slate-700 font-bold uppercase tracking-widest text-xs hover:text-fuchsia-600 transition-all duration-200 cursor-pointer mb-6">
           <ArrowLeft className="w-4 h-4" />
           Back to Blog
         </button>
@@ -170,7 +170,7 @@ export default function BlogPostDetail() {
                 <img
                   src={post.coverImageUrl}
                   alt={post.title}
-                  className="w-full h-auto max-h-[65vh] object-cover rounded-xl"
+                  className="w-full h-auto max-h-[75vh] object-cover rounded-xl"
                 />
               </div>
             )}
@@ -191,7 +191,7 @@ export default function BlogPostDetail() {
             </div>
 
             <h1
-              className="w-full text-2xl md:text-4xl font-bold uppercase 
+              className="w-full text-xl md:text-3xl font-bold uppercase 
                 tracking-tight text-[#2e1065] mt-3 mb-2"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
@@ -245,46 +245,55 @@ export default function BlogPostDetail() {
           </article>
         ) : null}
 
-        {!isLoading && relatedPosts.length > 0 && (
+        {!isLoading && (
           <section className="mt-16 pt-12 border-t border-gray-200">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">
-              More from {post?.department}
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {relatedPosts.map((relatedPost) => (
-                <Link
-                  key={relatedPost.id}
-                  to={`/blog/${relatedPost.slug}`}
-                  className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-purple-200 transition-all"
-                >
-                  <div className="aspect-[16/10] overflow-hidden bg-gray-100">
-                    {relatedPost.coverImageUrl ? (
-                      <img
-                        src={relatedPost.coverImageUrl}
-                        alt={relatedPost.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-purple-100 to-fuchsia-100 flex items-center justify-center">
-                        <Flame className="w-10 h-10 text-purple-300" />
+            {relatedPosts.length > 0 ? (
+              <>
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">Recommended</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {relatedPosts.map((relatedPost) => (
+                    <Link
+                      key={relatedPost.id}
+                      to={`/blog/${relatedPost.slug}`}
+                      className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-purple-200 transition-all"
+                    >
+                      <div className="aspect-[16/10] overflow-hidden bg-gray-100">
+                        {relatedPost.coverImageUrl ? (
+                          <img
+                            src={relatedPost.coverImageUrl}
+                            alt={relatedPost.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-purple-100 to-fuchsia-100 flex items-center justify-center">
+                            <Flame className="w-10 h-10 text-purple-300" />
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <h4 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-purple-700 transition-colors">
-                      {relatedPost.title}
-                    </h4>
-                    <p className="text-sm text-gray-500 mt-2">
-                      {new Date(relatedPost.createdOn).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                      <div className="p-4">
+                        <h4 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-purple-700 transition-colors">
+                          {relatedPost.title}
+                        </h4>
+                        <p className="text-sm text-gray-500 mt-2">
+                          {new Date(relatedPost.createdOn).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="flex justify-center">
+                <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-slate-700 font-bold uppercase tracking-widest text-xs hover:text-fuchsia-600 transition-all duration-200 cursor-pointer">
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to Blog
+                </button>
+              </div>
+            )}
           </section>
         )}
       </main>
