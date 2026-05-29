@@ -286,7 +286,7 @@ const Home: React.FC = () => {
       />
 
       {/* ── HERO ────────────────────────────────────────────────────── */}
-      <section className="relative min-h-[100dvh] h-[100dvh] flex items-center justify-center overflow-hidden bg-black" style={{ isolation: 'isolate' }}>
+      <section className="relative min-h-[100dvh] h-[100dvh] flex items-start md:items-center justify-center overflow-hidden bg-black" style={{ isolation: 'isolate' }}>
         <video
           autoPlay muted loop playsInline
           poster={auditorium}
@@ -307,7 +307,7 @@ const Home: React.FC = () => {
 
         <ParticleCanvas />
 
-        <div className="relative z-20 w-full text-center px-6 max-w-5xl -translate-y-16 md:translate-y-0">
+        <div className="relative z-20 w-full text-center px-6 max-w-5xl pt-24 md:pt-0">
           <AnimatedDiv direction="up" delay={200}>
             <span className="inline-block py-1 px-4 rounded-full bg-fuchsia-500/20 border border-fuchsia-400/30 text-fuchsia-300 text-[10px] font-black uppercase tracking-[0.4em] mb-8 backdrop-blur-md">
               Welcome Home
