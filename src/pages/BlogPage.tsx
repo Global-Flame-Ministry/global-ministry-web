@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import SEO from '../components/SEO';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Flame, ArrowLeft } from 'lucide-react';
+import { Search, ArrowLeft, Flame } from 'lucide-react';
 import { blogApi } from '../api/blogApi';
 import type { BlogQueryObject } from '../types';
 
@@ -45,70 +45,72 @@ const BlogPage: React.FC = () => {
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
+    <div className="min-h-screen bg-[#f9f9ff] pt-24">
       <SEO
         title="Blog — Stories & Insights"
         description="Inspiring stories, spiritual insights, and community updates from Global Flame Ministry."
         url="https://globalflameministry.org/blog"
       />
-      <main className="max-w-6xl mx-auto px-4 py-8 sm:py-12">
-        <div className="py-10 border-b border-slate-200 mb-8">
-          <p className="text-xs uppercase tracking-widest text-[#a21caf] font-bold mb-2">Blog</p>
-          <h1 className="text-4xl font-bold text-[#111827] mb-3">Stories & Insights</h1>
-          <p className="text-slate-500">Discover inspiring stories, spiritual insights, and community updates from our ministry family.</p>
-        </div>
 
-        <div className="mb-8">
-          <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg cursor-pointer">
-            <ArrowLeft className="w-4 h-4" /> Back
-          </button>
-        </div>
+      <section className="max-w-[1280px] mx-auto px-5 md:px-16 pt-16 pb-12 text-center">
+        <p className="text-xs uppercase tracking-widest text-[#a21caf] font-bold mb-4">Blog</p>
+        <h1 className="font-serif text-[40px] md:text-[64px] font-bold text-[#1a1c20] mb-6 tracking-tight leading-[1.1]">
+          Stories <span className="italic font-normal">and</span> Insights
+        </h1>
+        <p className="text-lg text-[#51424f] max-w-2xl mx-auto mb-12 leading-relaxed">
+          Discover inspiring stories, spiritual insights, and community updates from our ministry family.
+        </p>
 
-        <div className="mb-8 space-y-4">
-          <div className="relative max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <div className="max-w-3xl mx-auto space-y-8">
+          <div className="relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#837280] group-focus-within:text-[#5b0064] transition-colors" />
             <input
               type="text"
-              placeholder="Search posts..."
+              placeholder="Search sermons, stories, or authors..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow"
+              className="w-full pl-12 pr-4 py-4 rounded-xl border border-[#d5c0d1] bg-[#f3f3f9] focus:ring-2 focus:ring-[#5b0064]/20 focus:border-[#5b0064] outline-none transition-all text-base"
             />
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex items-center justify-center gap-4 md:gap-8 overflow-x-auto no-scrollbar pb-2">
             <button
               type="button"
-              onClick={() => {
-                setActiveDepartment('All');
-                setPageNumber(1);
-              }}
-              className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
+              onClick={() => { setActiveDepartment('All'); setPageNumber(1); }}
+              className={`px-2 py-1 text-sm font-semibold whitespace-nowrap transition-all border-b-2 ${
                 activeDepartment === 'All'
-                  ? 'bg-purple-600 text-white shadow-md'
-                  : 'bg-white text-gray-700 border border-gray-200 hover:border-purple-300 hover:text-purple-700'
+                  ? 'border-[#5b0064] text-[#5b0064]'
+                  : 'border-transparent text-[#51424f] hover:text-[#5b0064]'
               }`}
             >
-              All
+              All Posts
             </button>
             {departments.map((dept) => (
               <button
                 key={dept}
                 type="button"
-                onClick={() => {
-                  setActiveDepartment(dept);
-                  setPageNumber(1);
-                }}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                onClick={() => { setActiveDepartment(dept); setPageNumber(1); }}
+                className={`px-2 py-1 text-sm font-semibold whitespace-nowrap transition-all border-b-2 ${
                   activeDepartment === dept
-                    ? 'bg-purple-600 text-white shadow-md'
-                    : 'bg-white text-gray-700 border border-gray-200 hover:border-purple-300 hover:text-purple-700'
+                    ? 'border-[#5b0064] text-[#5b0064]'
+                    : 'border-transparent text-[#51424f] hover:text-[#5b0064]'
                 }`}
               >
                 {dept}
               </button>
             ))}
           </div>
+        </div>
+      </section>
+
+      <main className="max-w-[1280px] mx-auto px-5 md:px-16 pb-32">
+        <div className="mb-8">
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 text-[#51424f] font-bold uppercase tracking-widest text-xs hover:text-[#5b0064] transition-all duration-200 cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
         </div>
 
         {error && (
@@ -125,35 +127,29 @@ const BlogPage: React.FC = () => {
           </div>
         )}
 
-        <p className="text-sm text-slate-500 mb-6">
+        <p className="text-sm text-[#51424f] mb-8">
           Showing {posts.length} of {totalCount} posts
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLoading ? (
             Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-pulse"
-              >
-                <div className="aspect-[16/10] bg-gray-200" />
-                <div className="p-5">
-                  <div className="h-6 bg-gray-200 rounded mb-2" />
-                  <div className="h-6 w-3/4 bg-gray-200 rounded mb-3" />
-                  <div className="space-y-2 mb-4">
+              <div key={i} className="cinematic-shadow rounded-2xl bg-white p-4 animate-pulse">
+                <div className="aspect-video bg-gray-200 rounded-xl mb-6" />
+                <div className="px-2 space-y-4">
+                  <div className="h-3 w-24 bg-gray-200 rounded" />
+                  <div className="h-6 w-3/4 bg-gray-200 rounded" />
+                  <div className="space-y-2">
                     <div className="h-4 bg-gray-200 rounded" />
                     <div className="h-4 bg-gray-200 rounded" />
                     <div className="h-4 w-2/3 bg-gray-200 rounded" />
                   </div>
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-gray-200" />
-                      <div>
-                        <div className="h-4 w-20 bg-gray-200 rounded mb-1" />
-                        <div className="h-3 w-16 bg-gray-200 rounded" />
-                      </div>
+                      <div className="h-4 w-20 bg-gray-200 rounded" />
                     </div>
-                    <div className="h-4 w-20 bg-gray-200 rounded" />
+                    <div className="h-3 w-16 bg-gray-200 rounded" />
                   </div>
                 </div>
               </div>
@@ -165,63 +161,61 @@ const BlogPage: React.FC = () => {
                 day: 'numeric',
                 year: 'numeric',
               });
+              const initials = post.authorName
+                .split(' ')
+                .map((n) => n[0])
+                .join('')
+                .toUpperCase()
+                .slice(0, 2);
               return (
                 <article
                   key={post.id}
-                  className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-purple-200 transition-all duration-300"
+                  className="flex flex-col group cinematic-shadow rounded-2xl bg-white p-4 transition-all duration-300"
                 >
-                  <Link to={`/blog/${post.slug}`} className="block">
-                    <div className="aspect-[16/10] overflow-hidden bg-gray-100">
-                      {post.coverImageUrl ? (
-                        <img
-                          src={post.coverImageUrl}
-                          alt={post.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-purple-100 to-fuchsia-100 flex items-center justify-center">
-                          <Flame className="w-12 h-12 text-purple-300" />
-                        </div>
-                      )}
-                    </div>
+                  <Link to={`/blog/${post.slug}`} className="overflow-hidden rounded-xl mb-6 aspect-video relative block">
+                    {post.coverImageUrl ? (
+                      <img
+                        src={post.coverImageUrl}
+                        alt={post.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-purple-100 to-fuchsia-100 flex items-center justify-center">
+                        <Flame className="w-12 h-12 text-purple-300" />
+                      </div>
+                    )}
                   </Link>
-                  <div className="p-5">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-purple-600 mb-1 block">
+                  <div className="px-2 space-y-4 flex-grow flex flex-col">
+                    <span className="inline-block text-[#5b0064] font-bold text-xs uppercase tracking-widest">
                       {post.department}
                     </span>
-                    <Link to={`/blog/${post.slug}`} className="block mt-1">
-                      <h3 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-purple-700 transition-colors">
+                    <Link to={`/blog/${post.slug}`}>
+                      <h3 className="font-semibold text-xl text-[#1a1c20] group-hover:text-[#5b0064] transition-colors line-clamp-2 leading-tight">
                         {post.title}
                       </h3>
                     </Link>
                     {post.excerpt && (
-                      <p className="mt-2 text-gray-600 text-sm line-clamp-3 leading-relaxed">
+                      <p className="text-[#51424f] text-sm leading-relaxed line-clamp-3">
                         {post.excerpt}
                       </p>
                     )}
-                    <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-100">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center text-white text-xs font-semibold">
-                          {post.authorName
-                            .split(' ')
-                            .map((n) => n[0])
-                            .join('')
-                            .toUpperCase()
-                            .slice(0, 2)}
+                    <div className="flex items-center justify-between pt-4 border-t border-[#d5c0d1]/30 mt-auto">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#80008c] flex items-center justify-center text-white font-bold text-xs">
+                          {initials}
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{post.authorName}</p>
-                          <p className="text-xs text-gray-500">{formattedDate}</p>
-                        </div>
+                        <span className="text-sm font-medium text-[#1a1c20]">{post.authorName}</span>
                       </div>
-                      <Link
-                        to={`/blog/${post.slug}`}
-                        className="text-sm font-medium text-purple-600 hover:text-purple-800 transition-colors flex items-center gap-1"
-                      >
-                        Read More
-                        <span className="group-hover:translate-x-1 transition-transform">→</span>
-                      </Link>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-[#51424f]">
+                        {formattedDate}
+                      </span>
                     </div>
+                    <Link
+                      to={`/blog/${post.slug}`}
+                      className="inline-flex items-center gap-2 text-[#5b0064] font-bold text-sm group-hover:gap-4 transition-all pt-2"
+                    >
+                      Read more <span className="transition-transform group-hover:translate-x-1">→</span>
+                    </Link>
                   </div>
                 </article>
               );
@@ -231,8 +225,8 @@ const BlogPage: React.FC = () => {
               <div className="w-20 h-20 rounded-full bg-purple-100 flex items-center justify-center mb-4">
                 <Search className="w-10 h-10 text-purple-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No posts found</h3>
-              <p className="text-gray-600 text-center max-w-md">
+              <h3 className="text-xl font-semibold text-[#1a1c20] mb-2">No posts found</h3>
+              <p className="text-[#51424f] text-center max-w-md">
                 {debouncedSearch
                   ? `We couldn't find any posts matching "${debouncedSearch}". Try adjusting your search or filter.`
                   : 'There are no blog posts available at the moment. Check back soon!'}
@@ -242,21 +236,21 @@ const BlogPage: React.FC = () => {
         </div>
 
         {!isLoading && (
-          <div className="mt-10 flex items-center justify-center gap-2">
+          <div className="mt-12 flex items-center justify-center gap-2">
             <button
               disabled={pageNumber <= 1}
               onClick={() => setPageNumber(p => Math.max(1, p - 1))}
-              className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 hover:border-[#a21caf] hover:text-[#a21caf] disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
+              className="px-3 py-1.5 rounded-lg border border-[#d5c0d1] text-sm font-semibold text-[#51424f] hover:border-[#5b0064] hover:text-[#5b0064] disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
             >
               ← Prev
             </button>
-            <span className="text-sm text-slate-500 whitespace-nowrap">
+            <span className="text-sm text-[#51424f] whitespace-nowrap">
               {pageNumber} / {totalPages}
             </span>
             <button
               disabled={pageNumber >= totalPages}
               onClick={() => setPageNumber(p => Math.min(totalPages, p + 1))}
-              className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 hover:border-[#a21caf] hover:text-[#a21caf] disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
+              className="px-3 py-1.5 rounded-lg border border-[#d5c0d1] text-sm font-semibold text-[#51424f] hover:border-[#5b0064] hover:text-[#5b0064] disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
             >
               Next →
             </button>

@@ -1,4 +1,33 @@
 @import "tailwindcss";
+@theme {
+  --color-primary: #5b0064;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #80008c;
+  --color-secondary-container: #8b4bfc;
+  --color-on-surface-variant: #51424f;
+  --color-outline-variant: #d5c0d1;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f3f3f9;
+  --color-accent-gold: #ffb95f;
+  --color-deep-void: #09090b;
+  --color-surface-glass: rgba(255, 255, 255, 0.85);
+}
+
+.cinematic-shadow {
+  box-shadow: 0 10px 30px -10px rgba(91, 0, 100, 0.15), 0 4px 20px -12px rgba(113, 42, 226, 0.1);
+}
+.cinematic-shadow:hover {
+  box-shadow: 0 20px 40px -15px rgba(91, 0, 100, 0.25), 0 8px 30px -15px rgba(113, 42, 226, 0.15);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* index.css */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(28px); }
