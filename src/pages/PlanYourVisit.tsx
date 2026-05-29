@@ -490,13 +490,13 @@ const PlanYourVisit: React.FC = () => {
               {galleryImages.map((img, i) => (
                 <div
                   key={i}
-                  className={`relative overflow-hidden rounded-xl shadow-sm
+                  className={`relative overflow-hidden rounded-xl shadow-sm bg-black
                     ${i === 0 ? 'col-span-2 h-40 sm:h-48' : 'h-28 sm:h-36'}`}
                 >
                   <img
                     src={img.src}
                     alt={img.label}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                    className={`w-full h-full object-cover hover:scale-105 transition-transform duration-500${i === 2 ? ' object-top' : ''}`}
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
                     <span className="text-white text-[10px] font-bold uppercase tracking-widest">
