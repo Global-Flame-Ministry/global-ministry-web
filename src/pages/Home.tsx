@@ -10,6 +10,7 @@ import { bookApi } from '../api/bookApi';
 import { blogApi } from '../api/blogApi';
 import dddPreaching from '../assets/ddd-preaching.jpeg';
 import daddandmumm from '../assets/dadandmum.jpg';
+import auditorium from '../assets/auditorium.jpg';
 import { useScrollAnimation } from '../context/hooks/useScrollAnimation';
 import { useAuth } from '../context/useAuthContext';
 import TestimonyModal from '../components/TestimonyModal';
@@ -286,6 +287,13 @@ const Home: React.FC = () => {
 
       {/* ── HERO ────────────────────────────────────────────────────── */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden bg-black">
+        <video
+          autoPlay muted loop playsInline
+          poster={auditorium}
+          className="absolute inset-0 w-full h-full object-cover opacity-60"
+        >
+          <source src="/assets/hero-bg.mp4" type="video/mp4" />
+        </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70 z-0" />
 
         <ParticleCanvas />
