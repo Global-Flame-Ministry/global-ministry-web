@@ -86,8 +86,8 @@ const ParticleCanvas: React.FC = () => {
 
     const particles: { x: number; y: number; vx: number; vy: number; size: number }[] = [];
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
     };
     window.addEventListener('resize', resize);
     resize();
@@ -120,7 +120,7 @@ const ParticleCanvas: React.FC = () => {
     return () => window.removeEventListener('resize', resize);
   }, []);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-10" />;
+  return <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-10" style={{ width: '100%', height: '100%', overflow: 'hidden' }} />;
 };
 
 // ─── CORE BELIEFS TEASER DATA ─────────────────────────────────────────────────
@@ -261,7 +261,7 @@ const Home: React.FC = () => {
     });
 
   return (
-    <div className="bg-white selection:bg-fuchsia-100 font-['Inter'] overflow-x-hidden">
+    <div className="bg-white selection:bg-fuchsia-100 font-['Inter'] overflow-x-hidden max-w-full">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@100..900&display=swap');
         .font-serif { font-family: 'Playfair Display', serif; }
@@ -286,7 +286,7 @@ const Home: React.FC = () => {
       />
 
       {/* ── HERO ────────────────────────────────────────────────────── */}
-      <section className="relative min-h-[100dvh] h-[100dvh] flex items-start md:items-center justify-center overflow-hidden bg-black" style={{ isolation: 'isolate' }}>
+      <section className="relative min-h-[100dvh] h-[100dvh] flex items-start md:items-center justify-center overflow-hidden bg-black max-w-full" style={{ isolation: 'isolate' }}>
         <video
           autoPlay muted loop playsInline
           poster={auditorium}
