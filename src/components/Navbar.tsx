@@ -635,8 +635,13 @@ const Navbar: React.FC = () => {
           <div className="flex items-center justify-between px-6 py-5
             border-b border-slate-100">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="GFM"
-                className="h-9 w-9 object-cover" />
+              <div className="w-10 h-10 rounded-full border-2 border-[#a21caf] bg-black flex items-center justify-center overflow-hidden shrink-0">
+                <img
+                  src={logo}
+                  alt="GFM"
+                  className="w-full h-full object-contain object-center p-1"
+                />
+              </div>
               <span className="font-serif text-base font-bold text-slate-900">
                 Global Flame
               </span>
