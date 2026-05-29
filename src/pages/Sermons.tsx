@@ -41,6 +41,7 @@ const Sermons: React.FC = () => {
   const allSermons = useMemo(() => allSermonsData ?? [], [allSermonsData]);
   const [searchQuery, setSearchQuery] = useState('');
   const [visibleCount, setVisibleCount] = useState(6);
+  const [selectedSeries, setSelectedSeries] = useState('');
 
   const seriesGroups = useMemo(() => {
     const map = new Map<string, SermonDto[]>();
@@ -61,6 +62,11 @@ const Sermons: React.FC = () => {
     }));
   }, [allSermons]);
 
+  const conferenceSeries = useMemo(() => {
+    if (activeCategory !== 'Conference') return [];
+    return [...new Set(allSermons.filter(s => s.series?.trim()).map(s => s.series as string))];
+  }, [allSermons, activeCategory]);
+
   const searched = useMemo(() => {
     if (!searchQuery.trim()) return seriesGroups;
     const q = searchQuery.toLowerCase();
@@ -73,8 +79,13 @@ const Sermons: React.FC = () => {
     );
   }, [seriesGroups, searchQuery]);
 
-  const visibleSeries = searched.slice(0, visibleCount);
-  const hasMore = searched.length > visibleCount;
+  const seriesFiltered = useMemo(() => {
+    if (!selectedSeries) return searched;
+    return searched.filter(g => g.name === selectedSeries);
+  }, [searched, selectedSeries]);
+
+  const visibleSeries = seriesFiltered.slice(0, visibleCount);
+  const hasMore = seriesFiltered.length > visibleCount;
 
   return (
     <>
@@ -115,7 +126,7 @@ const Sermons: React.FC = () => {
           {CATEGORIES.map(cat => (
             <button
               key={cat.key}
-              onClick={() => { setActiveCategory(cat.key); setVisibleCount(6); }}
+              onClick={() => { setActiveCategory(cat.key); setSelectedSeries(''); setVisibleCount(6); }}
               className={`px-6 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] whitespace-nowrap transition-all ${
                 activeCategory === cat.key
                   ? 'bg-[#5b0064] text-white shadow-lg shadow-[#5b0064]/30'
@@ -126,11 +137,26 @@ const Sermons: React.FC = () => {
             </button>
           ))}
         </div>
+        {activeCategory === 'Conference' && conferenceSeries.length > 0 && (
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-8 pb-3">
+            <select
+              value={selectedSeries}
+              onChange={e => { setSelectedSeries(e.target.value); setVisibleCount(6); }}
+              className="px-6 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] bg-white text-[#51424f] border border-[#d5c0d1]/30 focus:border-[#5b0064] focus:outline-none focus:ring-1 focus:ring-[#5b0064] cursor-pointer pr-10 w-full sm:w-auto"
+              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235b0064' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 16px center', backgroundSize: '12px' }}
+            >
+              <option value="">All Series</option>
+              {conferenceSeries.map(name => (
+                <option key={name} value={name}>{name}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* ─── FILTER + GRID ─── */}
       <section className="bg-[#f9f9ff] flex-1 max-w-[1280px] mx-auto px-4 sm:px-8 relative z-20 pb-32">
-        <div className="flex justify-end mb-20">
+        <div className="flex justify-end mb-4">
           <button onClick={() => navigate(-1)} className="text-[#51424f] hover:text-[#5b0064] transition-colors p-2">
             <ArrowLeft className="w-5 h-5" />
           </button>
