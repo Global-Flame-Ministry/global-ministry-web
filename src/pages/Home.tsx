@@ -287,10 +287,24 @@ const Home: React.FC = () => {
 
       {/* ── HERO ────────────────────────────────────────────────────── */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden bg-black">
+        <img
+          src={auditorium}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover opacity-30"
+        />
         <video
-          autoPlay muted loop playsInline
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
           poster={auditorium}
-          className="absolute inset-0 w-full h-full object-cover opacity-60"
+          className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000"
+          onCanPlay={(e) => {
+            (e.target as HTMLVideoElement).classList.remove('opacity-0');
+            (e.target as HTMLVideoElement).classList.add('opacity-60');
+          }}
         >
           <source src="/assets/hero-bg.mp4" type="video/mp4" />
         </video>
