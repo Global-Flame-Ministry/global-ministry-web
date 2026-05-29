@@ -845,7 +845,7 @@ const Home: React.FC = () => {
                       </div>
                       <div className="mt-6 md:mt-0 md:ml-6 shrink-0">
                         <Link
-                          to={`/events#event-${event.id}`}
+                          to={`/events/${event.slug}`}
                           className="inline-block px-8 py-3 rounded-full border border-white/20 hover:bg-white hover:text-[#09090b] transition-all text-sm font-semibold"
                         >
                           Get Details

@@ -17,7 +17,7 @@ const emptyForm = (): CreateEventDto => ({
   location: '', imageUrl: '', module: 'Ministry',
   ministryId: null,
   acceptsDonations: false, donationLabel: '',
-  acceptsRegistrations: true,
+  acceptsRegistrations: false,
 });
 
 const TEXT_FIELDS: { label: string; key: keyof CreateEventDto; placeholder: string }[] = [
