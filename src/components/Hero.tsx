@@ -22,14 +22,29 @@ const Hero: React.FC = () => {
 
   return (
     <>
-      <div className="relative min-h-[100dvh] sm:h-screen flex items-center justify-center overflow-hidden">
+      <div className="relative min-h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-black">
         <div className="absolute inset-0 z-0">
           <img
             src={auditorium}
-            alt="Worship Background"
-            className="w-full h-full object-cover"
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover object-center opacity-30"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            className="absolute inset-0 w-full h-full object-cover object-center opacity-0 transition-opacity duration-1000"
+            onCanPlay={(e) => {
+              (e.target as HTMLVideoElement).classList.remove('opacity-0');
+              (e.target as HTMLVideoElement).classList.add('opacity-60');
+            }}
+          >
+            <source src="/assets/hero-bg.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

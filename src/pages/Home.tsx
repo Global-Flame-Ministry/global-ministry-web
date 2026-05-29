@@ -10,7 +10,6 @@ import { bookApi } from '../api/bookApi';
 import { blogApi } from '../api/blogApi';
 import dddPreaching from '../assets/ddd-preaching.jpeg';
 import daddandmumm from '../assets/dadandmum.jpg';
-import auditorium from '../assets/auditorium.jpg';
 import { useScrollAnimation } from '../context/hooks/useScrollAnimation';
 import { useAuth } from '../context/useAuthContext';
 import TestimonyModal from '../components/TestimonyModal';
@@ -287,27 +286,6 @@ const Home: React.FC = () => {
 
       {/* ── HERO ────────────────────────────────────────────────────── */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden bg-black">
-        <img
-          src={auditorium}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover opacity-30"
-        />
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          poster={auditorium}
-          className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000"
-          onCanPlay={(e) => {
-            (e.target as HTMLVideoElement).classList.remove('opacity-0');
-            (e.target as HTMLVideoElement).classList.add('opacity-60');
-          }}
-        >
-          <source src="/assets/hero-bg.mp4" type="video/mp4" />
-        </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70 z-0" />
 
         <ParticleCanvas />
