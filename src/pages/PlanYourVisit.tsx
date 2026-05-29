@@ -116,12 +116,14 @@ const PlanYourVisit: React.FC = () => {
       />
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <div className="relative min-h-[60vh] md:min-h-[70vh] flex items-end overflow-hidden">
+      <div className="relative min-h-screen md:min-h-[70vh] flex items-end overflow-hidden">
         <video
           autoPlay muted loop playsInline
-          src="/assets/hero-bg.mp4"
-          className="absolute inset-0 w-full h-full object-cover scale-105"
-        />
+          poster={auditorium}
+          className="absolute inset-0 w-full h-full object-cover min-h-full min-w-full scale-105"
+        >
+          <source src="/assets/hero-bg.mp4" type="video/mp4" />
+        </video>
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-slate-900/20" />
 
         {/* Back nav */}

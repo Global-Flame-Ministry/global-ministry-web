@@ -301,7 +301,7 @@ const Home: React.FC = () => {
             height: 'auto',
           }}
         >
-          <source src="/assets/hero-bg.mp4" type="video/mp4" />
+          <source src="/assets/home-bg.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70 z-0" />
 
@@ -320,7 +320,7 @@ const Home: React.FC = () => {
               Who will <span className="text-fuchsia-400">manifest</span> <span className="text-fuchsia-400">the Kingdom</span> and the realities of the <span className="text-fuchsia-400">fullness</span> of Christ through the Spirit
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link to="/sermons" className="w-full sm:w-auto flex items-center justify-center px-10 py-4 bg-white text-slate-900 text-sm font-bold rounded-full transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 uppercase tracking-widest">
+              <Link to="/sermons" className="w-auto flex items-center justify-center px-8 py-2.5 bg-white text-slate-900 text-sm font-bold rounded-full transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 uppercase tracking-widest whitespace-nowrap">
                 Watch Latest Service
               </Link>
               <Link to="/contact" className="w-full sm:w-auto flex items-center justify-center px-10 py-4 border-2 border-white/30 text-white text-sm font-bold rounded-full hover:bg-white/10 transition-all backdrop-blur-sm uppercase tracking-widest">
