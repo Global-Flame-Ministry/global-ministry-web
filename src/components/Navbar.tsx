@@ -104,7 +104,7 @@ const Dropdown: React.FC<DropdownProps> = ({ label, children, isActive }) => {
       onClick={() => setOpen(false)}
     >
       <button className={`flex items-center gap-1.5 font-semibold text-sm
-        tracking-wide transition-colors whitespace-nowrap py-2 px-1
+        tracking-wide transition-colors whitespace-nowrap py-2 px-1 cursor-pointer
         ${isActive || open
           ? 'text-fuchsia-600'
           : 'text-slate-700 hover:text-fuchsia-600'
@@ -315,9 +315,9 @@ const Navbar: React.FC = () => {
                   onMouseEnter={handleMegaEnter}
                   onMouseLeave={handleMegaLeave}
                 >
-                  <button className={`flex items-center gap-1.5 font-semibold text-sm
+                  <button                    className={`flex items-center gap-1.5 font-semibold text-sm
                     tracking-wide transition-colors
-                    whitespace-nowrap py-2 px-1 ${
+                    whitespace-nowrap py-2 px-1 cursor-pointer ${
                       isExploreActive || megaOpen
                         ? 'text-[#a21caf]'
                         : 'text-[#111827] hover:text-[#a21caf]'
@@ -364,10 +364,10 @@ const Navbar: React.FC = () => {
 
                 <button
                   onClick={handleGiveClick}
-                  className="flex items-center gap-1.5 font-semibold text-sm
+                    className="flex items-center gap-1.5 font-semibold text-sm
                     tracking-wide text-white bg-gradient-to-r from-[#a21caf] to-[#712ae2]
-                    hover:opacity-90 focus-visible:outline-none px-4 py-2 rounded-full
-                    whitespace-nowrap transition-all"
+                    hover:opacity-90 focus-visible:outline-none px-5 py-0.5 rounded-full
+                    whitespace-nowrap transition-all cursor-pointer"
                 >
                   <Heart className="w-3 h-3 fill-current" /> Give
                 </button>
@@ -401,7 +401,7 @@ const Navbar: React.FC = () => {
                     <button onClick={logout}
                       className="bg-slate-900 text-white px-3 py-1 text-[10px]
                         font-black uppercase tracking-widest hover:bg-red-600
-                        transition-all rounded-sm">
+                        transition-all rounded-sm cursor-pointer">
                       Logout
                     </button>
                   </>
@@ -427,7 +427,7 @@ const Navbar: React.FC = () => {
               <button
                 onClick={() => setMobileOpen(true)}
                 className="lg:hidden p-2 text-slate-900 hover:bg-slate-100
-                  rounded-lg transition-colors"
+                  rounded-lg transition-colors cursor-pointer"
               >
                 <Menu size={22} />
               </button>
@@ -648,7 +648,7 @@ const Navbar: React.FC = () => {
             </div>
             <button
               onClick={() => setMobileOpen(false)}
-              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
             >
               <X size={20} className="text-slate-600" />
             </button>
@@ -682,7 +682,7 @@ const Navbar: React.FC = () => {
                 <button
                   onClick={() => { logout(); setMobileOpen(false); }}
                   className="text-[10px] font-black uppercase tracking-widest
-                    text-red-500 hover:text-red-700 transition-colors"
+                    text-red-500 hover:text-red-700 transition-colors cursor-pointer"
                 >
                   Logout
                 </button>
@@ -711,7 +711,7 @@ const Navbar: React.FC = () => {
             onClick={() => { setMobileOpen(false); handleGiveClick(); }}
             className="flex items-center justify-center gap-2 mx-6 mt-4 py-3 min-h-[44px]
               bg-[#a21caf] text-white rounded-xl text-[10px] font-black
-              uppercase tracking-widest hover:bg-[#7c3aed] transition-colors"
+              uppercase tracking-widest hover:bg-[#7c3aed] transition-colors cursor-pointer"
           >
             <Heart className="w-3.5 h-3.5 fill-white" /> Give / Donate
           </button>
@@ -771,7 +771,7 @@ const Navbar: React.FC = () => {
                     mobileSection === section.id ? null : section.id
                   )}
                   className="flex items-center justify-between w-full px-3
-                    py-3.5 rounded-xl hover:bg-slate-50 transition-colors"
+                    py-3.5 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"
                 >
                   <span className="text-xs font-black uppercase tracking-widest
                     text-slate-700">
