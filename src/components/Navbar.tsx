@@ -671,7 +671,7 @@ const Navbar: React.FC = () => {
                       font-black uppercase tracking-widest text-slate-600
                       hover:text-fuchsia-600 transition-colors">
                     <UserAvatar
-                      size="md"
+                      size="sm"
                       profilePicUrl={profilePicUrl}
                       firstName={user?.firstName}
                       lastName={user?.lastName}
