@@ -40,23 +40,23 @@ const BlogPage: React.FC = () => {
   const departments = [...new Set(posts.map(p => p.department).filter(Boolean))];
 
   return (
-    <div className="min-h-screen bg-[#f9f9ff] pt-24">
+    <div className="min-h-screen bg-[#f9f9ff] pt-20">
       <SEO
         title="Blog — Stories & Insights"
         description="Inspiring stories, spiritual insights, and community updates from Global Flame Ministry."
         url="https://globalflameministry.org/blog"
       />
 
-      <section className="max-w-[1280px] mx-auto px-5 md:px-16 pt-8 pb-6 text-center">
+      <section className="max-w-[1280px] mx-auto px-5 md:px-16 pt-4 pb-4 text-center">
         <p className="text-xs uppercase tracking-widest text-[#a21caf] font-bold mb-4">Blog</p>
-        <h1 className="font-serif text-[40px] md:text-[64px] font-bold text-[#1a1c20] mb-3 tracking-tight leading-[1.1]">
+        <h1 className="font-serif text-[28px] md:text-[44px] font-bold text-[#1a1c20] mb-2 tracking-tight leading-[1.1]">
           Stories <span className="italic font-normal">and</span> Insights
         </h1>
-        <p className="text-lg text-[#51424f] max-w-2xl mx-auto mb-6 leading-relaxed">
+        <p className="text-sm text-[#51424f] max-w-2xl mx-auto mb-4 leading-relaxed">
           Discover inspiring stories, spiritual insights, and community updates from our ministry family.
         </p>
 
-        <div className="max-w-3xl mx-auto space-y-4">
+        <div className="max-w-3xl mx-auto space-y-3">
           <div className="relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#837280] group-focus-within:text-[#5b0064] transition-colors" />
             <input
@@ -98,8 +98,8 @@ const BlogPage: React.FC = () => {
         </div>
       </section>
 
-      <main className="max-w-[1280px] mx-auto px-5 md:px-16 pb-16">
-        <div className="mb-4">
+      <main className="max-w-[1280px] mx-auto px-5 md:px-16 pb-10">
+        <div className="mb-2">
           <button
             onClick={() => navigate(-1)}
             className="inline-flex items-center gap-2 text-[#51424f] font-bold uppercase tracking-widest text-xs hover:text-[#5b0064] transition-all duration-200 cursor-pointer"
@@ -122,7 +122,7 @@ const BlogPage: React.FC = () => {
           </div>
         )}
 
-        <p className="text-sm text-[#51424f] mb-4">
+        <p className="text-sm text-[#51424f] mb-3">
           Showing {posts.length} of {totalCount} posts
         </p>
 
