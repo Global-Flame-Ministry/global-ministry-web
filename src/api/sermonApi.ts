@@ -14,6 +14,7 @@ export interface CreateSermonDto {
   sermonDate: string;
   isPublished: boolean;
   isFeatured: boolean;
+  category: 'Conference' | 'PowerService' | 'MorningGlory';
 }
 
 export interface UpdateSermonDto {
@@ -29,6 +30,7 @@ export interface UpdateSermonDto {
   sermonDate: string;
   isPublished: boolean;
   isFeatured: boolean;
+  category: 'Conference' | 'PowerService' | 'MorningGlory';
 }
 
 export const sermonApi = {
@@ -40,6 +42,7 @@ export const sermonApi = {
     speaker?: string;
     series?: string;
     isFeatured?: boolean;
+    category?: 'Conference' | 'PowerService' | 'MorningGlory';
   }) =>
     api.get<ApiResponse<PagedResult<SermonDto>>>('/api/ministry/sermons', { params }),
 
@@ -54,10 +57,10 @@ export const sermonApi = {
     pageNumber?: number;
     pageSize?: number;
     title?: string;
-    speaker?: string;
     series?: string;
     isPublished?: boolean;
     isFeatured?: boolean;
+    category?: 'Conference' | 'PowerService' | 'MorningGlory';
   }) =>
     api.get<ApiResponse<PagedResult<SermonDto>>>('/api/admin/sermons', { params }),
 

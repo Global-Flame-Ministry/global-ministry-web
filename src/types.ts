@@ -134,6 +134,7 @@ export interface SermonDto {
   sermonDate: string;
   isPublished: boolean;
   isFeatured: boolean;
+  category: 'Conference' | 'PowerService' | 'MorningGlory';
   createdOn: string;
 }
 
@@ -591,12 +592,13 @@ export interface CreateSermonDto {
   speaker: string;
   series: string;
   description: string;
-  speakerImageUrl?: string;   // ← ADDED
+  speakerImageUrl?: string;
   imageUrl?: string;
   videoUrl?: string;
   audioUrl?: string;
   sermonDate: string;
   isPublished: boolean;
+  category: 'Conference' | 'PowerService' | 'MorningGlory';
 }
 
 export interface UpdateSermonDto {
@@ -604,12 +606,13 @@ export interface UpdateSermonDto {
   speaker: string;
   series: string;
   description: string;
-  speakerImageUrl?: string;   // ← ADDED
+  speakerImageUrl?: string;
   imageUrl?: string;
   videoUrl?: string;
   audioUrl?: string;
   sermonDate: string;
   isPublished: boolean;
+  category: 'Conference' | 'PowerService' | 'MorningGlory';
 }
 // COUNSELLING 
 export interface CounsellingResponseDto {

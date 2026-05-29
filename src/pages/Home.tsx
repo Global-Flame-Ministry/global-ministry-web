@@ -286,11 +286,20 @@ const Home: React.FC = () => {
       />
 
       {/* ── HERO ────────────────────────────────────────────────────── */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden bg-black">
+      <section className="relative min-h-[100dvh] h-[100dvh] flex items-center justify-center overflow-hidden bg-black" style={{ isolation: 'isolate' }}>
         <video
           autoPlay muted loop playsInline
           poster={auditorium}
-          className="absolute inset-0 w-full h-full object-cover opacity-60"
+          className="absolute object-cover object-center opacity-60"
+          style={{
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            minWidth: '100%',
+            minHeight: '100%',
+            width: 'auto',
+            height: 'auto',
+          }}
         >
           <source src="/assets/hero-bg.mp4" type="video/mp4" />
         </video>
@@ -298,7 +307,7 @@ const Home: React.FC = () => {
 
         <ParticleCanvas />
 
-        <div className="relative z-20 text-center px-6 max-w-5xl">
+        <div className="relative z-20 w-full text-center px-6 max-w-5xl -translate-y-16 md:translate-y-0">
           <AnimatedDiv direction="up" delay={200}>
             <span className="inline-block py-1 px-4 rounded-full bg-fuchsia-500/20 border border-fuchsia-400/30 text-fuchsia-300 text-[10px] font-black uppercase tracking-[0.4em] mb-8 backdrop-blur-md">
               Welcome Home

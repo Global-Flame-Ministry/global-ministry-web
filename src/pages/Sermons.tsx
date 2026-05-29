@@ -25,15 +25,21 @@ const getBadgeStyle = (name: string) => {
   return BADGE_COLORS[Math.abs(hash) % BADGE_COLORS.length];
 };
 
+const CATEGORIES = [
+  { key: 'Conference', label: 'Conference' },
+  { key: 'PowerService', label: 'Power Service' },
+  { key: 'MorningGlory', label: 'Morning Glory' },
+] as const;
+
 const Sermons: React.FC = () => {
   const navigate = useNavigate();
+  const [activeCategory, setActiveCategory] = useState<'Conference' | 'PowerService' | 'MorningGlory'>('Conference');
   const { data: allSermonsData, isLoading } = useQuery({
-    queryKey: ['publishedSermons'],
-    queryFn: () => sermonApi.getAll({ pageSize: 100 }).then(res => res.data.data?.items ?? []),
+    queryKey: ['publishedSermons', activeCategory],
+    queryFn: () => sermonApi.getAll({ pageSize: 100, category: activeCategory }).then(res => res.data.data?.items ?? []),
   });
   const allSermons = useMemo(() => allSermonsData ?? [], [allSermonsData]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('All');
   const [visibleCount, setVisibleCount] = useState(6);
 
   const seriesGroups = useMemo(() => {
@@ -55,27 +61,17 @@ const Sermons: React.FC = () => {
     }));
   }, [allSermons]);
 
-  const departmentNames = useMemo(() => {
-    return ['All', ...seriesGroups.map(g => g.name)];
-  }, [seriesGroups]);
-
-  const filtered = useMemo(() => {
-    return activeFilter === 'All'
-      ? seriesGroups
-      : seriesGroups.filter(g => g.name === activeFilter);
-  }, [seriesGroups, activeFilter]);
-
   const searched = useMemo(() => {
-    if (!searchQuery.trim()) return filtered;
+    if (!searchQuery.trim()) return seriesGroups;
     const q = searchQuery.toLowerCase();
-    return filtered.filter(g =>
+    return seriesGroups.filter(g =>
       g.name.toLowerCase().includes(q) ||
       g.sermons.some(s =>
         s.speaker?.toLowerCase().includes(q) ||
         s.title?.toLowerCase().includes(q)
       )
     );
-  }, [filtered, searchQuery]);
+  }, [seriesGroups, searchQuery]);
 
   const visibleSeries = searched.slice(0, visibleCount);
   const hasMore = searched.length > visibleCount;
@@ -113,20 +109,28 @@ const Sermons: React.FC = () => {
         </div>
       </section>
 
+      {/* ─── CATEGORY TABS ─── */}
+      <div className="sticky top-0 z-30 bg-[#f9f9ff] border-b border-[#d5c0d1]/20">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-8 flex gap-1 py-3 overflow-x-auto">
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat.key}
+              onClick={() => { setActiveCategory(cat.key); setVisibleCount(6); }}
+              className={`px-6 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] whitespace-nowrap transition-all ${
+                activeCategory === cat.key
+                  ? 'bg-[#5b0064] text-white shadow-lg shadow-[#5b0064]/30'
+                  : 'bg-white text-[#51424f] border border-[#d5c0d1]/30 hover:border-[#5b0064]/50'
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* ─── FILTER + GRID ─── */}
-      <section className="bg-[#f9f9ff] flex-1 max-w-[1280px] mx-auto px-4 sm:px-8 -mt-12 relative z-20 pb-32">
-        {/* Filter + Back row */}
-        <div className="flex items-center justify-between gap-4 mb-20">
-          <select
-            value={activeFilter}
-            onChange={(e) => { setActiveFilter(e.target.value); setVisibleCount(6); }}
-            className="px-6 py-3 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] bg-white text-[#51424f] border border-[#d5c0d1]/30 focus:border-[#5b0064] focus:outline-none focus:ring-1 focus:ring-[#5b0064] cursor-pointer pr-10"
-            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235b0064' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 16px center', backgroundSize: '12px' }}
-          >
-            {departmentNames.map(name => (
-              <option key={name} value={name}>{name}</option>
-            ))}
-          </select>
+      <section className="bg-[#f9f9ff] flex-1 max-w-[1280px] mx-auto px-4 sm:px-8 relative z-20 pb-32">
+        <div className="flex justify-end mb-20">
           <button onClick={() => navigate(-1)} className="text-[#51424f] hover:text-[#5b0064] transition-colors p-2">
             <ArrowLeft className="w-5 h-5" />
           </button>

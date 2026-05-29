@@ -14,7 +14,9 @@ import ImageUpload from '../../components/ImageUpload';
 const emptyForm = (): CreateSermonDto => ({
   title: '', speaker: '', series: '', theme: '', description: '',
   speakerImageUrl: '',
-  imageUrl: '', videoUrl: '', audioUrl: '', sermonDate: '', isPublished: false, isFeatured: false,
+  imageUrl: '', videoUrl: '', audioUrl: '', sermonDate: '',
+  isPublished: false, isFeatured: false,
+  category: 'Conference' as const,
 });
 
 const AdminSermons = () => {
@@ -44,6 +46,7 @@ const AdminSermons = () => {
   const [isLoading, setIsLoading]             = useState(true);
   const [search, setSearch]                   = useState('');
   const [filterPublished, setFilterPublished] = useState('');
+  const [filterCategory, setFilterCategory]   = useState('');
   const [pageNumber, setPageNumber]           = useState(1);
   const pageSize = 10;
   const [showForm, setShowForm]               = useState(false);
@@ -59,6 +62,7 @@ const AdminSermons = () => {
       const res = await sermonApi.adminGetAll({
         title: search || undefined,
         isPublished: filterPublished === '' ? undefined : filterPublished === 'true',
+        category: filterCategory === '' ? undefined : filterCategory as 'Conference' | 'PowerService' | 'MorningGlory',
         pageNumber, pageSize,
       });
       if (res.data.isSuccess && res.data.data) {
@@ -67,10 +71,10 @@ const AdminSermons = () => {
       }
     } catch { toast.error('Failed to load sermons'); }
     finally { setIsLoading(false); }
-  }, [search, filterPublished, pageNumber]);
+  }, [search, filterPublished, filterCategory, pageNumber]);
 
   useEffect(() => { fetchSermons(); }, [fetchSermons]);
-  useEffect(() => { setPageNumber(1); }, [search, filterPublished]);
+  useEffect(() => { setPageNumber(1); }, [search, filterPublished, filterCategory]);
 
   const openCreate = () => { setEditing(null); setForm(emptyForm()); setShowForm(true); };
 
@@ -89,6 +93,7 @@ const AdminSermons = () => {
       sermonDate:      s.sermonDate.slice(0, 10),
       isPublished:     s.isPublished,
       isFeatured:      s.isFeatured,
+      category:        s.category,
     });
     setShowForm(true);
   };
@@ -147,6 +152,7 @@ const AdminSermons = () => {
         sermonDate:      sermon.sermonDate.slice(0, 10),
         isPublished:     !sermon.isPublished,
         isFeatured:      sermon.isFeatured,
+        category:        sermon.category,
       };
       const res = await sermonApi.update(sermon.id, dto);
       if (res.data.isSuccess) {
@@ -229,6 +235,20 @@ const AdminSermons = () => {
             <option value="false">Drafts</option>
           </select>
         </div>
+        <div className="relative">
+          <Filter className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${t.subtext} pointer-events-none`} />
+          <select
+            value={filterCategory}
+            onChange={e => setFilterCategory(e.target.value)}
+            className={`w-full sm:w-auto pl-9 pr-8 py-2.5 border rounded-lg text-sm
+              outline-none appearance-none cursor-pointer ${t.input}`}
+          >
+            <option value="">All Categories</option>
+            <option value="Conference">Conference</option>
+            <option value="PowerService">Power Service</option>
+            <option value="MorningGlory">Morning Glory</option>
+          </select>
+        </div>
       </div>
 
       {/* List */}
@@ -303,6 +323,10 @@ const AdminSermons = () => {
                               Featured
                             </span>
                           )}
+                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 
+                            rounded-full bg-indigo-500/20 text-indigo-600">
+                            {sermon.category === 'PowerService' ? 'Power Service' : sermon.category === 'MorningGlory' ? 'Morning Glory' : sermon.category}
+                          </span>
                         </div>
                       </div>
                       {/* Actions */}
@@ -473,6 +497,18 @@ const AdminSermons = () => {
                     onChange={e => setForm(p => ({ ...p, sermonDate: e.target.value }))}
                     className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`}
                   />
+                </div>
+                <div>
+                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Category *</label>
+                  <select
+                    value={form.category}
+                    onChange={e => setForm(p => ({ ...p, category: e.target.value as 'Conference' | 'PowerService' | 'MorningGlory' }))}
+                    className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`}
+                  >
+                    <option value="Conference">Conference</option>
+                    <option value="PowerService">Power Service</option>
+                    <option value="MorningGlory">Morning Glory</option>
+                  </select>
                 </div>
                 <div className="pb-1">
                   <div
