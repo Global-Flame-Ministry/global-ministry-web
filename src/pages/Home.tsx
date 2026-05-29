@@ -841,7 +841,7 @@ const Home: React.FC = () => {
                         <h3 className="text-xl md:text-2xl font-serif mb-2 group-hover:text-[#ffb95f] transition-colors">
                           {event.title}
                         </h3>
-                        <p className="text-sm md:text-base text-white/40">{event.description}</p>
+                        <p className="text-sm md:text-base text-white/40 line-clamp-3">{event.description}</p>
                       </div>
                       <div className="mt-6 md:mt-0 md:ml-6 shrink-0">
                         <Link

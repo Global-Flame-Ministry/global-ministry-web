@@ -77,15 +77,14 @@ const EventCard: React.FC<{
   onRegister: (event: EventDto | null) => void;
   onDonate: (event: EventDto) => void;
   formatDate: (dateString: string) => string;
-  isOngoing: boolean;
-}> = ({ event, badge, index, onRegister, onDonate, formatDate, isOngoing: _isOngoing }) => {
+}> = ({ event, badge, index, onRegister, onDonate, formatDate }) => {
   const rCard = useReveal(index * 100);
   return (
-    <div id={`event-${event.id}`} ref={rCard} style={{
+    <div id={`event-${event.id}`} ref={rCard} onClick={() => navigate(`/events/${event.slug || event.id}`)} style={{
       opacity: 0,
       transform: 'translateY(32px)',
       transition: 'opacity 0.7s ease-out, transform 0.7s ease-out',
-    }} className="flex flex-col md:flex-row gap-8 pb-16 border-b border-gray-100 last:border-b-0">
+    }} className="flex flex-col md:flex-row gap-8 pb-16 border-b border-gray-100 last:border-b-0 cursor-pointer">
       <div className="w-full md:w-1/2 overflow-hidden rounded-xl bg-gray-100">
         {event.imageUrl ? (
           <img src={event.imageUrl} alt={event.title}
@@ -98,9 +97,14 @@ const EventCard: React.FC<{
         )}
       </div>
       <div className="w-full md:w-1/2 flex flex-col justify-center">
-        <span className="text-fuchsia-600 text-xs font-bold uppercase tracking-widest mb-3">
-          {badge}
-        </span>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-fuchsia-600 text-xs font-bold uppercase tracking-widest">
+            {badge}
+          </span>
+          <span className="text-fuchsia-600/60 text-xs font-bold uppercase tracking-widest">
+            {event.module}
+          </span>
+        </div>
         <h3 className="text-2xl font-serif font-bold text-gray-900 mb-3">{event.title}</h3>
         <div className="flex items-center gap-2 text-gray-500 text-sm mb-2">
           <Calendar className="w-4 h-4 text-fuchsia-500" />
@@ -110,22 +114,21 @@ const EventCard: React.FC<{
           <MapPin className="w-4 h-4 text-fuchsia-500" />
           {event.location}
         </div>
-        <span className="text-fuchsia-600 text-xs font-bold uppercase tracking-widest mb-3">
-          {event.module}
-        </span>
         {event.description && (
           <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-3">
             {event.description}
           </p>
         )}
         <div className="flex gap-3">
-          <button onClick={() => onRegister(event)}
-            className="px-6 py-2.5 bg-gray-900 text-white text-xs font-bold uppercase tracking-widest
-              rounded-lg hover:bg-fuchsia-600 transition-all">
-            Register
-          </button>
+          {event.acceptsRegistrations && (
+            <button onClick={(e) => { e.stopPropagation(); onRegister(event); }}
+              className="px-6 py-2.5 bg-gray-900 text-white text-xs font-bold uppercase tracking-widest
+                rounded-lg hover:bg-fuchsia-600 transition-all">
+              Register
+            </button>
+          )}
           {event.acceptsDonations && (
-            <button onClick={() => onDonate(event)}
+            <button onClick={(e) => { e.stopPropagation(); onDonate(event); }}
               className="px-6 py-2.5 border-2 border-fuchsia-200 text-fuchsia-600 text-xs font-bold
                 uppercase tracking-widest rounded-lg hover:bg-fuchsia-50 transition-all">
               Donate
@@ -258,7 +261,6 @@ const EventCard: React.FC<{
                   onRegister={setSelectedEvent}
                   onDonate={handleDonate}
                   formatDate={formatDate}
-                  isOngoing={true}
                 />
               ))}
             </div>
@@ -302,18 +304,17 @@ const EventCard: React.FC<{
 
         {!isLoadingUpcoming && upcomingEvents.length > 0 && (
           <div className="flex flex-col gap-12 sm:gap-16">
-            {upcomingEvents.map((event, i) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                badge="Upcoming"
-                index={i}
-                onRegister={setSelectedEvent}
-                onDonate={handleDonate}
-                formatDate={formatDate}
-                isOngoing={false}
-              />
-            ))}
+              {upcomingEvents.map((event, i) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  badge="Upcoming"
+                  index={i}
+                  onRegister={setSelectedEvent}
+                  onDonate={handleDonate}
+                  formatDate={formatDate}
+                />
+              ))}
           </div>
         )}
       </div>

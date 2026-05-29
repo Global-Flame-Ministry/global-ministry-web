@@ -196,7 +196,7 @@ export default function EventDetails() {
 
             {event.description && (
               <div className="prose prose-gray max-w-none">
-                <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap">
+                <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap text-justify">
                   {event.description}
                 </p>
               </div>
