@@ -22,12 +22,6 @@ const BlogPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  const { data: departmentsData } = useQuery({
-    queryKey: ['blogDepartments'],
-    queryFn: () => blogApi.getDepartments().then(res => res.data.data ?? []),
-  });
-  const departments = departmentsData ?? [];
-
   const { data: queryData, isLoading, error, refetch } = useQuery({
     queryKey: ['publishedBlogPosts', pageNumber, pageSize, activeDepartment, debouncedSearch],
     queryFn: async () => {
@@ -43,6 +37,7 @@ const BlogPage: React.FC = () => {
   const posts = queryData?.items ?? [];
   const totalCount = queryData?.totalCount ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const departments = [...new Set(posts.map(p => p.department).filter(Boolean))];
 
   return (
     <div className="min-h-screen bg-[#f9f9ff] pt-24">
@@ -77,7 +72,7 @@ const BlogPage: React.FC = () => {
             <button
               type="button"
               onClick={() => { setActiveDepartment('All'); setPageNumber(1); }}
-              className={`px-2 py-1 text-sm font-semibold whitespace-nowrap transition-all border-b-2 ${
+              className={`px-2 py-1 text-sm font-semibold whitespace-nowrap transition-all border-b-2 cursor-pointer ${
                 activeDepartment === 'All'
                   ? 'border-[#5b0064] text-[#5b0064]'
                   : 'border-transparent text-[#51424f] hover:text-[#5b0064]'
@@ -90,7 +85,7 @@ const BlogPage: React.FC = () => {
                 key={dept}
                 type="button"
                 onClick={() => { setActiveDepartment(dept); setPageNumber(1); }}
-                className={`px-2 py-1 text-sm font-semibold whitespace-nowrap transition-all border-b-2 ${
+                className={`px-2 py-1 text-sm font-semibold whitespace-nowrap transition-all border-b-2 cursor-pointer ${
                   activeDepartment === dept
                     ? 'border-[#5b0064] text-[#5b0064]'
                     : 'border-transparent text-[#51424f] hover:text-[#5b0064]'
@@ -172,7 +167,7 @@ const BlogPage: React.FC = () => {
                   key={post.id}
                   className="flex flex-col group cinematic-shadow rounded-2xl bg-white p-4 transition-all duration-300"
                 >
-                  <Link to={`/blog/${post.slug}`} className="overflow-hidden rounded-xl mb-6 aspect-video relative block">
+                  <Link to={`/blog/${post.slug}`} className="overflow-hidden rounded-xl mb-3 aspect-video relative block">
                     {post.coverImageUrl ? (
                       <img
                         src={post.coverImageUrl}
@@ -185,21 +180,21 @@ const BlogPage: React.FC = () => {
                       </div>
                     )}
                   </Link>
-                  <div className="px-2 space-y-4 flex-grow flex flex-col">
+                  <div className="px-2 space-y-3 flex-grow flex flex-col">
                     <span className="inline-block text-[#5b0064] font-bold text-xs uppercase tracking-widest">
                       {post.department}
                     </span>
                     <Link to={`/blog/${post.slug}`}>
-                      <h3 className="font-semibold text-xl text-[#1a1c20] group-hover:text-[#5b0064] transition-colors line-clamp-2 leading-tight">
+                      <h3 className="font-semibold text-lg text-[#1a1c20] group-hover:text-[#5b0064] transition-colors line-clamp-2 leading-tight">
                         {post.title}
                       </h3>
                     </Link>
                     {post.excerpt && (
-                      <p className="text-[#51424f] text-sm leading-relaxed line-clamp-3">
+                      <p className="text-[#51424f] text-sm leading-relaxed line-clamp-2">
                         {post.excerpt}
                       </p>
                     )}
-                    <div className="flex items-center justify-between pt-4 border-t border-[#d5c0d1]/30 mt-auto">
+                    <div className="flex items-center justify-between pt-3 border-t border-[#d5c0d1]/30 mt-auto">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-[#80008c] flex items-center justify-center text-white font-bold text-xs">
                           {initials}
@@ -212,7 +207,7 @@ const BlogPage: React.FC = () => {
                     </div>
                     <Link
                       to={`/blog/${post.slug}`}
-                      className="inline-flex items-center gap-2 text-[#5b0064] font-bold text-sm group-hover:gap-4 transition-all pt-2"
+                      className="inline-flex items-center gap-2 text-[#5b0064] font-bold text-sm group-hover:gap-4 transition-all"
                     >
                       Read more <span className="transition-transform group-hover:translate-x-1">→</span>
                     </Link>
