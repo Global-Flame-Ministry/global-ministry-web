@@ -61,7 +61,7 @@ const BlogPage: React.FC = () => {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#837280] group-focus-within:text-[#5b0064] transition-colors" />
             <input
               type="text"
-              placeholder="Search sermons, stories, or authors..."
+              placeholder="Search stories, or authors..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-4 rounded-xl border border-[#d5c0d1] bg-[#f3f3f9] focus:ring-2 focus:ring-[#5b0064]/20 focus:border-[#5b0064] outline-none transition-all text-base"

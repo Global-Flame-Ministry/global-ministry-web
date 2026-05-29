@@ -399,7 +399,7 @@ const Navbar: React.FC = () => {
                       <span>Hi, {user?.firstName}</span>
                     </Link>
                     <button onClick={logout}
-                      className="bg-slate-900 text-white px-3 py-1.5 text-[10px]
+                      className="bg-slate-900 text-white px-3 py-1 text-[10px]
                         font-black uppercase tracking-widest hover:bg-red-600
                         transition-all rounded-sm">
                       Logout
