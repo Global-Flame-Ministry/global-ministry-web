@@ -132,6 +132,7 @@ const Navbar: React.FC = () => {
   const [mobileOpen, setMobileOpen]       = useState(false);
   const [mobileSection, setMobileSection] = useState<string | null>(null);
   const [megaOpen, setMegaOpen]           = useState(false);
+  const [navigatingToGive, setNavigatingToGive] = useState(false);
 
   const megaTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const { isAuthenticated, isAdmin, user, logout } = useAuth();
@@ -177,8 +178,12 @@ const Navbar: React.FC = () => {
   }, [mobileOpen]);
 
   const handleGiveClick = () => {
-    if (!isAuthenticated) navigate('/login', { state: { from: '/give' } });
-    else navigate('/give');
+    setNavigatingToGive(true);
+    setTimeout(() => {
+      setNavigatingToGive(false);
+      if (!isAuthenticated) navigate('/login', { state: { from: '/give' } });
+      else navigate('/give');
+    }, 1200);
   };
 
   const prefetchPage = (path: string) => {
@@ -603,6 +608,12 @@ const Navbar: React.FC = () => {
           </div>
         </nav>
       </div>
+
+      {navigatingToGive && (
+        <div className="fixed inset-0 z-[70] bg-white flex items-center justify-center">
+          <div className="w-12 h-12 border-[3px] border-[#5b0064] border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
 
       {/* ── MOBILE DRAWER ── */}
       <div className={`fixed inset-0 z-[60] transition-all duration-300
