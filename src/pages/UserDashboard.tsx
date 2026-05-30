@@ -24,8 +24,8 @@ const formatDateTime = (d: string) =>
     hour: '2-digit', minute: '2-digit'
   });
 
-const statusColor = (status: string) => {
-  switch (status.toLowerCase()) {
+const statusColor = (status: string | null | undefined) => {
+  switch (status?.toLowerCase()) {
     case 'completed': return 'bg-emerald-100 text-emerald-700';
     case 'pending':   return 'bg-amber-100 text-amber-700';
     case 'failed':    return 'bg-red-100 text-red-600';
@@ -301,7 +301,7 @@ const UserDashboard: React.FC = () => {
             </h1>
             <div className="flex items-center justify-center md:justify-start
               gap-2 flex-wrap">
-              {profile?.roles.map(r => (
+              {profile?.roles?.map(r => (
                 <span key={r} className="text-[10px] font-black uppercase
                   tracking-widest px-3 py-1 bg-white/10 text-white/70
                   rounded-full">
@@ -751,7 +751,7 @@ const UserDashboard: React.FC = () => {
             </Section>
 
             {/* Admin link */}
-            {profile.roles.includes('Admin') && (
+            {profile.roles?.includes('Admin') && (
               <div className="p-6 bg-fuchsia-50 border border-fuchsia-200
                 rounded-2xl flex items-center justify-between">
                 <div>
@@ -950,7 +950,7 @@ const UserDashboard: React.FC = () => {
                       </div>
                       <div className="text-right shrink-0">
                         <p className="font-black text-lg text-slate-900">
-                          {d.currency} {d.amount.toLocaleString()}
+                          {d.currency} {(d.amount ?? 0).toLocaleString()}
                         </p>
                         <span className={`text-[10px] font-black uppercase
                           tracking-widest px-2 py-0.5 rounded-full
