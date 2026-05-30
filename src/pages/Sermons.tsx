@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import SEO from '../components/SEO';
-import { Search, Library, ChevronRight, Home, Clapperboard, User, ArrowLeft } from 'lucide-react';
+import { Search, Library, ChevronRight, Home, Clapperboard, User, ArrowLeft, Loader } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
 import type { SermonDto } from '../types';
 
@@ -164,17 +164,8 @@ const Sermons: React.FC = () => {
 
         {/* Loading */}
         {isLoading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="animate-pulse bg-white rounded-xl overflow-hidden">
-                <div className="aspect-video bg-gray-200" />
-                <div className="p-8 space-y-4">
-                  <div className="h-3 bg-gray-200 rounded w-1/3" />
-                  <div className="h-5 bg-gray-200 rounded w-3/4" />
-                  <div className="h-3 bg-gray-200 rounded w-1/2" />
-                </div>
-              </div>
-            ))}
+          <div className="flex items-center justify-center py-40">
+            <Loader className="animate-spin text-fuchsia-600 w-8 h-8" />
           </div>
         )}
 

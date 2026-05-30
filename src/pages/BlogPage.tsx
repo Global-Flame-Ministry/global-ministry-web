@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import SEO from '../components/SEO';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Search, ArrowLeft, Flame } from 'lucide-react';
+import { Search, ArrowLeft, Flame, Loader } from 'lucide-react';
 import { blogApi } from '../api/blogApi';
 import type { BlogQueryObject } from '../types';
 
@@ -128,27 +128,9 @@ const BlogPage: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLoading ? (
-            Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="cinematic-shadow rounded-2xl bg-white p-4 animate-pulse">
-                <div className="aspect-video bg-gray-200 rounded-xl mb-6" />
-                <div className="px-2 space-y-4">
-                  <div className="h-3 w-24 bg-gray-200 rounded" />
-                  <div className="h-6 w-3/4 bg-gray-200 rounded" />
-                  <div className="space-y-2">
-                    <div className="h-4 bg-gray-200 rounded" />
-                    <div className="h-4 bg-gray-200 rounded" />
-                    <div className="h-4 w-2/3 bg-gray-200 rounded" />
-                  </div>
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gray-200" />
-                      <div className="h-4 w-20 bg-gray-200 rounded" />
-                    </div>
-                    <div className="h-3 w-16 bg-gray-200 rounded" />
-                  </div>
-                </div>
-              </div>
-            ))
+            <div className="col-span-full flex items-center justify-center py-40">
+              <Loader className="animate-spin text-fuchsia-600 w-8 h-8" />
+            </div>
           ) : posts.length > 0 ? (
             posts.map((post) => {
               const formattedDate = new Date(post.createdOn).toLocaleDateString('en-US', {

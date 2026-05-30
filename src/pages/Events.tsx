@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import SEO from '../components/SEO';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, X, Calendar, MapPin, ArrowLeft } from 'lucide-react';
+import { ArrowRight, X, Calendar, MapPin, ArrowLeft, Loader } from 'lucide-react';
 import { eventApi } from '../api/eventApi';
 import type { EventDto } from '../types';
 import toast from 'react-hot-toast';
@@ -216,6 +216,14 @@ const EventCard: React.FC<{
     setDonateEvent(event);
     setShowDonateModal(true);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <Loader className="animate-spin text-fuchsia-600 w-8 h-8" />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white relative">

@@ -1,7 +1,7 @@
 import SEO from '../components/SEO';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Calendar, MapPin, Clock, Building2 } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Clock, Building2, Loader } from 'lucide-react';
 import { eventApi } from '../api/eventApi';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -134,20 +134,8 @@ export default function EventDetails() {
         </button>
 
         {isLoading ? (
-          <div className="animate-pulse">
-            <div className="aspect-[21/9] bg-gray-200 rounded-2xl mb-8" />
-            <div className="h-6 w-24 bg-gray-200 rounded-full mb-4" />
-            <div className="h-10 bg-gray-200 rounded mb-4" />
-            <div className="h-10 w-3/4 bg-gray-200 rounded mb-6" />
-            <div className="flex items-center gap-4 mb-8">
-              <div className="h-5 w-32 bg-gray-200 rounded" />
-              <div className="h-5 w-48 bg-gray-200 rounded" />
-            </div>
-            <div className="space-y-4">
-              <div className="h-4 bg-gray-200 rounded" />
-              <div className="h-4 bg-gray-200 rounded" />
-              <div className="h-4 w-5/6 bg-gray-200 rounded" />
-            </div>
+          <div className="flex items-center justify-center py-40">
+            <Loader className="animate-spin text-fuchsia-600 w-8 h-8" />
           </div>
         ) : event ? (
           <article>

@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import SEO from '../components/SEO';
-import { Play, Headphones, Film, ArrowLeft, Home, Clapperboard, User } from 'lucide-react';
+import { Play, Headphones, Film, ArrowLeft, Home, Clapperboard, User, Loader } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
 import type { SermonDto } from '../types';
 
@@ -91,17 +91,8 @@ const SeriesDetail: React.FC = () => {
       <main className="bg-[#f9f9ff] text-[#1a1c20] flex-1 pb-24 px-4 sm:px-8 max-w-[1280px] mx-auto w-full">
         {/* Loading */}
         {isLoading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="animate-pulse bg-white rounded-xl overflow-hidden">
-                <div className="aspect-video bg-gray-200" />
-                <div className="p-6 space-y-4">
-                  <div className="h-3 bg-gray-200 rounded w-1/3" />
-                  <div className="h-5 bg-gray-200 rounded w-3/4" />
-                  <div className="h-3 bg-gray-200 rounded w-1/2" />
-                </div>
-              </div>
-            ))}
+          <div className="flex items-center justify-center py-40">
+            <Loader className="animate-spin text-fuchsia-600 w-8 h-8" />
           </div>
         )}
 

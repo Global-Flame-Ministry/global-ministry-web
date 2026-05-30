@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   Bell, Search, Calendar, Tag, ArrowRight, ArrowLeft,
-  X, AlertCircle, Link as LinkIcon, ExternalLink
+  X, AlertCircle, Link as LinkIcon, ExternalLink, Loader
 } from 'lucide-react';
 import { announcementApi } from '../api/announcementApi';
 import type { AnnouncementDto } from '../types';
@@ -73,21 +73,6 @@ const renderContentWithLinks = (text: string) => {
 };
 
 // ── SKELETON ─────────────────────────────────────────────────────────────────
-const SkeletonCard = () => (
-  <div className="animate-pulse border border-slate-100 rounded-xl p-6 bg-white">
-    <div className="flex justify-between mb-4">
-      <div className="h-4 bg-slate-200 rounded w-20" />
-      <div className="h-4 bg-slate-200 rounded w-24" />
-    </div>
-    <div className="h-6 bg-slate-200 rounded mb-3 w-3/4" />
-    <div className="space-y-2">
-      <div className="h-4 bg-slate-200 rounded w-full" />
-      <div className="h-4 bg-slate-200 rounded w-5/6" />
-      <div className="h-4 bg-slate-200 rounded w-4/6" />
-    </div>
-  </div>
-);
-
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────────
 const AnnouncementsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -251,8 +236,8 @@ const AnnouncementsPage: React.FC = () => {
             </div>
 
           ) : isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
+            <div className="flex items-center justify-center py-40">
+              <Loader className="animate-spin text-fuchsia-600 w-8 h-8" />
             </div>
 
           ) : announcements.length === 0 ? (
