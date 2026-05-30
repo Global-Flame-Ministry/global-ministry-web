@@ -157,6 +157,7 @@ const GivePage = () => {
   const [amount, setAmount]             = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState('');
   const [isLoading, setIsLoading]       = useState(false);
+  const [processing, setProcessing]     = useState(false);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
   const [showConfirmModal, setShowConfirmModal]     = useState(false);
 
@@ -176,7 +177,11 @@ const GivePage = () => {
   const next = (validate: () => boolean) => {
     if (!validate()) return;
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    setStep(s => (s + 1) as 1 | 2 | 3);
+    setProcessing(true);
+    setTimeout(() => {
+      setStep(s => (s + 1) as 1 | 2 | 3);
+      setProcessing(false);
+    }, 1800);
   };
 
   const back = () => {
@@ -353,6 +358,14 @@ const GivePage = () => {
           </div>
         </div>
       </div>
+
+      {processing && (
+        <div className="fixed inset-0 z-50 bg-white/90 backdrop-blur-md flex flex-col items-center justify-center">
+          <div className="w-16 h-16 border-4 border-[#5b0064] border-t-transparent rounded-full animate-spin mb-6" />
+          <p className="font-black text-xs uppercase tracking-[0.3em] text-[#1a1c20]">Processing</p>
+          <p className="text-[#51424f] text-xs mt-2">Please do not refresh your browser</p>
+        </div>
+      )}
     </>
   );
 
@@ -536,7 +549,7 @@ const GivePage = () => {
             <div className="flex flex-col gap-3">
               <button
                 type="button"
-                onClick={() => { setShowConfirmModal(false); setStep(3); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                onClick={() => { setShowConfirmModal(false); setProcessing(true); window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => { setStep(3); setProcessing(false); }, 1800); }}
                 className="w-full py-3.5 rounded-full bg-gradient-to-r from-[#5b0064] to-[#712ae2] text-white font-bold uppercase tracking-widest text-xs shadow-md cursor-pointer"
               >
                 Confirm
@@ -550,6 +563,14 @@ const GivePage = () => {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {processing && (
+        <div className="fixed inset-0 z-50 bg-white/90 backdrop-blur-md flex flex-col items-center justify-center">
+          <div className="w-16 h-16 border-4 border-[#5b0064] border-t-transparent rounded-full animate-spin mb-6" />
+          <p className="font-black text-xs uppercase tracking-[0.3em] text-[#1a1c20]">Processing</p>
+          <p className="text-[#51424f] text-xs mt-2">Please do not refresh your browser</p>
         </div>
       )}
     </>
@@ -650,6 +671,14 @@ const GivePage = () => {
             <p className="text-[#51424f] text-xs mt-2">
               Please do not refresh your browser
             </p>
+          </div>
+        )}
+
+        {processing && (
+          <div className="fixed inset-0 z-50 bg-white/90 backdrop-blur-md flex flex-col items-center justify-center">
+            <div className="w-16 h-16 border-4 border-[#5b0064] border-t-transparent rounded-full animate-spin mb-6" />
+            <p className="font-black text-xs uppercase tracking-[0.3em] text-[#1a1c20]">Processing</p>
+            <p className="text-[#51424f] text-xs mt-2">Please do not refresh your browser</p>
           </div>
         )}
       </div>
