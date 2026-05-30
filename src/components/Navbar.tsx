@@ -399,24 +399,18 @@ const Navbar: React.FC = () => {
                       <span>Hi, {user?.firstName}</span>
                     </Link>
                     <button onClick={logout}
-                      className="bg-slate-900 text-white px-3 py-1 text-[10px]
-                        font-black uppercase tracking-widest hover:bg-red-600
-                        transition-all rounded-sm cursor-pointer">
+                      className="px-4 py-1.5 rounded-full border-2 border-[#d5c0d1] text-[#51424f] text-xs font-bold uppercase tracking-widest hover:border-[#5b0064] hover:text-[#5b0064] transition-all cursor-pointer">
                       Logout
                     </button>
                   </>
                 ) : (
                   <div className="flex items-center gap-2">
                     <Link to="/login"
-                      className="text-[10px] font-black uppercase tracking-widest
-                        text-slate-700 hover:text-fuchsia-600 transition-colors
-                        px-3 py-1.5">
+                      className="px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-[#51424f] hover:text-[#5b0064] transition-colors">
                       Login
                     </Link>
                     <Link to="/register"
-                      className="bg-slate-900 text-white px-4 py-1.5 text-[10px]
-                        font-black uppercase tracking-widest hover:bg-fuchsia-600
-                        transition-all rounded-sm">
+                      className="px-4 py-1.5 rounded-full bg-gradient-to-r from-[#5b0064] to-[#712ae2] text-white text-xs font-bold uppercase tracking-widest hover:scale-105 hover:shadow-md transition-all">
                       Register
                     </Link>
                   </div>
@@ -681,8 +675,7 @@ const Navbar: React.FC = () => {
                 </div>
                 <button
                   onClick={() => { logout(); setMobileOpen(false); }}
-                  className="text-[10px] font-black uppercase tracking-widest
-                    text-red-500 hover:text-red-700 transition-colors cursor-pointer"
+                  className="px-3 py-1 rounded-full border-2 border-[#d5c0d1] text-[#51424f] text-[10px] font-black uppercase tracking-widest hover:border-[#5b0064] hover:text-[#5b0064] transition-all cursor-pointer"
                 >
                   Logout
                 </button>
@@ -691,15 +684,15 @@ const Navbar: React.FC = () => {
               <div className="flex items-center gap-3">
                 <Link to="/login" onClick={() => setMobileOpen(false)}
                   className="flex-1 text-center py-2.5 text-[10px] font-black
-                    uppercase tracking-widest text-slate-700 border
-                    border-slate-200 rounded-lg hover:border-fuchsia-300
-                    hover:text-fuchsia-600 transition-colors">
+                    uppercase tracking-widest text-[#51424f] border
+                    border-slate-200 rounded-lg hover:text-[#5b0064]
+                    hover:border-[#5b0064] transition-colors">
                   Login
                 </Link>
                 <Link to="/register" onClick={() => setMobileOpen(false)}
                   className="flex-1 text-center py-2.5 text-[10px] font-black
-                    uppercase tracking-widest text-white bg-slate-900
-                    rounded-lg hover:bg-fuchsia-600 transition-colors">
+                    uppercase tracking-widest text-white bg-gradient-to-r from-[#5b0064] to-[#712ae2]
+                    rounded-lg hover:scale-105 hover:shadow-md transition-all">
                   Register
                 </Link>
               </div>

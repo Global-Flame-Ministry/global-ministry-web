@@ -96,11 +96,11 @@ const Sermons: React.FC = () => {
       />
 
       {/* ─── HERO ─── */}
-      <section className="relative h-[500px] flex items-center justify-center overflow-hidden bg-[#09090b]">
+      <section className="relative h-[320px] flex items-center justify-center overflow-hidden bg-[#09090b]">
         <div className="absolute inset-0 bg-[#09090b]">
           <div className="absolute inset-0 bg-gradient-to-b from-[#09090b]/40 via-[#09090b]/80 to-[#f9f9ff]" />
         </div>
-        <div className="relative z-10 text-center px-4 max-w-4xl w-full">
+        <div className="relative z-10 text-center px-4 max-w-4xl w-full pt-16">
           <h1 className="font-display-lg text-5xl sm:text-6xl md:text-7xl text-white mb-8 tracking-tighter font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
             Message Archive
           </h1>
