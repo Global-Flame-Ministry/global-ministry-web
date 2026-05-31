@@ -180,7 +180,7 @@ const SermonPlayer: React.FC = () => {
                   </div>
                   <div>
                     <p className="font-serif text-xl text-[#1a1c20]">{sermon.speaker}</p>
-                    <p className="text-[#837280] text-sm">Lead Pastor, Global Flame Ministry</p>
+                    <p className="text-[#837280] text-sm">Guest Speaker, Global Flame Ministry</p>
                   </div>
                 </div>
                 <div className="flex gap-3">
