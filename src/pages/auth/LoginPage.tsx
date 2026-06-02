@@ -50,10 +50,15 @@ const LoginPage = () => {
     try {
       // 'data' now includes the 'remember' boolean field
       const response = await authApi.login(data);
-      const userData = response.data;
+      const userData = response.data.data;
+      if (!userData) {
+        toast.error(response.data.message || 'Login failed');
+        setIsLoading(false);
+        return;
+      }
       login(userData);
       toast.success(`Welcome back, ${userData.firstName}`);
-      if (userData.roles.includes('Admin')) {
+      if (userData.roles?.includes('Admin')) {
         navigate('/admin', { replace: true });
       } else {
         navigate(from, { replace: true });

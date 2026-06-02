@@ -14,7 +14,7 @@ export const authApi = {
     api.post<ApiResponse<string>>('/api/auth/register', dto),
 
   login: (dto: LoginDto) =>
-    api.post<NewUserDto>('/api/auth/login', dto),
+    api.post<ApiResponse<NewUserDto>>('/api/auth/login', dto),
 
   forgotPassword: (dto: ForgotPasswordDto) =>
     api.post<ApiResponse<string>>('/api/auth/forgot-password', dto),
