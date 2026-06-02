@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, X, Calendar, MapPin, ArrowLeft, Loader } from 'lucide-react';
 import { eventApi } from '../api/eventApi';
 import type { EventDto } from '../types';
+import api from '../api/axios';
 import toast from 'react-hot-toast';
 
 const useReveal = (delay = 0) => {
@@ -151,25 +152,20 @@ const EventCard: React.FC<{
     }
     setIsSubmitting(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/ministry/events/${selectedEvent.id}/register`,
+      const response = await api.post(
+        `/api/ministry/events/${selectedEvent.id}/register`,
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fullName: regForm.fullName,
-            email: regForm.email,
-            phoneNumber: regForm.phone || null
-          })
+          fullName: regForm.fullName,
+          email: regForm.email,
+          phoneNumber: regForm.phone || null
         }
       );
-      const data = await response.json();
-      if (data.isSuccess) {
+      if (response.data.isSuccess) {
         toast.success(`Registered! Check ${regForm.email} for your confirmation.`);
         setSelectedEvent(null);
         setRegForm({ fullName: '', email: '', phone: '' });
       } else {
-        toast.error(data.message || 'Registration failed');
+        toast.error(response.data.message || 'Registration failed');
       }
     } catch {
       toast.error('Something went wrong. Please try again.');
@@ -182,24 +178,20 @@ const EventCard: React.FC<{
     if (!donateEvent) return;
     setIsSubmitting(true);
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/ministry/donations/${method}`,
+      const res = await api.post(
+        `/api/ministry/donations/${method}`,
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            donorName: donationForm.donorName,
-            donorEmail: donationForm.donorEmail,
-            amount: parseFloat(donationForm.amount),
-            currency: donationForm.currency,
-            paymentMethod: method === 'paystack' ? 'Paystack' : 'Flutterwave',
-            donationType: 'Event',
-            eventId: donateEvent.id,
-            eventTitle: donateEvent.title
-          })
+          donorName: donationForm.donorName,
+          donorEmail: donationForm.donorEmail,
+          amount: parseFloat(donationForm.amount),
+          currency: donationForm.currency,
+          paymentMethod: method === 'paystack' ? 'Paystack' : 'Flutterwave',
+          donationType: 'Event',
+          eventId: donateEvent.id,
+          eventTitle: donateEvent.title
         }
       );
-      const data = await res.json();
+      const data = res.data;
       if (data.isSuccess && data.data?.paymentUrl) {
         window.location.href = data.data.paymentUrl;
       } else {

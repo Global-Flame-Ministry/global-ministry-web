@@ -8,6 +8,8 @@ import { eventApi } from '../../api/eventApi';
 import { announcementApi } from '../../api/announcementApi';
 import type { EventDto, AnnouncementDto } from '../../types';
 import { useAuth } from '../../context/useAuthContext';
+import api from '../../api/axios';
+import toast from 'react-hot-toast';
 
 // ─── EVENT STATUS HELPERS ─────────────────────────────────────────────────────
 const getEventStatus = (event: EventDto): 'upcoming' | 'ongoing' | 'past' => {
@@ -139,7 +141,7 @@ const YouthPage: React.FC = () => {
           setEvents(res.data.data.items);
         }
       } catch {
-        console.error('Failed to fetch youth events');
+        if (import.meta.env.DEV) console.error('Failed to fetch youth events');
       } finally {
         setIsLoadingEvents(false);
       }
@@ -153,7 +155,7 @@ const YouthPage: React.FC = () => {
           setAnnouncements(res.data.data.items);
         }
       } catch {
-        console.error('Failed to fetch youth announcements');
+        if (import.meta.env.DEV) console.error('Failed to fetch youth announcements');
       } finally {
         setIsLoadingAnnouncements(false);
       }
@@ -178,34 +180,23 @@ const YouthPage: React.FC = () => {
     if (!selectedEvent) return;
     setIsSubmitting(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/ministry/events/${selectedEvent.id}/register`,
+      const response = await api.post(
+        `/api/ministry/events/${selectedEvent.id}/register`,
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fullName: regForm.fullName,
-            email: regForm.email,
-            phoneNumber: regForm.phone || null,
-          }),
+          fullName: regForm.fullName,
+          email: regForm.email,
+          phoneNumber: regForm.phone || null,
         }
       );
-      const data = await response.json();
-      if (data.isSuccess) {
-        import('react-hot-toast').then(({ default: toast }) => {
-          toast.success(`Registered! Check ${regForm.email} for your confirmation. 📧`);
-        });
+      if (response.data.isSuccess) {
+        toast.success(`Registered! Check ${regForm.email} for your confirmation.`);
         setSelectedEvent(null);
         setRegForm({ fullName: '', email: '', phone: '' });
       } else {
-        import('react-hot-toast').then(({ default: toast }) => {
-          toast.error(data.message || 'Registration failed');
-        });
+        toast.error(response.data.message || 'Registration failed');
       }
     } catch {
-      import('react-hot-toast').then(({ default: toast }) => {
-        toast.error('Something went wrong. Please try again.');
-      });
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

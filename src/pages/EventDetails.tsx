@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Calendar, MapPin, Clock, Building2, Loader } from 'lucide-react';
 import { eventApi } from '../api/eventApi';
+import api from '../api/axios';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -62,25 +63,20 @@ export default function EventDetails() {
     }
     setIsSubmitting(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/ministry/events/${event.id}/register`,
+      const response = await api.post(
+        `/api/ministry/events/${event.id}/register`,
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fullName: regForm.fullName,
-            email: regForm.email,
-            phoneNumber: regForm.phone || null,
-          }),
+          fullName: regForm.fullName,
+          email: regForm.email,
+          phoneNumber: regForm.phone || null,
         }
       );
-      const data = await response.json();
-      if (data.isSuccess) {
+      if (response.data.isSuccess) {
         toast.success('Registered successfully! We look forward to seeing you.');
         setShowRegModal(false);
         setRegForm({ fullName: '', email: '', phone: '' });
       } else {
-        toast.error(data.message || 'Registration failed');
+        toast.error(response.data.message || 'Registration failed');
       }
     } catch {
       toast.error('Something went wrong. Please try again.');
