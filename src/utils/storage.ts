@@ -4,8 +4,13 @@ const USER_KEY = 'gfm_user';
 
 export const storage = {
   getUser: (): NewUserDto | null => {
-    const u = localStorage.getItem(USER_KEY);
-    return u ? JSON.parse(u) : null;
+    try {
+      const u = localStorage.getItem(USER_KEY);
+      return u ? JSON.parse(u) : null;
+    } catch {
+      localStorage.removeItem(USER_KEY);
+      return null;
+    }
   },
 
   setUser: (user: NewUserDto): void =>
