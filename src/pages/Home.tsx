@@ -200,6 +200,10 @@ const Home: React.FC = () => {
     queryKey: ['upcomingEvents'],
     queryFn: () => eventApi.getUpcoming({ pageSize: 3 }).then(res => res.data.data?.items ?? []),
   });
+  const { data: ongoingEventsData } = useQuery({
+    queryKey: ['ongoingEvents'],
+    queryFn: () => eventApi.getOngoing({ pageSize: 3 }).then(res => res.data.data?.items ?? []),
+  });
   const { data: latestAnnouncementsData } = useQuery({
     queryKey: ['homeAnnouncements'],
     queryFn: () => announcementApi.getAll({ pageSize: 3, module: 'Ministry' }).then(res => res.data.data?.items ?? []),
@@ -808,6 +812,59 @@ const Home: React.FC = () => {
                   </div>
                 </article>
               ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── HAPPENING NOW ──────────────────────────────────────────── */}
+      {ongoingEventsData != null && ongoingEventsData.length > 0 && (
+        <section className="py-24 md:py-32 bg-[#09090b] text-white border-t border-gray-800">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <div className="flex items-center gap-3 mb-16">
+              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+              <h2 className="text-4xl md:text-5xl font-serif text-white">Happening Now</h2>
+            </div>
+            <div className="grid md:grid-cols-3 gap-8">
+              {ongoingEventsData.map((event) => {
+                const dateStr = event.startDate;
+                const imgUrl = event.imageUrl ?? '';
+                return (
+                  <Link
+                    key={event.id}
+                    to={`/events/${event.slug}`}
+                    className="group block bg-white/5 rounded-2xl overflow-hidden hover:bg-white/10 transition-all duration-300"
+                  >
+                    <div className="aspect-[16/9] overflow-hidden">
+                      <img
+                        src={imgUrl}
+                        alt={event.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <span className="inline-block px-3 py-1 text-xs font-medium bg-green-500/20 text-green-400 rounded-full mb-3">
+                        Happening Now
+                      </span>
+                      <h3 className="text-xl font-serif text-white group-hover:text-fuchsia-400 transition-colors">
+                        {event.title}
+                      </h3>
+                      {event.description && (
+                        <p className="mt-2 text-gray-400 text-sm line-clamp-2">
+                          {event.description}
+                        </p>
+                      )}
+                      {dateStr && (
+                        <p className="mt-3 text-sm text-gray-500">
+                          {new Date(dateStr).toLocaleDateString('en-US', {
+                            month: 'long', day: 'numeric', year: 'numeric',
+                          })}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>
