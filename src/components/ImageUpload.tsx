@@ -158,6 +158,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           <img
             src={value}
             alt="Uploaded"
+            loading="lazy"
             className="w-full h-48 object-cover"
           />
           {/* Success badge */}

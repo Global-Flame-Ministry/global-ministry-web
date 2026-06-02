@@ -136,6 +136,7 @@ const SermonPlayer: React.FC = () => {
                   <img
                     src={sermon.imageUrl || ''}
                     alt={sermon.title}
+                    loading="lazy"
                     className="absolute top-0 left-0 w-full h-full object-cover opacity-80 hover:scale-105 transition-transform duration-700"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent opacity-60" />
@@ -171,7 +172,7 @@ const SermonPlayer: React.FC = () => {
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-[#5b0064]/20 shrink-0 bg-gray-100 flex items-center justify-center">
                     {sermon.speakerImageUrl ? (
-                      <img src={sermon.speakerImageUrl} alt={sermon.speaker} className="w-full h-full object-cover" />
+                      <img src={sermon.speakerImageUrl} alt={sermon.speaker} loading="lazy" className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-lg font-bold text-[#712ae2] uppercase">
                         {sermon.speaker?.charAt(0)}
@@ -260,6 +261,7 @@ const SermonPlayer: React.FC = () => {
                     <img
                       src={sermon.imageUrl || ''}
                       alt={sermon.title}
+                      loading="lazy"
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-[#5b0064]/40 flex items-center justify-center">

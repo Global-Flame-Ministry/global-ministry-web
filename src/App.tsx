@@ -27,6 +27,7 @@ import CounsellingPage   from './pages/CounsellingPage';
 import PlanYourVisit from './pages/PlanYourVisit';
 
 // ABOUT PAGES 
+import About from './pages/About';
 import OurStory    from './pages/OurStory';
 import OurMission  from './pages/OurMission';
 import SeniorPastor from './pages/SeniorPastor';
@@ -168,6 +169,8 @@ const App: React.FC = () => {
             <Route path="/"
               element={<PublicLayout><Home /></PublicLayout>} />
 
+            <Route path="/about"
+              element={<PublicLayout><About /></PublicLayout>} />
             <Route path="/our-story"
               element={<PublicLayout><OurStory /></PublicLayout>} />
             <Route path="/our-mission"

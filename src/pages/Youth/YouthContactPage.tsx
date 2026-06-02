@@ -1,3 +1,4 @@
+import SEO from '../../components/SEO';
 import { useState } from 'react';
 import type { FC, SyntheticEvent } from 'react';
 import { Mail, MapPin, Phone, MessageSquare, Send, Instagram, Facebook, Twitter } from 'lucide-react';
@@ -53,6 +54,8 @@ const YouthContactPage: FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
+      <SEO title="Youth Contact" description="Get in touch with the Global Flame Ministry Youth Community. We'd love to hear from you." url="https://globalflameministry.org/youth/contact" />
+
 
       {/* Hero */}
       <section className="bg-purple-800 text-white py-20 px-6 text-center">

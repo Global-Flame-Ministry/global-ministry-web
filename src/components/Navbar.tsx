@@ -45,6 +45,7 @@ const UserAvatar = ({
       <img
         src={profilePicUrl}
         alt={firstName ?? 'User'}
+        loading="lazy"
         className={`${dim} rounded-full object-cover ring-2 ring-[#a21caf]/20 shrink-0`}
       />
     );
@@ -265,6 +266,7 @@ const Navbar: React.FC = () => {
                       <img
                         src={logo}
                         alt="GFM"
+                        loading="lazy"
                         className="w-full h-full object-contain object-center p-1"
                       />
                     </div>

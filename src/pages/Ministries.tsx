@@ -58,6 +58,7 @@ const MinistryRow: React.FC<{
             <img
               src={ministry.coverImageUrl}
               alt={ministry.name}
+              loading="lazy"
               className="w-full h-full object-cover object-center transition-transform
                 duration-1000 group-hover:scale-105"
             />
@@ -92,6 +93,7 @@ const MinistryRow: React.FC<{
               <img
                 src={ministry.leaderImageUrl}
                 alt={ministry.leaderName}
+                loading="lazy"
                 className="w-10 h-10 rounded-full object-cover border-2
                   border-fuchsia-200"
               />

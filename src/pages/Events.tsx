@@ -88,7 +88,7 @@ const EventCard: React.FC<{
     }} className="flex flex-col md:flex-row gap-8 pb-16 border-b border-gray-100 last:border-b-0 cursor-pointer">
       <div className="w-full md:w-1/2 overflow-hidden rounded-xl bg-gray-100">
         {event.imageUrl ? (
-          <img src={event.imageUrl} alt={event.title}
+          <img src={event.imageUrl} alt={event.title} loading="lazy"
             className="w-full aspect-video object-cover" />
         ) : (
           <div className="w-full aspect-video bg-gradient-to-br from-fuchsia-100 to-purple-100
@@ -349,6 +349,7 @@ const EventCard: React.FC<{
                       <img
                         src={event.imageUrl}
                         alt={event.title}
+                        loading="lazy"
                         className="w-full h-full object-cover object-center grayscale
                           group-hover:grayscale-0 transition-all duration-500
                           group-hover:scale-105"

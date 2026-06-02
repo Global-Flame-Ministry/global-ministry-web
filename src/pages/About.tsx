@@ -110,7 +110,7 @@ const About: React.FC = () => {
               <div className="lg:col-span-5 order-2 lg:order-1">
                 <div className="relative group">
                     <div className="absolute -inset-4 border border-brand-200 translate-x-4 translate-y-4 -z-10 group-hover:translate-x-2 group-hover:translate-y-2 transition-all duration-700"></div>
-                    <img src={preach} alt="Apostle Preaching" className="w-full shadow-2xl grayscale hover:grayscale-0 transition-all duration-1000 aspect-4/5 object-cover" />
+                    <img src={preach} alt="Apostle Preaching" loading="lazy" className="w-full shadow-2xl grayscale hover:grayscale-0 transition-all duration-1000 aspect-4/5 object-cover" />
                 </div>
               </div>
 
@@ -130,8 +130,8 @@ const About: React.FC = () => {
                 </div>
                 
                 <div className="mt-16 grid grid-cols-2 gap-6 opacity-80">
-                    <img src={dad} className="h-64 w-full object-cover rounded-sm shadow-lg hover:opacity-100 transition-opacity" alt="Portrait" />
-                    <img src={cong} className="h-64 w-full object-cover rounded-sm shadow-lg hover:opacity-100 transition-opacity" alt="Work" />
+                    <img src={dad} className="h-64 w-full object-cover rounded-sm shadow-lg hover:opacity-100 transition-opacity" alt="Portrait" loading="lazy" />
+                    <img src={cong} className="h-64 w-full object-cover rounded-sm shadow-lg hover:opacity-100 transition-opacity" alt="Work" loading="lazy" />
                 </div>
               </div>
             </div>
@@ -150,7 +150,7 @@ const About: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center w-full">
                 <div className="relative px-12">
                      <div className="absolute top-0 right-0 w-full h-full border border-slate-100 -translate-y-8 translate-x-8 -z-10"></div>
-                     <img src={mummy} alt="Apostle Faith" className="w-full shadow-2xl" />
+                     <img src={mummy} alt="Apostle Faith" loading="lazy" className="w-full shadow-2xl" />
                 </div>
                 <div className="space-y-8 text-slate-600 font-light leading-relaxed text-xl">
                     <p className="first-letter:text-5xl first-letter:font-serif first-letter:mr-3 first-letter:float-left first-letter:text-brand-600">
@@ -189,9 +189,9 @@ const About: React.FC = () => {
                    </div>
                 </div>
                 <div className="relative">
-                    <img src={dadandmum} alt="Pastors" className="w-full h-150 object-cover grayscale brightness-75 shadow-2xl" />
+                    <img src={dadandmum} alt="Pastors" loading="lazy" className="w-full h-150 object-cover grayscale brightness-75 shadow-2xl" />
                     <div className="absolute -bottom-10 -left-10 w-2/3 h-64 bg-white p-4 shadow-2xl hidden md:block">
-                         <img src={auditorium} className="w-full h-full object-cover" alt="Church" />
+                         <img src={auditorium} className="w-full h-full object-cover" alt="Church" loading="lazy" />
                     </div>
                 </div>
              </div>

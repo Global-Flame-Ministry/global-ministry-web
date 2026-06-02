@@ -4,6 +4,7 @@ import { Users, ArrowRight, Lock } from 'lucide-react';
 import { youthApi } from '../../api/youthApi';
 import { useAuth } from '../../context/useAuthContext';
 import toast from 'react-hot-toast';
+import SEO from '../../components/SEO';
 
 const JoinYouthPage = () => {
   const { state }    = useLocation();
@@ -71,6 +72,7 @@ const JoinYouthPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center
                     justify-center px-4 py-16">
+      <SEO title="Join Youth Community" description="Join the Global Flame Ministry Youth Community and connect with other passionate believers." url="https://globalflameministry.org/youth/join" />
       <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl
                       border-t-8 border-fuchsia-600 overflow-hidden">
 

@@ -19,6 +19,7 @@ import victor   from '../../assets/images/Victor.jpg';
 import joan     from '../../assets/images/joan.jpg';
 import vic      from '../../assets/images/vic.jpg';
 import smile    from '../../assets/images/smile.jpg';
+import SEO from '../../components/SEO';
 
 const assetImages = {
   'hyelzira.jpg': hyelzira, 'bruce.jpg': bruce,   'emie.jpg': emie,
@@ -51,7 +52,7 @@ const ALL_TEAM_MEMBERS: TeamMember[] = [
 const ImageWithFallback: FC<{
   src: string; alt: string; className: string;
 }> = ({ src, alt, className }) => (
-  <img src={src} alt={alt} className={className}
+  <img src={src} alt={alt} loading="lazy" className={className}
     onError={(e: SyntheticEvent<HTMLImageElement>) => {
       (e.target as HTMLImageElement).onerror = null;
       (e.target as HTMLImageElement).src =
@@ -229,6 +230,7 @@ const YouthTeamPage: FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
+      <SEO title="Youth Team" description="Meet the leadership team of the Global Flame Ministry Youth Community." url="https://globalflameministry.org/youth/team" />
 
       {/* Hero */}
       <section className="relative bg-gradient-to-br from-indigo-900

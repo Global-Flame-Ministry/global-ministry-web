@@ -263,6 +263,7 @@ const UserDashboard: React.FC = () => {
                 <img
                   src={profile.profilePictureUrl}
                   alt={profile.fullName}
+                  loading="lazy"
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -803,6 +804,7 @@ const UserDashboard: React.FC = () => {
                         <img
                           src={reg.eventImageUrl}
                           alt={reg.eventTitle}
+                          loading="lazy"
                           className="w-full h-full object-cover"
                         />
                       </div>

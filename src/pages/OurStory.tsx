@@ -76,7 +76,7 @@ const OurStory: React.FC = () => {
         {/* Hero image */}
         <div ref={r2} style={fadeStyle}>
           <div className="rounded-2xl overflow-hidden mb-14 aspect-video shadow-xl shadow-slate-100">
-            <img src={daddyandmum} alt="Global Flame Ministry" className="w-full h-full object-cover" />
+            <img src={daddyandmum} alt="Global Flame Ministry" loading="lazy" className="w-full h-full object-cover" />
           </div>
         </div>
 

@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -75,6 +76,7 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4 py-16">
+      <Helmet><meta name="robots" content="noindex" /></Helmet>
       {/* Subtle background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-32 -right-32 w-96 h-96 bg-fuchsia-50 rounded-full blur-3xl opacity-60" />
@@ -88,6 +90,7 @@ const LoginPage = () => {
             <img
               src={logo}
               alt="Global Flame Ministries"
+              loading="lazy"
               className="w-11 h-11 rounded-xl object-cover"
             />
           </div>

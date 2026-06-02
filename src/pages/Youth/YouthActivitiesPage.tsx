@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { eventApi } from '../../api/eventApi';
 import type { EventDto } from '../../types';
+import SEO from '../../components/SEO';
 
 // ── MODAL ────────────────────────────────────────────────────────────────────
 const EventModal: FC<{ event: EventDto; onClose: () => void }> = ({
@@ -25,7 +26,7 @@ const EventModal: FC<{ event: EventDto; onClose: () => void }> = ({
         </button>
       </div>
       {event.imageUrl && (
-        <img src={event.imageUrl} alt={event.title}
+        <img src={event.imageUrl} alt={event.title} loading="lazy"
           className="w-full h-64 object-cover" />
       )}
       <div className="p-6 space-y-6">
@@ -96,7 +97,7 @@ const EventCard: FC<{
                     hover:shadow-xl transition-shadow duration-300
                     transform hover:-translate-y-1 relative">
       {event.imageUrl ? (
-        <img src={event.imageUrl} alt={event.title}
+        <img src={event.imageUrl} alt={event.title} loading="lazy"
           className="w-full h-48 object-cover" />
       ) : (
         <div className="w-full h-48 bg-fuchsia-50 flex items-center justify-center">
@@ -152,7 +153,7 @@ const PastEventCard: FC<{ event: EventDto }> = ({ event }) => (
   <div className="relative group overflow-hidden rounded-xl shadow-md
                   hover:shadow-xl transition-shadow duration-300">
     {event.imageUrl ? (
-      <img src={event.imageUrl} alt={event.title}
+      <img src={event.imageUrl} alt={event.title} loading="lazy"
         className="w-full h-56 object-cover transform
                    group-hover:scale-105 transition-transform duration-300" />
     ) : (
@@ -225,6 +226,7 @@ const YouthActivitiesPage: FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
+      <SEO title="Youth Activities" description="Past and upcoming activities from the Global Flame Ministry Youth Community." url="https://globalflameministry.org/youth/activities" />
 
       {/* Hero */}
       <section className="bg-gradient-to-r from-purple-800 to-fuchsia-900

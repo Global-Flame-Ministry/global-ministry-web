@@ -497,6 +497,7 @@ const PlanYourVisit: React.FC = () => {
                   <img
                     src={img.src}
                     alt={img.label}
+                    loading="lazy"
                     className={`w-full h-full object-cover hover:scale-105 transition-transform duration-500${i === 2 ? ' object-top' : ''}`}
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">

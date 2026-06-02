@@ -74,6 +74,7 @@ const OurMission: React.FC = () => {
           <img
             src={work3}
             alt="Our Mission"
+            loading="lazy"
             className="w-full h-[350px] md:h-[450px] object-cover"
           />
         </div>

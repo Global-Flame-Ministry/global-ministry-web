@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import type { FC } from 'react';
 import { Calendar, User, Tag, ArrowRight, Search, X } from 'lucide-react';
+import SEO from '../../components/SEO';
 
 // Image map
 const assetImages: Record<string, string> = {
@@ -62,7 +63,7 @@ const PostCard: FC<{ post: typeof BLOG_POSTS[0]; isFeatured: boolean }> = ({
     <article className={isFeatured
       ? 'lg:col-span-2 flex flex-col md:flex-row bg-white rounded-xl shadow-2xl overflow-hidden border-t-8 border-fuchsia-600'
       : 'bg-white rounded-xl shadow-lg overflow-hidden flex flex-col hover:shadow-xl transition-shadow'}>
-      <img src={imgSrc} alt={post.title}
+      <img src={imgSrc} alt={post.title} loading="lazy"
         className={isFeatured
           ? 'w-full md:w-1/2 h-64 md:h-auto object-cover'
           : 'w-full h-48 object-cover'} />
@@ -120,6 +121,7 @@ const YouthBlogPage: FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
+      <SEO title="Youth Blog" description="Stories, insights, and updates from the Global Flame Ministry Youth Community." url="https://globalflameministry.org/youth/blog" />
 
       {/* Hero */}
       <section className="bg-gradient-to-r from-purple-800 to-fuchsia-900

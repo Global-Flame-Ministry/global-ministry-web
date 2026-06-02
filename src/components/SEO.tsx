@@ -19,6 +19,27 @@ const SEO: React.FC<SEOProps> = ({
     ? title
     : `${title} | Global Flame Ministry`;
 
+  const orgSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Global Flame Ministry',
+    alternateName: 'GFM',
+    url: 'https://globalflameministry.org',
+    logo: 'https://globalflameministry.org/og-image.jpg',
+    description: 'Raising a people of power who will manifest the kingdom and the realities of the fullness of Christ through the Spirit.',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Jos',
+      addressRegion: 'Plateau',
+      addressCountry: 'NG',
+    },
+    sameAs: [
+      'https://www.facebook.com/globalflameministry',
+      'https://www.instagram.com/globalflameministry',
+      'https://www.youtube.com/@globalflameministry',
+    ],
+  };
+
   return (
     <Helmet>
       <title>{fullTitle}</title>
@@ -39,6 +60,11 @@ const SEO: React.FC<SEOProps> = ({
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={image} />
+
+      {/* Structured Data (JSON-LD) */}
+      <script type="application/ld+json">
+        {JSON.stringify(orgSchema)}
+      </script>
     </Helmet>
   );
 };

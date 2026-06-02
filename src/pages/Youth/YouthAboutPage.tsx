@@ -4,6 +4,7 @@ import {
   Target, Eye, Award, Users, Lightbulb, Heart, Zap,
   CheckCircle, Landmark, BookOpen,
 } from 'lucide-react';
+import SEO from '../../components/SEO';
 
 const ASSET_PATH = '/images/';
 
@@ -45,7 +46,7 @@ const GFM_YOUTH_HISTORY = [
 const ImageWithFallback: FC<{ src: string; alt: string; className: string; fallback?: string }> = ({
   src, alt, className, fallback = `${ASSET_PATH}default-profile.jpg`,
 }) => (
-  <img src={src} alt={alt} className={className}
+  <img src={src} alt={alt} loading="lazy" className={className}
     onError={(e: SyntheticEvent<HTMLImageElement>) => {
       (e.target as HTMLImageElement).onerror = null;
       (e.target as HTMLImageElement).src = fallback;
@@ -87,6 +88,7 @@ const HistoryCard: FC<{
 const YouthAboutPage: FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
+      <SEO title="About Youth Community" description="Learn about the Global Flame Ministry Youth Community — our vision, mission, and values." url="https://globalflameministry.org/youth/about" />
 
       {/* Hero */}
       <section className="relative bg-gradient-to-br from-purple-800 to-fuchsia-700

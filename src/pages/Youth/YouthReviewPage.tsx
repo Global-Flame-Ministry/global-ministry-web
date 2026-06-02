@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { testimonyApi } from '../../api/testimonyApi';
 import type { TestimonyDto } from '../../types';
+import SEO from '../../components/SEO';
 
 // ── STAR DISPLAY ──────────────────────────────────────────────────────────────
 const Rating: FC<{ count: number }> = ({ count }) => (
@@ -241,6 +242,7 @@ const YouthReviewPage: FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
+      <SEO title="Youth Testimonies" description="Read testimonies and reviews from members of the Global Flame Ministry Youth Community." url="https://globalflameministry.org/youth/reviews" />
 
       {/* Hero */}
       <section className="bg-gradient-to-br from-fuchsia-900 to-purple-800

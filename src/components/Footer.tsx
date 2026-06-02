@@ -131,6 +131,7 @@ const Footer: React.FC = () => {
                 <img
                   src={logo}
                   alt="Global Flame Logo"
+                  loading="lazy"
                   className="w-10 h-10 md:w-20 md:h-20 rounded-full object-cover animate-shimmer-opacity shrink-0"
                 />
                 <span

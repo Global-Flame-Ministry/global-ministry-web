@@ -97,7 +97,7 @@ const BuyModal: React.FC<{ book: BookDto; onClose: () => void }> = ({ book, onCl
         </button>
         <div className="flex gap-4 mb-6">
           {book.coverImageUrl ? (
-            <img src={book.coverImageUrl} alt={book.title} className="w-16 h-24 object-cover rounded-xl shadow-md shrink-0" />
+            <img src={book.coverImageUrl} alt={book.title} loading="lazy" className="w-16 h-24 object-cover rounded-xl shadow-md shrink-0" />
           ) : (
             <div className="w-16 h-24 bg-slate-100 rounded-xl flex items-center justify-center shrink-0">
               <Library size={24} className="text-slate-300" />
@@ -165,6 +165,7 @@ const BookCard: React.FC<{ book: BookDto; onSelect: (book: BookDto) => void }> =
               <img
                 src={book.coverImageUrl}
                 alt={book.title}
+                loading="lazy"
                 className="w-full aspect-[2/3] object-cover rounded shadow-2xl"
               />
             ) : (

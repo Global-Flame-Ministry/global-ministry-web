@@ -1,4 +1,5 @@
 ﻿import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -38,6 +39,7 @@ const ResendConfirmPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
+        <Helmet><meta name="robots" content="noindex" /></Helmet>
         <div className="w-full max-w-md">
           <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-xs hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-200 rounded-lg cursor-pointer mb-6">
             <ArrowLeft className="w-4 h-4" /> Back to Home

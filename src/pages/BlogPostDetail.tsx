@@ -47,7 +47,8 @@ function ContentBlock({ block }: { block: BlogBlockDto }) {
         <figure className="my-8 w-full mx-auto">
           <img
             src={block.imageUrl ?? ''}
-            alt=""
+            alt={block.imageUrl?.split('/').pop() ?? 'Blog post image'}
+            loading="lazy"
             className="w-full max-h-[420px] md:max-h-[520px] object-cover rounded-xl"
           />
         </figure>
@@ -155,6 +156,7 @@ export default function BlogPostDetail() {
                 <img
                   src={post.coverImageUrl}
                   alt={post.title}
+                  loading="lazy"
                   className="w-full h-auto max-h-[75vh] object-cover rounded-xl"
                 />
               </div>
@@ -247,6 +249,7 @@ export default function BlogPostDetail() {
                           <img
                             src={relatedPost.coverImageUrl}
                             alt={relatedPost.title}
+                            loading="lazy"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         ) : (

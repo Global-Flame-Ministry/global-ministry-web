@@ -146,6 +146,7 @@ const getEmbedUrl = (url: string): string => {
                   <img
                     src={activeSermon.imageUrl || ''}
                     alt={activeSermon.title}
+                    loading="lazy"
                     className="absolute top-0 left-0 w-full h-full object-cover opacity-80 hover:scale-105 transition-transform duration-700"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent opacity-60" />
@@ -186,7 +187,7 @@ const getEmbedUrl = (url: string): string => {
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-[#5b0064]/20 shrink-0 bg-gray-100 flex items-center justify-center">
                     {activeSermon.speakerImageUrl ? (
-                      <img src={activeSermon.speakerImageUrl} alt={activeSermon.speaker} className="w-full h-full object-cover" />
+                      <img src={activeSermon.speakerImageUrl} alt={activeSermon.speaker} loading="lazy" className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-lg font-bold text-[#712ae2] uppercase">
                         {activeSermon.speaker?.charAt(0)}
@@ -273,6 +274,7 @@ const getEmbedUrl = (url: string): string => {
                     <img
                       src={activeSermon.imageUrl || ''}
                       alt={activeSermon.title}
+                      loading="lazy"
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-[#5b0064]/40 flex items-center justify-center">

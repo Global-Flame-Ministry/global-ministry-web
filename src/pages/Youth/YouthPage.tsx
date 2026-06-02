@@ -10,6 +10,7 @@ import type { EventDto, AnnouncementDto } from '../../types';
 import { useAuth } from '../../context/useAuthContext';
 import api from '../../api/axios';
 import toast from 'react-hot-toast';
+import SEO from '../../components/SEO';
 
 // ─── EVENT STATUS HELPERS ─────────────────────────────────────────────────────
 const getEventStatus = (event: EventDto): 'upcoming' | 'ongoing' | 'past' => {
@@ -54,6 +55,7 @@ const YouthEventCard: React.FC<{
           <img
             src={event.imageUrl}
             alt={event.title}
+            loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105
               transition-transform duration-500"
           />
@@ -204,6 +206,7 @@ const YouthPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEO title="GFM Youth" description="Global Flame Ministry Youth — events, announcements, and community for young believers." url="https://globalflameministry.org/youth" />
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <div className="relative h-[65vh] flex items-end overflow-hidden bg-slate-900">

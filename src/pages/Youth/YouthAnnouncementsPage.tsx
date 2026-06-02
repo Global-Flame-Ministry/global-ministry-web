@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Megaphone, Calendar, Tag, ChevronDown, ChevronUp } from 'lucide-react';
 import { announcementApi } from '../../api/announcementApi';
 import type { AnnouncementDto } from '../../types';
+import SEO from '../../components/SEO';
 
 // ── ANNOUNCEMENT CARD ────────────────────────────────────────────────────────
 const AnnouncementCard = ({ item }: { item: AnnouncementDto }) => {
@@ -105,6 +106,7 @@ const YouthAnnouncementsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
+      <SEO title="Youth Announcements" description="Latest announcements and updates for the Global Flame Ministry Youth Community." url="https://globalflameministry.org/youth/announcements" />
 
       {/* Hero */}
       <section className="bg-gradient-to-r from-purple-800 to-fuchsia-900

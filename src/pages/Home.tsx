@@ -498,6 +498,7 @@ const Home: React.FC = () => {
                           <img
                             src={sermon.imageUrl}
                             alt={sermon.title}
+                            loading="lazy"
                             className="w-full h-full object-cover object-top transition-all duration-700 group-hover:scale-105"
                           />
                         ) : (
@@ -569,6 +570,7 @@ const Home: React.FC = () => {
                           <img
                             src={book.coverImageUrl}
                             alt={book.title}
+                            loading="lazy"
                             className="w-full aspect-[2/3] object-cover rounded shadow-2xl"
                           />
                         ) : (
@@ -661,6 +663,7 @@ const Home: React.FC = () => {
               <img
                 src={daddandmumm}
                 alt="Leadership"
+                loading="lazy"
                 className="w-full aspect-[4/3] object-cover"
               />
             </div>
@@ -780,7 +783,7 @@ const Home: React.FC = () => {
                   <Link to={`/blog/${post.slug}`} className="block">
                     <div className="aspect-[16/10] overflow-hidden bg-gray-100">
                       {post.coverImageUrl ? (
-                        <img src={post.coverImageUrl} alt={post.title}
+                        <img src={post.coverImageUrl} alt={post.title} loading="lazy"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-purple-100 to-fuchsia-100
@@ -839,6 +842,7 @@ const Home: React.FC = () => {
                       <img
                         src={imgUrl}
                         alt={event.title}
+                        loading="lazy"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     </div>

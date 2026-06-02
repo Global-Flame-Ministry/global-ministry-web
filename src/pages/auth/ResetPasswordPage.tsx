@@ -1,4 +1,5 @@
 ﻿import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -93,6 +94,7 @@ const ResetPasswordPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
+      <Helmet><meta name="robots" content="noindex" /></Helmet>
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
 
@@ -101,6 +103,7 @@ const ResetPasswordPage = () => {
             <img
               src={logo}
               alt="Global Flame Ministries"
+              loading="lazy"
               className="h-16 w-16 rounded-full object-cover mb-3 ring-4 ring-fuchsia-100"
             />
             <h1 className="text-2xl font-bold text-gray-900">Reset Password</h1>

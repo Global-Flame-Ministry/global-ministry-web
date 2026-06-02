@@ -52,6 +52,7 @@ const EventCard: React.FC<{ event: EventDto }> = ({ event }) => {
           <img
             src={event.imageUrl}
             alt={event.title}
+            loading="lazy"
             className="w-full h-full object-cover object-top
               group-hover:scale-105 transition-transform duration-500"
           />
@@ -308,6 +309,7 @@ const MinistryDetail: React.FC = () => {
               <img
                 src={src}
                 alt={`Royal Priesthood Highlight ${index + 1}`}
+                loading="lazy"
                 className="w-full h-full object-cover object-center 
                   group-hover:scale-105 transition-transform duration-500"
                 onError={(e) => {
@@ -401,12 +403,13 @@ const MinistryDetail: React.FC = () => {
               <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm
                 border border-white/20 rounded-2xl px-4 sm:px-5 py-3">
                 {ministry.leaderImageUrl && (
-                  <img
-                    src={ministry.leaderImageUrl}
-                    alt={ministry.leaderName}
-                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover
-                      object-top border-2 border-white/30"
-                  />
+              <img
+                src={ministry.leaderImageUrl}
+                alt={ministry.leaderName}
+                loading="lazy"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover
+                  object-top border-2 border-white/30"
+              />
                 )}
                 <div>
                   <p className="text-white font-bold text-sm">{ministry.leaderName}</p>

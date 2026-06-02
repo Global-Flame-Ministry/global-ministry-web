@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Calendar, MapPin, Clock, Sparkles, ArrowRight, Users, X } from 'lucide-react';
 import { eventApi } from '../../api/eventApi';
 import type { EventDto } from '../../types';
+import SEO from '../../components/SEO';
 
 // ── MODAL ────────────────────────────────────────────────────────────────────
 const EventModal = ({
@@ -23,7 +24,7 @@ const EventModal = ({
       </div>
 
       {event.imageUrl && (
-        <img src={event.imageUrl} alt={event.title}
+        <img src={event.imageUrl} alt={event.title} loading="lazy"
           className="w-full h-64 object-cover" />
       )}
 
@@ -88,7 +89,7 @@ const EventCard = ({
                     hover:shadow-xl transition-shadow duration-300
                     transform hover:-translate-y-1 relative">
       {event.imageUrl ? (
-        <img src={event.imageUrl} alt={event.title}
+        <img src={event.imageUrl} alt={event.title} loading="lazy"
           className="w-full h-48 object-cover" />
       ) : (
         <div className="w-full h-48 bg-fuchsia-100 flex items-center
@@ -147,7 +148,7 @@ const PastEventCard = ({ event }: { event: EventDto }) => (
   <div className="relative group overflow-hidden rounded-xl shadow-md
                   hover:shadow-xl transition-shadow duration-300">
     {event.imageUrl ? (
-      <img src={event.imageUrl} alt={event.title}
+      <img src={event.imageUrl} alt={event.title} loading="lazy"
         className="w-full h-56 object-cover transform
                    group-hover:scale-105 transition-transform duration-300" />
     ) : (
@@ -220,6 +221,7 @@ const YouthEventsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
+      <SEO title="Youth Events" description="Upcoming events and activities for the Global Flame Ministry Youth Community." url="https://globalflameministry.org/youth/events" />
 
       {/* Hero */}
       <section className="bg-gradient-to-r from-purple-800 to-fuchsia-900

@@ -4,6 +4,7 @@ import {
   Heart, Lightbulb, Users, Handshake, BookOpen,
   Megaphone, Sparkles, Leaf, ArrowRight,
 } from 'lucide-react';
+import SEO from '../../components/SEO';
 
 const CORE_SERVICES = [
   { icon: Users, title: 'ACCOUNTABILITY',
@@ -34,6 +35,7 @@ const HOW_WE_SERVE_STEPS = [
 const YouthServicesPage: FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
+      <SEO title="Youth Services" description="Discover the services and ministries available through the Global Flame Youth Community." url="https://globalflameministry.org/youth/services" />
 
       {/* Hero */}
       <section className="bg-gradient-to-br from-fuchsia-800 to-purple-900

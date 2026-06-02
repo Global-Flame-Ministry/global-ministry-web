@@ -149,7 +149,7 @@ const SeriesDetail: React.FC = () => {
                   <div className="flex items-center gap-3 pt-4 border-t border-[#d5c0d1]/40">
                     <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 shrink-0 flex items-center justify-center">
                       {sermon.speakerImageUrl ? (
-                        <img src={sermon.speakerImageUrl} alt={sermon.speaker} className="w-full h-full object-cover" />
+                        <img src={sermon.speakerImageUrl} alt={sermon.speaker} loading="lazy" className="w-full h-full object-cover" />
                       ) : (
                         <span className="text-[10px] font-bold text-[#712ae2] uppercase">{sermon.speaker?.charAt(0)}</span>
                       )}

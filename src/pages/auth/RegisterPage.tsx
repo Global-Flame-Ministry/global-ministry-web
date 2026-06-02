@@ -1,4 +1,5 @@
 ﻿import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -74,6 +75,7 @@ const RegisterPage = () => {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4 py-12">
+      <Helmet><meta name="robots" content="noindex" /></Helmet>
 
       {/* Background blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -86,7 +88,7 @@ const RegisterPage = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-fuchsia-600 to-purple-700 shadow-lg mb-3">
-            <img src={logo} alt="Logo" className="w-10 h-10 rounded-xl object-cover" />
+            <img src={logo} alt="Logo" loading="lazy" className="w-10 h-10 rounded-xl object-cover" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
             Global Flame

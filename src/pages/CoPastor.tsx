@@ -68,6 +68,7 @@ const CoPastor: React.FC = () => {
                 <img
                   src={mummy}
                   alt="Pastor Faith Musa"
+                  loading="lazy"
                   style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }}
                 />
               </div>

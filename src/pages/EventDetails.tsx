@@ -140,6 +140,7 @@ export default function EventDetails() {
                 <img
                   src={event.imageUrl}
                   alt={event.title}
+                  loading="lazy"
                   className="w-full h-[300px] sm:h-[450px] object-cover rounded-xl"
                 />
               </div>

@@ -1,3 +1,4 @@
+import SEO from '../components/SEO';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, Phone, Mail, MessageSquare, ChevronDown, Check, Loader, ArrowLeft } from 'lucide-react';
@@ -109,6 +110,7 @@ const CounsellingPage: React.FC = () => {
 
   return (
     <div className="bg-white min-h-screen">
+      <SEO title="Counselling" description="Get pastoral care and counselling from Global Flame Ministry. We are here to support you with prayer and guidance." url="https://globalflameministry.org/counselling" />
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <div className="bg-[#0a0a0a] pt-32 pb-20 px-6">
