@@ -222,6 +222,8 @@ const App: React.FC = () => {
               element={<AuthLayout><RegisterPage /></AuthLayout>} />
             <Route path="/forgot-password"
               element={<AuthLayout><ForgotPasswordPage /></AuthLayout>} />
+            <Route path="/reset-password/:token"
+              element={<AuthLayout><ResetPasswordPage /></AuthLayout>} />
             <Route path="/reset-password"
               element={<AuthLayout><ResetPasswordPage /></AuthLayout>} />
             <Route path="/resend-confirmation"

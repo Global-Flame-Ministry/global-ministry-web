@@ -63,7 +63,7 @@ const Contact: React.FC = () => {
       const err = error as {
         response?: { data?: { message?: string; errors?: unknown } }
       };
-      console.error('Contact error:', err.response?.data);
+      if (import.meta.env.DEV) console.error('Contact error:', err.response?.data);
       toast.error(
         err.response?.data?.message || 'Something went wrong. Please try again.'
       );

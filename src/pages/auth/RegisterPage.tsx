@@ -42,9 +42,9 @@ const RegisterPage = () => {
 } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      firstName: searchParams.get('firstName') ?? '',
-      lastName:  searchParams.get('lastName')  ?? '',
-      email:     searchParams.get('email')     ?? '',
+      firstName: searchParams.get('firstName')?.replace(/[^a-zA-Z\s-]/g, '') ?? '',
+      lastName:  searchParams.get('lastName')?.replace(/[^a-zA-Z\s-]/g, '') ?? '',
+      email:     searchParams.get('email')?.replace(/[^a-zA-Z0-9@.\-_]/g, '') ?? '',
     },
   });
 

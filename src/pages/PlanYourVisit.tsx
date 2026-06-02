@@ -97,7 +97,7 @@ const PlanYourVisit: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ locationType, ...form });
+    if (import.meta.env.DEV) console.log({ locationType, ...form });
     setSubmitted(true);
   };
 

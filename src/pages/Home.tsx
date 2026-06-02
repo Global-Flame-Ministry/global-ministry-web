@@ -254,7 +254,7 @@ const Home: React.FC = () => {
 
   const handleVisitSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ locationType, needsBus, pickupLocation });
+    if (import.meta.env.DEV) console.log({ locationType, needsBus, pickupLocation });
     alert('Thank you! Your visit details have been submitted successfully.');
     closeVisitModal();
   };

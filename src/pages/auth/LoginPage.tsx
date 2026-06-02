@@ -50,23 +50,16 @@ const LoginPage = () => {
     try {
       // 'data' now includes the 'remember' boolean field
       const response = await authApi.login(data);
-      if (response.data.isSuccess && response.data.data) {
-        login(response.data.data);
-        toast.success(`Welcome back, ${response.data.data.firstName}`);
-        if (response.data.data.roles.includes('Admin')) {
-          navigate('/admin', { replace: true });
-        } else {
-          navigate(from, { replace: true });
-        }
+      const userData = response.data;
+      login(userData);
+      toast.success(`Welcome back, ${userData.firstName}`);
+      if (userData.roles.includes('Admin')) {
+        navigate('/admin', { replace: true });
       } else {
-        toast.error(response.data.message || 'Login failed');
+        navigate(from, { replace: true });
       }
-    } catch (error: any) {
-      const message =
-        error?.response?.data?.errors ||
-        error?.response?.data?.message ||
-        'Invalid email or password';
-      toast.error(message);
+    } catch {
+      toast.error('Invalid email or password. Please try again.');
     } finally {
       setIsLoading(false);
     }

@@ -1,5 +1,5 @@
 ﻿import { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,10 +29,11 @@ const ResetPasswordPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Token and email come from the URL — backend sends them in the reset link
+  // Token from path param (preferred) or query string (legacy)
+  const { token: pathToken } = useParams<{ token: string }>();
   const [searchParams] = useSearchParams();
   const email = searchParams.get('email') ?? '';
-  const token = searchParams.get('token') ?? '';
+  const token = pathToken || searchParams.get('token') || '';
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),

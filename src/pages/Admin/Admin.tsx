@@ -100,7 +100,7 @@ export default function AdminDashboard() {
           message: "An unexpected error occurred. Please try again.",
         });
       }
-      console.error("Dashboard fetch error:", err);
+      if (import.meta.env.DEV) console.error("Dashboard fetch error:", err);
     } finally {
       setIsLoading(false);
     }
