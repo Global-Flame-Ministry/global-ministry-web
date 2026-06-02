@@ -25,6 +25,12 @@ api.interceptors.response.use(
       _retry?: boolean;
     };
 
+    const isAuthEndpoint =
+      original.url?.includes('/auth/login') ||
+      original.url?.includes('/auth/refresh') ||
+      original.url?.includes('/auth/logout');
+    if (isAuthEndpoint) return Promise.reject(error);
+
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true;
       try {

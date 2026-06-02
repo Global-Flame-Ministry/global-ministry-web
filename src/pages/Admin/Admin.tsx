@@ -61,12 +61,6 @@ export default function AdminDashboard() {
       if (isApiError(err) && err.response) {
         // Server responded with an error status
         switch (err.response.status) {
-          case 401:
-            setError({
-              type: "auth",
-              message: "Your session has expired. Please log in again.",
-            });
-            break;
           case 403:
             setError({
               type: "forbidden",
