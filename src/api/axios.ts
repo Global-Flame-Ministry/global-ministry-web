@@ -5,26 +5,16 @@ import axios, {
 } from 'axios';
 import { storage } from '../utils/storage';
 
-// Change this one URL and everything updates automatically
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const api = axios.create({
   baseURL: BASE_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   },
 });
 
-// Attach JWT to every request automatically
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = storage.getToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// Auto refresh token on 401
 api.interceptors.response.use(
   (res: AxiosResponse) => {
     if (res.status === 204) return res;
@@ -38,23 +28,17 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true;
       try {
-        const user = storage.getUser();
-        const refreshToken = storage.getRefreshToken();
+        const res = await axios.post<{ success: boolean }>(
+          `${BASE_URL}/api/auth/refresh`,
+          {},
+          { withCredentials: true }
+        );
 
-        if (user && refreshToken) {
-          const res = await axios.post<{ data: string }>(
-            `${BASE_URL}/api/auth/refresh-token`,  // ✅ uses constant
-            { email: user.email, refreshToken }
-          );
-
-          const newToken = res.data.data;
-          storage.setToken(newToken);
-          original.headers.Authorization = `Bearer ${newToken}`;
-
+        if (res.data.success) {
           return api(original);
         }
       } catch {
-        storage.clearAll();
+        storage.removeUser();
         window.location.href = '/login';
       }
     }

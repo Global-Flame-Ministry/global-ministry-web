@@ -70,8 +70,6 @@ export interface NewUserDto {
   email: string;
   module: string | null;
   roles: string[];
-  token: string;
-  refreshToken: string;
   profilePictureUrl: string | null;
 }
 
