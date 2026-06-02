@@ -4,6 +4,7 @@ import axios, {
   type AxiosError
 } from 'axios';
 import { storage } from '../utils/storage';
+import { getAccessToken, setAccessToken } from '../context/AuthContext';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -13,6 +14,14 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json'
   },
+});
+
+api.interceptors.request.use((config) => {
+  const token = getAccessToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 api.interceptors.response.use(
@@ -34,16 +43,19 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true;
       try {
-        const res = await axios.post<{ success: boolean }>(
+        const res = await axios.post<{ isSuccess: boolean; data: { accessToken: string } | null }>(
           `${BASE_URL}/api/auth/refresh`,
           {},
           { withCredentials: true }
         );
 
-        if (res.data.success) {
+        if (res.data.isSuccess && res.data.data?.accessToken) {
+          setAccessToken(res.data.data.accessToken);
+          original.headers.Authorization = `Bearer ${res.data.data.accessToken}`;
           return api(original);
         }
       } catch {
+        setAccessToken(null);
         storage.removeUser();
         window.location.href = '/login';
       }

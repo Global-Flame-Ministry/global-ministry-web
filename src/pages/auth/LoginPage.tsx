@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import { authApi } from '../../api/authApi';
 import { useAuth } from '../../context/useAuthContext';
+import { setAccessToken } from '../../context/AuthContext';
 import logo from '../../assets/flames.jpg';
 
 // Updated Schema to include remember boolean
@@ -50,12 +51,14 @@ const LoginPage = () => {
     try {
       // 'data' now includes the 'remember' boolean field
       const response = await authApi.login(data);
-      const userData = response.data.data;
-      if (!userData) {
+      const loginData = response.data.data;
+      if (!loginData) {
         toast.error(response.data.message || 'Login failed');
         setIsLoading(false);
         return;
       }
+      const { accessToken, user: userData } = loginData;
+      setAccessToken(accessToken);
       login(userData);
       toast.success(`Welcome back, ${userData.firstName}`);
       if (userData.roles?.includes('Admin')) {

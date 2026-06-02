@@ -61,6 +61,11 @@ export interface PagedResult<T> {
 }
 
 // AUTH 
+export interface LoginResponseDto {
+  accessToken: string;
+  user: NewUserDto;
+}
+
 export interface NewUserDto {
   id: string;
   firstName: string;
