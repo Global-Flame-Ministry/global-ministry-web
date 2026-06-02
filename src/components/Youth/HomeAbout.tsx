@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DOMPurify from 'dompurify';
 // 1. Import Lucide Icons
 import { 
     X, Mail, Send, // Existing imports
@@ -66,7 +67,6 @@ const ContactAdminForm = ({ programTitle }: { programTitle: string }) => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         // 1. You would integrate your actual API call here (e.g., Axios, Fetch)
-        console.log("Admin contact form submitted for:", programTitle, formState);
         
         // 2. Mock submission success for UI
         setIsSubmitted(true);
@@ -244,7 +244,7 @@ const ProgramModal: React.FC<ProgramModalProps> = ({ item, onClose }) => {
                     {/* Detailed Explanation */}
                     <div className="mb-6">
                         <p className="text-gray-700 text-base leading-relaxed" 
-                            dangerouslySetInnerHTML={{ __html: programDetails.desc.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} 
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(programDetails.desc.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')) }} 
                         />
                     </div>
                     

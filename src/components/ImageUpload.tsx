@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { ImageIcon, Upload, X, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import api from '../api/axios';
 
 interface ImageUploadProps {
   value?: string | null;
@@ -7,8 +8,6 @@ interface ImageUploadProps {
   label?: string;
 }
 
-const CLOUD_NAME = 'dveeb0yop';
-const UPLOAD_PRESET = 'gfm_uploads';
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const ACCEPTED_EXT   = 'JPG, PNG, WEBP';
@@ -45,13 +44,29 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     setProgress(0);
     setErrorMsg('');
 
+    // Get a signed upload signature from the backend
+    let signature: string, timestamp: number, apiKey: string, cloudName: string;
+    try {
+      const sigRes = await api.post('/api/media/sign-upload');
+      signature = sigRes.data.signature;
+      timestamp = sigRes.data.timestamp;
+      apiKey    = sigRes.data.apiKey;
+      cloudName = sigRes.data.cloudName;
+    } catch {
+      setErrorMsg('Failed to prepare upload. Please try again.');
+      setState('error');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', UPLOAD_PRESET);
+    formData.append('api_key', apiKey);
+    formData.append('timestamp', String(timestamp));
+    formData.append('signature', signature);
 
     // Use XMLHttpRequest so we get real upload progress
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`);
+    xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`);
 
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) {

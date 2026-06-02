@@ -6,6 +6,7 @@ import {
   Shield, Mail, Phone, ChevronDown, Paperclip, X, FileImage
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import api from '../api/axios';
 import { prayerApi } from '../api/prayerApi';
 import { useAuth } from '../context/useAuthContext';
 
@@ -21,9 +22,6 @@ const TOPICS = [
   'Salvation of Loved Ones',
   'Other',
 ];
-
-const CLOUDINARY_CLOUD_NAME = 'dveeb0yop';
-const CLOUDINARY_UPLOAD_PRESET = 'gfm_uploads';
 
 type Step = 'form' | 'success';
 
@@ -75,12 +73,18 @@ const PrayerRequestPage: React.FC = () => {
 
     setIsUploading(true);
     try {
+      // Get a signed upload signature from the backend
+      const sigRes = await api.post('/api/media/sign-upload');
+      const { signature, timestamp, apiKey, cloudName } = sigRes.data;
+
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      formData.append('api_key', apiKey);
+      formData.append('timestamp', String(timestamp));
+      formData.append('signature', signature);
 
       const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`,
+        `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
         { method: 'POST', body: formData }
       );
 
