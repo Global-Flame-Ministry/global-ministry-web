@@ -7,7 +7,7 @@ import {
   Users, MapPin, HandHeart, Globe,
   Flame, ArrowRight, Phone, MessageCircleHeart,
 } from 'lucide-react';
-import logo from '../assets/Logoo.jpg';
+import logo from '../assets/Logoo.png';
 import { ministryApi } from '../api/ministryApi';
 import { accountApi } from '../api/accountApi';
 import { sermonApi } from '../api/sermonApi';
