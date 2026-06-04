@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import SEO from '../components/SEO';
 import { Link, useNavigate } from 'react-router-dom';
 import { announcementApi } from '../api/announcementApi';
-import { Calendar, Play, ArrowRight, Heart, HandHeart, Star, Library, ShieldCheck, Flame, HeartHandshake, Phone, Mail, MapPin, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Play, ArrowRight, Heart, HandHeart, Star, Library, ShieldCheck, Flame, HeartHandshake, Phone, Mail, MapPin, ChevronDown, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
 import { eventApi } from '../api/eventApi';
 import { bookApi } from '../api/bookApi';
@@ -191,6 +191,7 @@ const BeliefCard: React.FC<BeliefCardProps> = ({ title, body, delay, direction }
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [navigating, setNavigating] = useState(false);
 
   const { data: latestSermonsData } = useQuery({
     queryKey: ['featuredSermons'],
@@ -266,6 +267,14 @@ const Home: React.FC = () => {
 
   return (
     <div className="bg-white selection:bg-fuchsia-100 font-['Inter'] overflow-x-hidden max-w-full">
+      {navigating && (
+        <div className="fixed inset-0 z-[9999] bg-white/90 backdrop-blur-sm flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-12 h-12 text-fuchsia-600 animate-spin" />
+            <p className="text-sm font-bold text-slate-600 uppercase tracking-widest">Preparing your visit...</p>
+          </div>
+        </div>
+      )}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@100..900&display=swap');
         .font-serif { font-family: 'Playfair Display', serif; }
@@ -451,11 +460,14 @@ const Home: React.FC = () => {
               </p>
               <div className="flex flex-wrap lg:flex-nowrap items-center gap-3">
                 <button
-                  onClick={() => navigate('/plan-your-visit')}
+                  onClick={() => {
+                    setNavigating(true);
+                    setTimeout(() => navigate('/plan-your-visit'), 800);
+                  }}
                   className="px-8 py-4 sm:px-10 sm:py-5 bg-[#7C3AED] text-white font-black
                     uppercase tracking-widest text-[11px] sm:text-[13px] hover:bg-[#6D28D9]
                     hover:scale-105 rounded-full transition-all duration-200 shadow-2xl
-                    whitespace-nowrap active:scale-95 animate-bob-glow"
+                    whitespace-nowrap active:scale-95 animate-bob-glow cursor-pointer"
                 >
                   Plan Your Visit
                 </button>
