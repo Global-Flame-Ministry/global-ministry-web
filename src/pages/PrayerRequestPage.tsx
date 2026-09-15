@@ -6,7 +6,7 @@ import {
   Shield, Mail, Phone, ChevronDown, Paperclip, X, FileImage
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../api/axios';
+import { mediaApi } from '../api/mediaApi';
 import { prayerApi } from '../api/prayerApi';
 import { useAuth } from '../context/useAuthContext';
 
@@ -54,7 +54,7 @@ const PrayerRequestPage: React.FC = () => {
   const [token, setToken]         = useState('');
   const [copied, setCopied]       = useState(false);
 
-  // ── Cloudinary upload ────────────────────────────────────────────
+  // ── Upload (backend relays to Cloudinary) ────────────────────────────
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -73,29 +73,17 @@ const PrayerRequestPage: React.FC = () => {
 
     setIsUploading(true);
     try {
-      // Get a signed upload signature from the backend
-      const sigRes = await api.post('/api/media/sign-upload');
-      const { signature, timestamp, apiKey, cloudName } = sigRes.data;
+      const res = await mediaApi.uploadFile(file);
+      const url: string | undefined = res.data?.data?.url;
+      if (!url) throw new Error('Upload failed');
 
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('api_key', apiKey);
-      formData.append('timestamp', String(timestamp));
-      formData.append('signature', signature);
-
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
-        { method: 'POST', body: formData }
-      );
-
-      if (!res.ok) throw new Error('Upload failed');
-
-      const data = await res.json();
-      setAttachmentUrl(data.secure_url);
+      setAttachmentUrl(url);
       setAttachmentName(file.name);
       toast.success('Attachment uploaded');
-    } catch {
-      toast.error('Failed to upload attachment. Please try again.');
+    } catch (err) {
+      const message = (err as { response?: { data?: { message?: string } } })
+        ?.response?.data?.message;
+      toast.error(message || 'Failed to upload attachment. Please try again.');
     } finally {
       setIsUploading(false);
       // Reset input so the same file can be re-selected if needed

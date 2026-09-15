@@ -1,8 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Upload, X, Music, Loader2 } from 'lucide-react';
-
-const CLOUD_NAME = 'dveeb0yop';
-const UPLOAD_PRESET = 'gfm_uploads';
+import { mediaApi } from '../api/mediaApi';
 
 interface AudioUploadProps {
   value: string;
@@ -19,7 +17,7 @@ const AudioUpload: React.FC<AudioUploadProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const uploadToCloudinary = async (file: File) => {
+  const uploadAudio = async (file: File) => {
     // Validate file type
     if (!file.type.startsWith('audio/')) {
       alert('Please select an audio file (MP3, WAV, etc.)');
@@ -28,26 +26,19 @@ const AudioUpload: React.FC<AudioUploadProps> = ({
 
     setIsUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', UPLOAD_PRESET);
-      formData.append('folder', 'global-flame-ministry/audio');
-      formData.append('resource_type', 'video'); // Cloudinary uses "video" for audio
+      const res = await mediaApi.uploadFile(file, 'global-flame-ministry/audio');
 
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`,
-        { method: 'POST', body: formData }
-      );
+      const url: string | undefined = res.data?.data?.url;
 
-      const data = await response.json();
-
-      if (data.secure_url) {
-        onChange(data.secure_url);
+      if (url) {
+        onChange(url);
       } else {
         alert('Upload failed. Please try again.');
       }
-    } catch {
-      alert('Upload failed. Please check your connection.');
+    } catch (err) {
+      const message = (err as { response?: { data?: { message?: string } } })
+        ?.response?.data?.message;
+      alert(message || 'Upload failed. Please check your connection.');
     } finally {
       setIsUploading(false);
     }
@@ -55,14 +46,14 @@ const AudioUpload: React.FC<AudioUploadProps> = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) uploadToCloudinary(file);
+    if (file) uploadAudio(file);
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files?.[0];
-    if (file) uploadToCloudinary(file);
+    if (file) uploadAudio(file);
   };
 
   return (
@@ -128,7 +119,7 @@ const AudioUpload: React.FC<AudioUploadProps> = ({
                   Click to upload audio
                 </p>
                 <p className="text-xs text-slate-400 mt-1">
-                  MP3, WAV, M4A up to 200MB
+                  MP3, WAV, M4A up to 100MB
                 </p>
               </div>
             </div>

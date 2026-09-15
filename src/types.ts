@@ -60,6 +60,11 @@ export interface PagedResult<T> {
   hasNextPage?: boolean;
 }
 
+export interface MediaUploadResult {
+  url: string;
+  publicId: string;
+}
+
 // AUTH 
 export interface LoginResponseDto {
   accessToken: string;

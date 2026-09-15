@@ -10,6 +10,7 @@ import {
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/useAuthContext';
 import { accountApi } from '../api/accountApi';
+import { mediaApi } from '../api/mediaApi';
 
 type Tab = 'profile' | 'registrations' | 'givings' | 'prayers';
 
@@ -177,29 +178,21 @@ const UserDashboard: React.FC = () => {
 
     setIsSavingPic(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', 'gfm_uploads');
-      formData.append('folder', 'gfm');
+      // Upload through the backend which relays to Cloudinary
+      const res = await mediaApi.uploadFile(file, 'gfm');
+      const cloudinaryUrl: string | undefined = res.data?.data?.url;
+      if (!cloudinaryUrl) throw new Error('Upload failed');
 
-      const uploadRes = await fetch(
-        'https://api.cloudinary.com/v1_1/dveeb0yop/image/upload',
-        { method: 'POST', body: formData }
-      );
-
-      if (!uploadRes.ok) throw new Error('Upload failed');
-
-      const uploadData = await uploadRes.json();
-      const cloudinaryUrl: string = uploadData.secure_url;
-
-      const res = await accountApi.updateProfilePicture(cloudinaryUrl);
-      if (res.data.isSuccess && res.data.data) {
+      const profileRes = await accountApi.updateProfilePicture(cloudinaryUrl);
+      if (profileRes.data.isSuccess && profileRes.data.data) {
         queryClient.invalidateQueries({ queryKey: ['myProfile'] });
         setShowPicInput(false);
         toast.success('Profile picture updated');
       }
-    } catch {
-      toast.error('Failed to update picture');
+    } catch (err) {
+      const message = (err as { response?: { data?: { message?: string } } })
+        ?.response?.data?.message;
+      toast.error(message || 'Failed to update picture');
     } finally {
       setIsSavingPic(false);
       if (picInputRef.current) picInputRef.current.value = '';

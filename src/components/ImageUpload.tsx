@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { ImageIcon, Upload, X, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
-import api from '../api/axios';
+import { mediaApi } from '../api/mediaApi';
 
 interface ImageUploadProps {
   value?: string | null;
@@ -44,54 +44,24 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     setProgress(0);
     setErrorMsg('');
 
-    // Get a signed upload signature from the backend
-    let signature: string, timestamp: number, apiKey: string, cloudName: string;
+    // Upload through the backend which relays to Cloudinary
     try {
-      const sigRes = await api.post('/api/media/sign-upload');
-      signature = sigRes.data.signature;
-      timestamp = sigRes.data.timestamp;
-      apiKey    = sigRes.data.apiKey;
-      cloudName = sigRes.data.cloudName;
-    } catch {
-      setErrorMsg('Failed to prepare upload. Please try again.');
-      setState('error');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('api_key', apiKey);
-    formData.append('timestamp', String(timestamp));
-    formData.append('signature', signature);
-
-    // Use XMLHttpRequest so we get real upload progress
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`);
-
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) {
-        setProgress(Math.round((e.loaded / e.total) * 100));
-      }
-    };
-
-    xhr.onload = () => {
-      if (xhr.status === 200) {
-        const data = JSON.parse(xhr.responseText);
-        onChange(data.secure_url);
-        setState('success');
-        setProgress(100);
-      } else {
+      const res = await mediaApi.uploadFile(file, undefined, (p) => setProgress(p));
+      const url: string | undefined = res.data?.data?.url;
+      if (!url) {
         setErrorMsg('Upload failed. Please try again.');
         setState('error');
+        return;
       }
-    };
-
-    xhr.onerror = () => {
-      setErrorMsg('Network error. Please check your connection.');
+      onChange(url);
+      setState('success');
+      setProgress(100);
+    } catch (err) {
+      const message = (err as { response?: { data?: { message?: string } } })
+        ?.response?.data?.message;
+      setErrorMsg(message || 'Upload failed. Please try again.');
       setState('error');
-    };
-
-    xhr.send(formData);
+    }
   }, [onChange]);
 
   // ── File input change ────────────────────────────────────────────────────
