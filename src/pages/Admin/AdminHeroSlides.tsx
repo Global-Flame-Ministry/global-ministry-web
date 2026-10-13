@@ -11,13 +11,13 @@ import ImageUpload from '../../components/ImageUpload';
 import VideoUpload from '../../components/VideoUpload';
 import { getPosterUrl } from '../../components/HeroCarousel';
 
-const emptyForm = (): CreateHeroSlideDto => ({
+const emptyForm = (displayOrder = 0): CreateHeroSlideDto => ({
   mediaType: 'Image',
   url: '',
   title: '',
   subtitle: '',
   targetUrl: '',
-  displayOrder: 0,
+  displayOrder,
   isActive: true,
 });
 
@@ -48,9 +48,14 @@ const AdminHeroSlides = () => {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<HeroSlide | null>(null);
   const [form, setForm] = useState<CreateHeroSlideDto>(emptyForm());
+  const [initialForm, setInitialForm] = useState<CreateHeroSlideDto | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<HeroSlide | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const isDirty = initialForm != null && JSON.stringify(form) !== JSON.stringify(initialForm);
+  const isBusy  = isSaving || isUploading;
 
   const fetchSlides = useCallback(async () => {
     setIsLoading(true);
@@ -65,10 +70,28 @@ const AdminHeroSlides = () => {
 
   useEffect(() => { fetchSlides(); }, [fetchSlides]);
 
-  const openCreate = () => { setEditing(null); setForm(emptyForm()); setShowForm(true); };
+  const closeForm = useCallback(() => {
+    setShowForm(false);
+    setEditing(null);
+    setInitialForm(null);
+    setIsUploading(false);
+  }, []);
+
+  // Default new slides to the end of the list
+  const nextDisplayOrder = () =>
+    slides.length === 0 ? 0 : Math.max(...slides.map(s => s.displayOrder)) + 1;
+
+  const openCreate = () => {
+    const f = emptyForm(nextDisplayOrder());
+    setEditing(null);
+    setForm(f);
+    setInitialForm(f);
+    setIsUploading(false);
+    setShowForm(true);
+  };
+
   const openEdit = (s: HeroSlide) => {
-    setEditing(s);
-    setForm({
+    const f: CreateHeroSlideDto = {
       mediaType: s.mediaType,
       url: s.url,
       title: s.title ?? '',
@@ -76,21 +99,43 @@ const AdminHeroSlides = () => {
       targetUrl: s.targetUrl ?? '',
       displayOrder: s.displayOrder,
       isActive: s.isActive,
-    });
+    };
+    setEditing(s);
+    setForm(f);
+    setInitialForm(f);
+    setIsUploading(false);
     setShowForm(true);
   };
 
+  // Lock body scroll while the modal is open
+  useEffect(() => {
+    if (!showForm) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previous; };
+  }, [showForm]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!showForm) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeForm(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showForm, closeForm]);
+
+  // Close on backdrop click only when the form is pristine
+  const handleBackdropClick = () => { if (!isDirty) closeForm(); };
+
   const handleSave = async () => {
-    if (!form.mediaType) { toast.error('Media type is required'); return; }
-    if (!form.url.trim()) { toast.error('Media is required'); return; }
+    if (!form.url.trim()) { toast.error('Please upload media first'); return; }
     setIsSaving(true);
     try {
       if (editing) {
         const res = await heroApi.updateSlide(editing.id, form);
-        if (res.data.isSuccess) { toast.success('Updated'); setShowForm(false); fetchSlides(); }
+        if (res.data.isSuccess) { toast.success('Updated'); closeForm(); fetchSlides(); }
       } else {
         const res = await heroApi.createSlide(form);
-        if (res.data.isSuccess) { toast.success('Created'); setShowForm(false); fetchSlides(); }
+        if (res.data.isSuccess) { toast.success('Created'); closeForm(); fetchSlides(); }
       }
     } catch { toast.error('Failed to save'); }
     finally { setIsSaving(false); }
@@ -263,16 +308,19 @@ const AdminHeroSlides = () => {
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowForm(false)} />
-          <div className={`relative rounded-2xl w-full max-w-lg shadow-2xl border ${t.modal}`}>
-            <div className={`flex items-center justify-between px-6 py-4 border-b ${t.border}`}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={handleBackdropClick} />
+          <div className={`relative flex flex-col w-full max-w-lg max-h-[90vh] rounded-2xl shadow-2xl border overflow-hidden ${t.modal}`}>
+            {/* Fixed header */}
+            <div className={`flex items-center justify-between px-6 py-4 border-b shrink-0 ${t.border}`}>
               <h3 className="font-bold">{editing ? 'Edit Hero Slide' : 'New Hero Slide'}</h3>
-              <button onClick={() => setShowForm(false)} className={`p-1.5 rounded-lg transition-colors ${t.btnGhost}`}>
+              <button onClick={closeForm} className={`p-1.5 rounded-lg transition-colors ${t.btnGhost}`}>
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="px-6 py-5 space-y-4">
+
+            {/* Scrollable body */}
+            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
               <div>
                 <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Media Type</label>
                 <div className="grid grid-cols-2 gap-2">
@@ -281,7 +329,7 @@ const AdminHeroSlides = () => {
                       key={type}
                       type="button"
                       onClick={() => setForm(f => ({ ...f, mediaType: type, url: '' }))}
-                      className={`flex items-center justify-center gap-2 px-4 py-3 border rounded-xl text-sm font-bold uppercase tracking-widest transition-all ${
+                      className={`flex items-center justify-center gap-2 px-4 py-2.5 border rounded-xl text-sm font-bold uppercase tracking-widest transition-all ${
                         form.mediaType === type
                           ? 'bg-fuchsia-600 text-white border-fuchsia-600'
                           : `${t.modalInput} hover:border-fuchsia-400`
@@ -299,9 +347,21 @@ const AdminHeroSlides = () => {
                   {form.mediaType === 'Image' ? 'Photo' : 'Video Clip'} — rotates every 15s
                 </label>
                 {form.mediaType === 'Image' ? (
-                  <ImageUpload label="" value={form.url || null} onChange={url => setForm(f => ({ ...f, url: url ?? '' }))} />
+                  <ImageUpload
+                    label=""
+                    compact
+                    value={form.url || null}
+                    onChange={url => setForm(f => ({ ...f, url: url ?? '' }))}
+                    onUploadingChange={setIsUploading}
+                  />
                 ) : (
-                  <VideoUpload label="" value={form.url || null} onChange={url => setForm(f => ({ ...f, url: url ?? '' }))} />
+                  <VideoUpload
+                    label=""
+                    compact
+                    value={form.url || null}
+                    onChange={url => setForm(f => ({ ...f, url: url ?? '' }))}
+                    onUploadingChange={setIsUploading}
+                  />
                 )}
               </div>
 
@@ -341,12 +401,17 @@ const AdminHeroSlides = () => {
                 <span className={`text-sm ${t.subtext}`}>Show on homepage</span>
               </label>
             </div>
-            <div className={`px-6 py-4 border-t ${t.border} flex gap-3 justify-end`}>
-              <button onClick={() => setShowForm(false)} className={`px-4 py-2 rounded-lg text-sm transition-colors ${t.btnGhost}`}>Cancel</button>
-              <button onClick={handleSave} disabled={isSaving}
-                className="px-5 py-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500 disabled:opacity-50 text-sm font-bold transition-colors text-white flex items-center gap-2">
-                {isSaving && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
-                {editing ? 'Update' : 'Create'}
+
+            {/* Fixed footer */}
+            <div className={`px-6 py-4 border-t shrink-0 flex gap-3 justify-end ${t.border}`}>
+              <button onClick={closeForm} disabled={isBusy}
+                className={`px-4 py-2 rounded-lg text-sm transition-colors disabled:opacity-50 ${t.btnGhost}`}>
+                Cancel
+              </button>
+              <button onClick={handleSave} disabled={isBusy || !form.url}
+                className="px-5 py-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-bold transition-colors text-white flex items-center gap-2">
+                {isBusy && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                {isUploading ? 'Uploading…' : isSaving ? 'Saving…' : editing ? 'Update' : 'Create'}
               </button>
             </div>
           </div>

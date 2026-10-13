@@ -170,7 +170,7 @@ const App: React.FC = () => {
 
             {/* PUBLIC ROUTES */}
             <Route path="/"
-              element={<PublicLayout><Home /></PublicLayout>} />
+              element={<PublicLayout fullBleed><Home /></PublicLayout>} />
 
             <Route path="/about"
               element={<PublicLayout><About /></PublicLayout>} />
