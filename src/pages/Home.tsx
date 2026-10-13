@@ -8,6 +8,8 @@ import { sermonApi } from '../api/sermonApi';
 import { eventApi } from '../api/eventApi';
 import { bookApi } from '../api/bookApi';
 import { blogApi } from '../api/blogApi';
+import { heroApi } from '../api/heroApi';
+import HeroCarousel from '../components/HeroCarousel';
 import dddPreaching from '../assets/ddd-preaching.jpeg';
 import daddandmumm from '../assets/dadandmum.jpg';
 import auditorium from '../assets/auditorium.jpg';
@@ -198,11 +200,11 @@ const Home: React.FC = () => {
     queryFn: () => sermonApi.getAll({ pageSize: 3, isFeatured: true }).then(res => res.data.data?.items ?? []),
   });
   const { data: upcomingEventsData } = useQuery({
-    queryKey: ['upcomingEvents'],
+    queryKey: ['homeUpcomingEvents'],
     queryFn: () => eventApi.getUpcoming({ pageSize: 3 }).then(res => res.data.data?.items ?? []),
   });
   const { data: ongoingEventsData } = useQuery({
-    queryKey: ['ongoingEvents'],
+    queryKey: ['homeOngoingEvents'],
     queryFn: () => eventApi.getOngoing({ pageSize: 3 }).then(res => res.data.data?.items ?? []),
   });
   const { data: latestAnnouncementsData } = useQuery({
@@ -217,12 +219,18 @@ const Home: React.FC = () => {
     queryKey: ['homeBlogPosts'],
     queryFn: () => blogApi.getPublishedPosts({ pageSize: 3, pageNumber: 1, sortBy: 'createdOn', isDescending: true }).then(res => res.data.data?.items ?? []),
   });
+  const { data: heroSlidesData } = useQuery({
+    queryKey: ['homeHeroSlides'],
+    queryFn: () => heroApi.getActiveSlides().then(res => res.data.data ?? []),
+    staleTime: 10 * 60 * 1000,
+  });
 
   const latestSermons = latestSermonsData ?? [];
   const upcomingEvents = upcomingEventsData ?? [];
   const latestAnnouncements = latestAnnouncementsData ?? [];
   const featuredBooks = featuredBooksData ?? [];
   const latestBlogPosts = latestBlogPostsData ?? [];
+  const heroSlides = heroSlidesData ?? [];
   const [showTestimonyModal, setShowTestimonyModal] = useState(false);
 
   // ── Sign-up bar state ─────────────────────────────────────────────────────
@@ -300,23 +308,27 @@ const Home: React.FC = () => {
 
       {/* ── HERO ────────────────────────────────────────────────────── */}
       <section className="relative min-h-[100dvh] h-[100dvh] flex items-start md:items-center justify-center overflow-hidden bg-black max-w-full" style={{ isolation: 'isolate' }}>
-        <video
-          autoPlay muted loop playsInline
-          poster={auditorium}
-          className="absolute object-cover object-center opacity-60"
-          style={{
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            minWidth: '100%',
-            minHeight: '100%',
-            width: 'auto',
-            height: 'auto',
-          }}
-        >
-          <source src="/assets/home-bg.mp4" type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70 z-0" />
+        {heroSlides.length > 0 ? (
+          <HeroCarousel slides={heroSlides} />
+        ) : (
+          <video
+            autoPlay muted loop playsInline
+            poster={auditorium}
+            className="absolute object-cover object-center opacity-60"
+            style={{
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              minWidth: '100%',
+              minHeight: '100%',
+              width: 'auto',
+              height: 'auto',
+            }}
+          >
+            <source src="/assets/home-bg.mp4" type="video/mp4" />
+          </video>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70 z-10" />
 
         <ParticleCanvas />
 

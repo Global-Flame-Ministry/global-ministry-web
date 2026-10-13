@@ -7,6 +7,7 @@ import AdminRoute from './components/guards/AdminRoute';
 import AdminLayout from './components/AdminLayout';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import TopProgressBar from './components/TopProgressBar';
 import BookStore from './pages/BookStore';
 import ConfirmEmailChange from './pages/auth/ConfirmEmailChange';
 
@@ -48,6 +49,7 @@ import UserDashboard from './pages/UserDashboard';
 import Admin               from './pages/Admin/Admin';
 import AdminContacts       from './pages/Admin/AdminContacts';
 import AdminAnnouncements  from './pages/Admin/AdminAnnouncements';
+import AdminHeroSlides     from './pages/Admin/AdminHeroSlides';
 import AdminEvents         from './pages/Admin/AdminEvents';
 import AdminSermons        from './pages/Admin/AdminSermons';
 import AdminPrayerRequests from './pages/Admin/AdminPrayerRequests';
@@ -134,6 +136,7 @@ const App: React.FC = () => {
     <Router>
       <AuthProvider>
         <ScrollToTop />
+        <TopProgressBar />
 
         <Toaster
           position="top-right"
@@ -268,6 +271,8 @@ const App: React.FC = () => {
                 element={<AdminLayout><AdminCounselling /></AdminLayout>} />
               <Route path="blog"
                 element={<AdminLayout><AdminBlog /></AdminLayout>} />
+              <Route path="hero-slides"
+                element={<AdminLayout><AdminHeroSlides /></AdminLayout>} />
             </Route>
 
             {/* 404 */}

@@ -14,6 +14,7 @@ import type {
 import toast from 'react-hot-toast';
 import { useAdminTheme } from '../../context/AdminThemeContext';
 import ImageUpload from '../../components/ImageUpload';
+import VideoUpload from '../../components/VideoUpload';
 
 const BLOCK_TYPES = ['Heading', 'Paragraph', 'Image', 'Quote'] as const;
 type BlockType = (typeof BLOCK_TYPES)[number];
@@ -422,13 +423,11 @@ const AdminBlog: React.FC = () => {
                     value={form.coverImageUrl ?? null}
                     onChange={(url) => setForm(prev => ({ ...prev, coverImageUrl: url ?? undefined }))}
                   />
-                  <label className="space-y-2 text-sm text-slate-700 block">
-                    Video URL (optional)
-                    <input value={form.videoUrl ?? ''}
-                      onChange={e => setForm(prev => ({ ...prev, videoUrl: e.target.value || undefined }))}
-                      className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${style.input}`}
-                      placeholder="Paste video URL (optional)" />
-                  </label>
+                  <VideoUpload
+                    label="Header Video (optional)"
+                    value={form.videoUrl ?? null}
+                    onChange={(url) => setForm(prev => ({ ...prev, videoUrl: url ?? undefined }))}
+                  />
                 </div>
               </div>
 

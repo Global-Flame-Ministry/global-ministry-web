@@ -4,7 +4,7 @@ import {
   Activity, LayoutDashboard, Users, MessageSquare,
   Megaphone, Calendar, HandHeart, Star, LogOut, Menu, X,
   Sun, Moon, BookOpen, Heart, Library, Mail,
-  ChevronLeft, ChevronRight, HeartHandshake
+  ChevronLeft, ChevronRight, HeartHandshake, LayoutGrid
 } from 'lucide-react';
 import { useAuth } from '../context/useAuthContext';
 import { Building2 } from 'lucide-react';
@@ -22,6 +22,7 @@ const NAV_ITEMS = [
   { icon: <Star size={18} />,            label: 'Testimonies',       route: '/admin/testimonies' },
   { icon: <Heart size={18} />,           label: 'Donations',         route: '/admin/donations' },
   { icon: <Library size={18} />,         label: 'Books',             route: '/admin/books' },
+  { icon: <LayoutGrid size={18} />,      label: 'Hero Slides',        route: '/admin/hero-slides' },
   { icon: <Mail size={18} />,            label: 'Bulk Email',        route: '/admin/bulk-email' },
   { icon: <BookOpen size={18} />,        label: 'Blog',              route: '/admin/blog' },
   { icon: <Building2 size={18} />,       label: 'Ministries',        route: '/admin/ministries' },

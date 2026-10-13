@@ -63,7 +63,42 @@ export interface PagedResult<T> {
 export interface MediaUploadResult {
   url: string;
   publicId: string;
+  resourceType?: string;
+  format?: string;
+  duration?: number | null;
+  bytes?: number | null;
+  width?: number | null;
+  height?: number | null;
+  pageCount?: number | null;
 }
+
+// HERO SLIDES
+export type HeroSlideMediaType = 'Image' | 'Video';
+
+export interface HeroSlide {
+  id: number;
+  mediaType: HeroSlideMediaType;
+  url: string;
+  title?: string | null;
+  subtitle?: string | null;
+  targetUrl?: string | null;
+  displayOrder: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt?: string | null;
+}
+
+export interface CreateHeroSlideDto {
+  mediaType: HeroSlideMediaType;
+  url: string;
+  title?: string;
+  subtitle?: string;
+  targetUrl?: string;
+  displayOrder: number;
+  isActive: boolean;
+}
+
+export interface UpdateHeroSlideDto extends CreateHeroSlideDto {}
 
 // AUTH 
 export interface LoginResponseDto {

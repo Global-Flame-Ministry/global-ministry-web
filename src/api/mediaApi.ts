@@ -4,6 +4,13 @@ import type { ApiResponse } from '../types';
 export interface MediaUploadResult {
   url: string;
   publicId: string;
+  resourceType?: string;
+  format?: string;
+  duration?: number | null;
+  bytes?: number | null;
+  width?: number | null;
+  height?: number | null;
+  pageCount?: number | null;
 }
 
 export const mediaApi = {
