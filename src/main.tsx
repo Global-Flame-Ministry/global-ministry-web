@@ -1,21 +1,10 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { HelmetProvider } from 'react-helmet-async'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClient } from './queryClient'
 import './index.css'
 import App from './App.tsx'
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5,
-      gcTime: 1000 * 60 * 10,
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      retry: 1,
-    },
-  },
-});
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

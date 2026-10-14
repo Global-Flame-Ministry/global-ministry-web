@@ -1,13 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, matchPath } from 'react-router-dom';
 import { Facebook, Instagram, Youtube, ArrowUp } from 'lucide-react';
 import { ministryApi } from '../api/ministryApi';
+import { routeQueryMap } from '../utils/routeQueryMap';
+import { usePrefetchNavigate } from '../hooks/usePrefetchNavigate';
 import logo from '../assets/Logoo.png';
 import type { MinistryResponseDto } from '../types';
 
 const Footer: React.FC = () => {
   const year = new Date().getFullYear();
   const [ministries, setMinistries] = useState<MinistryResponseDto[]>([]);
+  const { navigateWithPrefetch } = usePrefetchNavigate();
+
+  const handlePrefetchNav = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
+    const inMap = routeQueryMap.some(entry => matchPath(entry.pattern, path) !== null);
+    if (!inMap) return;
+    e.preventDefault();
+    navigateWithPrefetch(path);
+  };
 
   useEffect(() => {
     ministryApi.getAll({ pageSize: 20 })
@@ -66,9 +77,9 @@ const Footer: React.FC = () => {
             <div>
               <h4 className="font-bold mb-6 text-[#ffd6fa] uppercase tracking-widest text-sm">Departments</h4>
               <ul className="space-y-4 text-white/60">
-                {ministries.map(m => (
+                  {ministries.map(m => (
                   <li key={m.id}>
-                    <Link to={`/ministries/${m.slug}`} className="hover:text-white cursor-pointer transition-colors">
+                    <Link to={`/ministries/${m.slug}`} onClick={(e) => handlePrefetchNav(e, `/ministries/${m.slug}`)} className="hover:text-white cursor-pointer transition-colors">
                       {m.name}
                     </Link>
                   </li>
@@ -101,7 +112,7 @@ const Footer: React.FC = () => {
               <ul className="space-y-4 text-white/60">
                 {quickLinks.map(link => (
                   <li key={link.label}>
-                    <Link to={link.path} className="hover:text-white cursor-pointer transition-colors">
+                    <Link to={link.path} onClick={(e) => handlePrefetchNav(e, link.path)} className="hover:text-white cursor-pointer transition-colors">
                       {link.label}
                     </Link>
                   </li>
@@ -115,7 +126,7 @@ const Footer: React.FC = () => {
               <ul className="space-y-4 text-white/60">
                 {supportLinks.map(link => (
                   <li key={link.label}>
-                    <Link to={link.path} className="hover:text-white cursor-pointer transition-colors">
+                    <Link to={link.path} onClick={(e) => handlePrefetchNav(e, link.path)} className="hover:text-white cursor-pointer transition-colors">
                       {link.label}
                     </Link>
                   </li>

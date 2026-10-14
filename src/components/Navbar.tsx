@@ -1,20 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link, NavLink, useNavigate, useLocation, matchPath } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { routeQueryMap } from '../utils/routeQueryMap';
+import { usePrefetchNavigate } from '../hooks/usePrefetchNavigate';
 import {
   Menu, X, Heart, ChevronDown, ShieldCheck,
-  UserCircle, Play, Calendar, BookOpen, Bell,
+  UserCircle, Play, Calendar, BookOpen, Bell, Film,
   Users, MapPin, HandHeart, Globe,
   Flame, ArrowRight, Phone, MessageCircleHeart,
 } from 'lucide-react';
 import logo from '../assets/Logoo.png';
 import { ministryApi } from '../api/ministryApi';
 import { accountApi } from '../api/accountApi';
-import { sermonApi } from '../api/sermonApi';
-import { eventApi } from '../api/eventApi';
-import { announcementApi } from '../api/announcementApi';
-import { blogApi } from '../api/blogApi';
-import { bookApi } from '../api/bookApi';
 import { useAuth } from '../context/useAuthContext';
 
 // ─── STATIC NAV DATA ──────────────────────────────────────────────────────────
@@ -60,6 +57,7 @@ const UserAvatar = ({
 
 const EXPLORE_CHURCH_LIFE = [
   { label: 'Events',         path: '/events',         icon: <Calendar className="w-4 h-4" /> },
+  { label: 'Short Clips',    path: '/clips',          icon: <Film className="w-4 h-4" /> },
   { label: 'Contact',        path: '/contact',        icon: <Phone className="w-4 h-4" /> },
   { label: 'Prayer Request', path: '/prayer-request', icon: <HandHeart className="w-4 h-4" /> },
   { label: 'Counselling',    path: '/counselling',    icon: <MessageCircleHeart className="w-4 h-4" /> },
@@ -139,7 +137,17 @@ const Navbar: React.FC = () => {
   const { isAuthenticated, isAdmin, user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const queryClient = useQueryClient();
+  const { navigateWithPrefetch } = usePrefetchNavigate();
+
+  const isPrefetchRoute = (path: string) =>
+    routeQueryMap.some(entry => matchPath(entry.pattern, path) !== null);
+
+  const handlePrefetchNav = (e: React.MouseEvent, path: string) => {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
+    if (!isPrefetchRoute(path)) return;
+    e.preventDefault();
+    navigateWithPrefetch(path);
+  };
 
   const { data: navMinistries = [] } = useQuery({
     queryKey: ['navMinistries'],
@@ -187,28 +195,7 @@ const Navbar: React.FC = () => {
     }, 1200);
   };
 
-  const prefetchPage = (path: string) => {
-    switch (path) {
-      case '/sermons':
-        queryClient.prefetchQuery({ queryKey: ['publishedSermons'], queryFn: () => sermonApi.getAll({ pageSize: 10 }).then(r => r.data) });
-        break;
-      case '/events':
-        queryClient.prefetchQuery({ queryKey: ['upcomingEvents'], queryFn: () => eventApi.getUpcoming({ pageSize: 6 }).then(r => r.data) });
-        break;
-      case '/announcements':
-        queryClient.prefetchQuery({ queryKey: ['announcements', 1, '', ''], queryFn: () => announcementApi.getAll({ pageSize: 10 }).then(r => r.data) });
-        break;
-      case '/blog':
-        queryClient.prefetchQuery({ queryKey: ['publishedBlogPosts', 1, 10, '', ''], queryFn: () => blogApi.getPublishedPosts({ pageNumber: 1, pageSize: 10 }).then(r => r.data) });
-        break;
-      case '/ministries':
-        queryClient.prefetchQuery({ queryKey: ['ministries'], queryFn: () => ministryApi.getAll({ pageSize: 50 }).then(r => r.data) });
-        break;
-      case '/books':
-        queryClient.prefetchQuery({ queryKey: ['publishedBooks'], queryFn: () => bookApi.getPublished({ pageSize: 10 }).then(r => r.data) });
-        break;
-    }
-  };
+
 
   const handleMegaEnter = () => { clearTimeout(megaTimeoutRef.current); setMegaOpen(true); };
   const handleMegaLeave = () => {
@@ -224,7 +211,7 @@ const Navbar: React.FC = () => {
   ].includes(location.pathname);
 
   const isExploreActive = [
-    '/ministries', '/events', '/contact', '/youth', '/prayer-request', '/counselling'
+    '/ministries', '/events', '/contact', '/youth', '/prayer-request', '/counselling', '/clips'
   ].some(p => location.pathname.startsWith(p));
 
   // Mobile explore links — Youth Community is intentionally excluded here.
@@ -261,7 +248,7 @@ const Navbar: React.FC = () => {
 
               {/* LOGO */}
                 {/* LOGO */}
-                <Link to="/" className="flex items-center gap-3 shrink-0 group">
+                <Link to="/" onClick={(e) => handlePrefetchNav(e, '/')} className="flex items-center gap-3 shrink-0 group">
                   <div className={`${scrolled ? 'w-9 h-9' : 'w-11 h-11'} rounded-full border-2 border-[#a21caf] bg-black flex items-center justify-center transition-all duration-300 overflow-hidden`}>
                       <img
                         src={logo}
@@ -279,7 +266,7 @@ const Navbar: React.FC = () => {
               {/* DESKTOP NAV */}
               <div className="hidden lg:flex items-center gap-8">
 
-                <NavLink to="/" onMouseEnter={() => prefetchPage('/sermons')} className={({ isActive }) =>
+                <NavLink to="/" onClick={(e) => handlePrefetchNav(e, '/')} className={({ isActive }) =>
                   `font-semibold text-sm tracking-wide transition-colors
                   py-2 px-1 ${
                     isActive
@@ -341,7 +328,7 @@ const Navbar: React.FC = () => {
                     <div className="p-2">
                       {MEDIA_LINKS.map(item => (
                         <Link key={item.label} to={item.path}
-                          onMouseEnter={() => prefetchPage(item.path)}
+                          onClick={(e) => handlePrefetchNav(e, item.path)}
                           className="flex items-center gap-3 p-3 rounded-lg
                             hover:bg-[#f3e8ff] group transition-colors">
                           <span className="text-[#a21caf] group-hover:text-[#7c3aed] transition-colors">
@@ -362,7 +349,7 @@ const Navbar: React.FC = () => {
                   </div>
                 </Dropdown>
 
-                <NavLink to="/blog" onMouseEnter={() => prefetchPage('/blog')} className={({ isActive }) =>
+                <NavLink to="/blog" onClick={(e) => handlePrefetchNav(e, '/blog')} className={({ isActive }) =>
                   `font-semibold text-sm tracking-wide transition-colors py-2 px-1 ${
                     isActive ? 'text-[#a21caf] border-b-2 border-[#a21caf] pb-0.5' : 'text-[#111827] hover:text-[#a21caf]'
                   }`}>
@@ -394,6 +381,7 @@ const Navbar: React.FC = () => {
                       </Link>
                     )}
                     <Link to="/dashboard"
+                      onClick={(e) => handlePrefetchNav(e, '/dashboard')}
                       className="flex items-center gap-1.5 text-[10px]
                         font-black uppercase tracking-widest text-slate-600
                         hover:text-fuchsia-600 transition-colors">
@@ -461,7 +449,7 @@ const Navbar: React.FC = () => {
                     <ul className="space-y-1">
                       <li>
                         <Link to="/ministries"
-                          onMouseEnter={() => prefetchPage('/ministries')}
+                          onClick={(e) => handlePrefetchNav(e, '/ministries')}
                           className="group flex items-start gap-3 p-2.5
                             rounded-lg hover:bg-fuchsia-50 transition-colors">
                           <ArrowRight className="w-3 h-3 text-fuchsia-300
@@ -481,6 +469,7 @@ const Navbar: React.FC = () => {
                       {navMinistries.map(ministry => (
                         <li key={ministry.id}>
                           <Link to={`/ministries/${ministry.slug}`}
+                            onClick={(e) => handlePrefetchNav(e, `/ministries/${ministry.slug}`)}
                             className="group flex items-start gap-3 p-2.5
                               rounded-lg hover:bg-fuchsia-50 transition-colors">
                             <ArrowRight className="w-3 h-3 text-fuchsia-300
@@ -513,7 +502,7 @@ const Navbar: React.FC = () => {
                       {EXPLORE_CHURCH_LIFE.map(item => (
                         <li key={item.label}>
                           <Link to={item.path}
-                            onMouseEnter={() => prefetchPage(item.path)}
+                            onClick={(e) => handlePrefetchNav(e, item.path)}
                             className="group flex items-center gap-3 p-2.5
                               rounded-lg hover:bg-fuchsia-50 transition-colors">
                             <span className="text-fuchsia-300
@@ -543,7 +532,7 @@ const Navbar: React.FC = () => {
                         </span>
                       </p>
                       <Link to="/events"
-                        onMouseEnter={() => prefetchPage('/events')}
+                        onClick={(e) => handlePrefetchNav(e, '/events')}
                         className="inline-flex items-center gap-1.5 text-[10px]
                           font-black uppercase tracking-widest text-fuchsia-600
                           hover:text-fuchsia-800 transition-colors group">
@@ -727,7 +716,10 @@ const Navbar: React.FC = () => {
 
             <Link
               to="/"
-              onClick={() => setMobileOpen(false)}
+              onClick={(e) => {
+                setMobileOpen(false);
+                handlePrefetchNav(e, '/');
+              }}
               className="flex items-center justify-between w-full px-4 py-3 rounded-xl
                 bg-slate-50 hover:bg-slate-100 transition-colors group"
             >
@@ -741,7 +733,10 @@ const Navbar: React.FC = () => {
 
             <Link
               to="/blog"
-              onClick={() => setMobileOpen(false)}
+              onClick={(e) => {
+                setMobileOpen(false);
+                handlePrefetchNav(e, '/blog');
+              }}
               className="flex items-center justify-between w-full px-4 py-3 rounded-xl
                 bg-slate-50 hover:bg-[#f3e8ff] transition-colors group"
             >
@@ -806,8 +801,16 @@ const Navbar: React.FC = () => {
                               navigate('/login', { state: { from: link.path } });
                               return;
                             }
-                            setMobileOpen(false);
-                            setMobileSection(null);
+                            const isPrefetchable = routeQueryMap.some(entry => matchPath(entry.pattern, link.path) !== null);
+                            if (isPrefetchable && e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey) {
+                              e.preventDefault();
+                              setMobileOpen(false);
+                              setMobileSection(null);
+                              navigateWithPrefetch(link.path);
+                            } else {
+                              setMobileOpen(false);
+                              setMobileSection(null);
+                            }
                           }}
                           className="flex items-center gap-2 px-3 py-2.5
                             rounded-lg hover:bg-fuchsia-50 group transition-colors"
