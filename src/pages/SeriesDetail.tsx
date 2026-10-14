@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import SEO from '../components/SEO';
+import SmartImage from '../components/SmartImage';
 import { Play, Headphones, Film, ArrowLeft, Home, Clapperboard, User, Loader } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
 import type { SermonDto } from '../types';
@@ -122,7 +123,14 @@ const SeriesDetail: React.FC = () => {
                 className="group bg-white rounded-xl overflow-hidden shadow-[0_10px_30px_-10px_rgba(91,0,100,0.1),0_10px_30px_-10px_rgba(113,42,226,0.1)] transition-all duration-300 hover:scale-[1.02] flex flex-col cursor-pointer"
               >
                 <div className="relative aspect-video overflow-hidden">
-                  <img src={sermon.imageUrl || ''} alt={sermon.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" />
+                  <SmartImage
+                    src={sermon.imageUrl}
+                    alt={sermon.title}
+                    variant="frame"
+                    ratio={16 / 9}
+                    rounded=""
+                    className="h-full w-full"
+                  />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <div className="w-16 h-16 rounded-full bg-[#5b0064]/90 text-white flex items-center justify-center shadow-lg">
                       <Play className="w-7 h-7 fill-current ml-0.5" />

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import SEO from '../components/SEO';
 import { Search, Library, ChevronRight, Home, Clapperboard, User, ArrowLeft, Loader } from 'lucide-react';
+import SmartImage from '../components/SmartImage';
 import { sermonApi } from '../api/sermonApi';
 import type { SermonDto } from '../types';
 
@@ -182,13 +183,14 @@ const Sermons: React.FC = () => {
                   className="group relative flex flex-col bg-white rounded-xl overflow-hidden shadow-[0_10px_30px_-10px_rgba(91,0,100,0.15),0_4px_12px_-5px_rgba(113,42,226,0.1)] transition-all hover:-translate-y-2"
                 >
                   <div className="relative aspect-video overflow-hidden">
-                    {group.imageUrl ? (
-                      <img src={group.imageUrl} alt={group.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
-                    ) : (
-                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                        <Library className="w-12 h-12 text-gray-300" />
-                      </div>
-                    )}
+                    <SmartImage
+                      src={group.imageUrl}
+                      alt={group.name}
+                      variant="frame"
+                      ratio={16 / 9}
+                      rounded=""
+                      className="h-full w-full"
+                    />
                     <div className={`absolute top-4 left-4 ${badge.bg} ${badge.text} px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-[0.15em]`}>
                       {group.name}
                     </div>

@@ -9,16 +9,17 @@ import { eventApi } from '../api/eventApi';
 import { bookApi } from '../api/bookApi';
 import { blogApi } from '../api/blogApi';
 import { heroApi } from '../api/heroApi';
-import HeroCarousel, { HERO_ROTATION_MS } from '../components/HeroCarousel';
+import HeroCarousel, { HERO_ROTATION_MS, type HeroSlideView } from '../components/HeroCarousel';
 import FeaturedClips from '../components/home/FeaturedClips';
 import BlogCard from '../components/blog/BlogCard';
+import SmartImage from '../components/SmartImage';
+import { getReadTime } from '../utils/readTime';
 import dddPreaching from '../assets/ddd-preaching.jpeg';
 import daddandmumm from '../assets/dadandmum.jpg';
 import auditorium from '../assets/auditorium.jpg';
 import { useScrollAnimation } from '../context/hooks/useScrollAnimation';
 import { useAuth } from '../context/useAuthContext';
 import TestimonyModal from '../components/TestimonyModal';
-import type { HeroSlide } from '../types';
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
@@ -27,6 +28,52 @@ const getTransformClass = (direction: string) => {
   if (direction === 'right') return '-translate-x-12';
   if (direction === 'fade')  return '';
   return 'translate-y-10';
+};
+
+// Fallback hero content, used only when no slides are configured.
+const DEFAULT_HERO = {
+  label: 'Welcome Home',
+  title: 'Raising a People of Power.',
+  description:
+    'Who will manifest the Kingdom and the realities of the fullness of Christ through the Spirit',
+};
+
+// Hard cap on the number of hero slides. Events and admin image slides are
+// ordered first, so truncating from the end never drops them for blog posts.
+export const HERO_MAX_SLIDES = 6;
+
+// Strip any markup so blog excerpts render as plain text in the hero.
+const toPlainText = (value: string | null | undefined): string =>
+  (value ?? '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
+// "14 Oct 2026" (en-GB) for the blog hero meta line.
+const formatPublishedDate = (value: string): string => {
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+// "12 to 14 Nov 2026" (en-GB). Collapses gracefully for single-day or missing ranges.
+const formatEventDateRange = (start: string, end: string): string => {
+  const s = new Date(start);
+  if (isNaN(s.getTime())) return '';
+  const e = new Date(end);
+
+  const full = (d: Date) =>
+    d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  if (isNaN(e.getTime())) return full(s);
+
+  const sameDay =
+    s.getFullYear() === e.getFullYear() &&
+    s.getMonth() === e.getMonth() &&
+    s.getDate() === e.getDate();
+  if (sameDay) return full(s);
+
+  const sameMonth = s.getFullYear() === e.getFullYear() && s.getMonth() === e.getMonth();
+  if (sameMonth) return `${s.getDate()} to ${full(e)}`;
+
+  return `${full(s)} to ${full(e)}`;
 };
 
 interface AnimatedProps {
@@ -232,6 +279,11 @@ const Home: React.FC = () => {
     queryFn: () => eventApi.getAll({ isFeaturedOnHome: true, pageSize: 10 }).then(res => res.data.data?.items ?? []),
     staleTime: 5 * 60 * 1000,
   });
+  const { data: featuredBlogPostsData } = useQuery({
+    queryKey: ['homeFeaturedBlogPosts'],
+    queryFn: () => blogApi.getFeaturedPosts({ pageSize: 2 }).then(res => res.data.data?.items ?? []),
+    staleTime: 5 * 60 * 1000,
+  });
 
   const latestSermons = latestSermonsData ?? [];
   const upcomingEvents = upcomingEventsData ?? [];
@@ -239,34 +291,86 @@ const Home: React.FC = () => {
   const featuredBooks = featuredBooksData ?? [];
   const latestBlogPosts = latestBlogPostsData ?? [];
 
-  // Hero = image slides (by displayOrder) then featured upcoming events (by startDate).
+  // Hero = featured events (by startDate) FIRST, then image slides (by displayOrder).
   // Video slides are intentionally excluded from the hero.
   const imageSlides = (heroSlidesData ?? [])
     .filter(s => s.mediaType === 'Image')
     .sort((a, b) => a.displayOrder - b.displayOrder);
 
-  const featuredEventSlides: HeroSlide[] = (featuredEventsData ?? [])
-    .filter(e => !!e.imageUrl)
+  const eventSlides: HeroSlideView[] = (featuredEventsData ?? [])
+    .filter(e => !!e.imageUrl && !e.isCancelled)
     .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-    .map(e => ({
-      id: 1000000 + e.id,
-      mediaType: 'Image' as const,
-      url: e.imageUrl as string,
-      title: e.title,
-      subtitle: new Date(e.startDate).toLocaleString('en-US', {
-        weekday: 'short', month: 'short', day: 'numeric',
-        hour: 'numeric', minute: '2-digit'
-      }),
-      targetUrl: `/events/${e.slug}`,
-      displayOrder: 0,
-      isActive: true,
-      isFeatured: false,
-      featuredOrder: 0,
-      createdOn: e.createdOn,
-      updatedAt: null,
-    }));
+    .map(e => {
+      const openRegistration = e.acceptsRegistrations && (e.canRegister ?? true);
+      return {
+        id: `event-${e.id}`,
+        kind: 'event' as const,
+        imageUrl: e.imageUrl as string,
+        imageAlt: e.title,
+        label: 'Featured Event',
+        title: e.title,
+        theme: e.conferenceTheme,
+        scripture: e.anchorScripture,
+        scriptureReference: e.anchorScriptureReference,
+        dateText: formatEventDateRange(e.startDate, e.endDate),
+        location: e.location,
+        primaryCta: { text: 'View Details', href: `/events/${e.slug}` },
+        secondaryCta: openRegistration
+          ? { text: 'Register Now', href: `/events/${e.slug}#register` }
+          : undefined,
+      };
+    });
 
-  const heroSlides: HeroSlide[] = [...imageSlides, ...featuredEventSlides];
+  const imageSlideViews: HeroSlideView[] = imageSlides.map(s => {
+    const target = s.targetUrl?.trim();
+    const view: HeroSlideView = {
+      id: `slide-${s.id}`,
+      kind: 'slide',
+      imageUrl: s.url,
+      imageAlt: s.title ?? 'Global Flame Ministry',
+      // Admin-managed label wins; fall back to subtitle, then the default.
+      label: s.label?.trim() || s.subtitle || DEFAULT_HERO.label,
+      title: s.title || DEFAULT_HERO.title,
+      description: s.title ? null : DEFAULT_HERO.description,
+    };
+    // Only render a button when there is a real target — never a dead link.
+    if (target) {
+      view.primaryCta = { text: s.buttonText?.trim() || 'Learn more', href: target };
+    }
+    return view;
+  });
+
+  // Featured blog posts (newest featured first) become the last hero slides.
+  const blogSlides: HeroSlideView[] = (featuredBlogPostsData ?? [])
+    .filter(p => !!p.coverImageUrl)
+    .map(p => {
+      const excerpt = toPlainText(p.excerpt);
+      const readTime = getReadTime(p.blocks);
+      const published = formatPublishedDate(p.createdOn);
+      return {
+        id: `blog-${p.id}`,
+        kind: 'blog' as const,
+        imageUrl: p.coverImageUrl as string,
+        imageAlt: p.title,
+        // Department label wins; fall back to a generic blog label.
+        label: p.department?.trim() || 'From the Blog',
+        title: p.title,
+        description: excerpt || null,
+        meta: [readTime > 0 ? `${readTime} min read` : '', published]
+          .filter(Boolean)
+          .join(' · '),
+        primaryCta: { text: 'Read article', href: `/blog/${p.slug}` },
+        secondaryCta: { text: 'All posts', href: '/blog' },
+      };
+    });
+
+  // Order: events first, then image slides by displayOrder, then blog posts.
+  // Truncating from the end guarantees blog posts never bump events or slides.
+  const heroSlides: HeroSlideView[] = [
+    ...eventSlides,
+    ...imageSlideViews,
+    ...blogSlides,
+  ].slice(0, HERO_MAX_SLIDES);
   const [showTestimonyModal, setShowTestimonyModal] = useState(false);
 
   // ── Sign-up bar state ─────────────────────────────────────────────────────
@@ -345,56 +449,61 @@ const Home: React.FC = () => {
       {/* ── HERO ────────────────────────────────────────────────────── */}
       <section className="relative min-h-[100dvh] h-[100dvh] flex items-start md:items-center justify-center overflow-hidden bg-black max-w-full" style={{ isolation: 'isolate' }}>
         {heroSlides.length > 0 ? (
-          <HeroCarousel slides={heroSlides} intervalMs={HERO_ROTATION_MS} />
+          <>
+            <HeroCarousel slides={heroSlides} intervalMs={HERO_ROTATION_MS} />
+            <ParticleCanvas />
+          </>
         ) : (
-          <video
-            autoPlay muted loop playsInline
-            poster={auditorium}
-            className="absolute object-cover object-center opacity-60"
-            style={{
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              minWidth: '100%',
-              minHeight: '100%',
-              width: 'auto',
-              height: 'auto',
-            }}
-          >
-            <source src="/assets/home-bg.mp4" type="video/mp4" />
-          </video>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70 z-10 pointer-events-none" />
+          <>
+            <video
+              autoPlay muted loop playsInline
+              poster={auditorium}
+              className="absolute object-cover object-center opacity-60"
+              style={{
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                minWidth: '100%',
+                minHeight: '100%',
+                width: 'auto',
+                height: 'auto',
+              }}
+            >
+              <source src="/assets/home-bg.mp4" type="video/mp4" />
+            </video>
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70 z-10 pointer-events-none" />
 
-        <ParticleCanvas />
+            <ParticleCanvas />
 
-        <div className="relative z-20 w-full text-center px-6 max-w-5xl pt-24 md:pt-0">
-          <AnimatedDiv direction="up" delay={200}>
-            <span className="inline-block py-1 px-4 rounded-full bg-fuchsia-500/20 border border-fuchsia-400/30 text-fuchsia-300 text-[10px] font-black uppercase tracking-[0.4em] mb-8 backdrop-blur-md">
-              Welcome Home
-            </span>
-            <h1 className="text-5xl md:text-8xl font-serif text-white tracking-tight mb-8 leading-[0.95]">
-              Raising a People <br />
-              <span className="italic text-fuchsia-400 font-light">of Power.</span>
-            </h1>
-            <p className="text-white/70 text-lg md:text-xl font-light tracking-wide max-w-2xl mx-auto mb-10">
-              Who will <span className="text-fuchsia-400">manifest</span> <span className="text-fuchsia-400">the Kingdom</span> and the realities of the <span className="text-fuchsia-400">fullness</span> of Christ through the Spirit
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link to="/sermons" className="w-auto flex items-center justify-center px-8 py-3 border-2 text-sm font-bold rounded-full uppercase tracking-widest whitespace-nowrap transition-all bg-white text-slate-900 shadow-lg hover:shadow-xl hover:-translate-y-1">
-                Watch Latest Service
-              </Link>
-              <Link to="/contact" className="w-auto flex items-center justify-center px-8 py-3 border-2 text-sm font-bold rounded-full uppercase tracking-widest whitespace-nowrap transition-all border-white/30 text-white hover:bg-white/10 backdrop-blur-sm">
-                Contact Us
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Link>
+            <div className="relative z-20 w-full text-center px-6 max-w-5xl pt-24 md:pt-0">
+              <AnimatedDiv direction="up" delay={200}>
+                <span className="inline-block py-1 px-4 rounded-full bg-fuchsia-500/20 border border-fuchsia-400/30 text-fuchsia-300 text-[10px] font-black uppercase tracking-[0.4em] mb-8 backdrop-blur-md">
+                  {DEFAULT_HERO.label}
+                </span>
+                <h1 className="text-5xl md:text-8xl font-serif text-white tracking-tight mb-8 leading-[0.95]">
+                  Raising a People <br />
+                  <span className="italic text-fuchsia-400 font-light">of Power.</span>
+                </h1>
+                <p className="text-white/70 text-lg md:text-xl font-light tracking-wide max-w-2xl mx-auto mb-10">
+                  Who will <span className="text-fuchsia-400">manifest</span> <span className="text-fuchsia-400">the Kingdom</span> and the realities of the <span className="text-fuchsia-400">fullness</span> of Christ through the Spirit
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <Link to="/sermons" className="w-auto flex items-center justify-center px-8 py-3 border-2 text-sm font-bold rounded-full uppercase tracking-widest whitespace-nowrap transition-all bg-white text-slate-900 shadow-lg hover:shadow-xl hover:-translate-y-1">
+                    Watch Latest Service
+                  </Link>
+                  <Link to="/contact" className="w-auto flex items-center justify-center px-8 py-3 border-2 text-sm font-bold rounded-full uppercase tracking-widest whitespace-nowrap transition-all border-white/30 text-white hover:bg-white/10 backdrop-blur-sm">
+                    Contact Us
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Link>
+                </div>
+              </AnimatedDiv>
             </div>
-          </AnimatedDiv>
-        </div>
 
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 animate-bounce">
-          <ChevronDown className="text-white/40 w-6 h-6" />
-        </div>
+            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 animate-bounce">
+              <ChevronDown className="text-white/40 w-6 h-6" />
+            </div>
+          </>
+        )}
       </section>
 
       {/* ── SIGN-UP BAR (hidden once user is logged in) ──────────────── */}
@@ -557,18 +666,14 @@ const Home: React.FC = () => {
                   <AnimatedDiv key={sermon.id} delay={i * 120} direction="up">
                     <Link to={`/sermons/${sermon.slug || sermon.id}`} className="group block bg-white p-4 rounded-2xl shadow-sm hover:shadow-xl transition-all">
                       <div className="relative aspect-video overflow-hidden rounded-lg mb-3">
-                        {sermon.imageUrl ? (
-                          <img
-                            src={sermon.imageUrl}
-                            alt={sermon.title}
-                            loading="lazy"
-                            className="w-full h-full object-cover object-top transition-all duration-700 group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-slate-200 flex items-center justify-center">
-                            <Play className="w-10 h-10 text-slate-400" />
-                          </div>
-                        )}
+                        <SmartImage
+                          src={sermon.imageUrl}
+                          alt={sermon.title}
+                          variant="frame"
+                          ratio={16 / 9}
+                          rounded=""
+                          className="h-full w-full"
+                        />
                         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
                           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-fuchsia-600 shadow-lg">
                             <Play className="w-5 h-5 fill-current" />
@@ -867,11 +972,13 @@ const Home: React.FC = () => {
                     className="group block bg-white/5 rounded-2xl overflow-hidden hover:bg-white/10 transition-all duration-300"
                   >
                     <div className="aspect-[16/9] overflow-hidden">
-                      <img
+                      <SmartImage
                         src={imgUrl}
                         alt={event.title}
-                        loading="lazy"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        variant="frame"
+                        ratio={16 / 9}
+                        rounded=""
+                        className="h-full w-full"
                       />
                     </div>
                     <div className="p-6">

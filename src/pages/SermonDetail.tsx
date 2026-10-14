@@ -7,6 +7,7 @@ import {
   ArrowLeft, Home, Clapperboard, User,
 } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
+import SmartImage from '../components/SmartImage';
 
 const slugify = (s: string) => s.toLowerCase().replace(/\s+/g, '-');
 
@@ -143,11 +144,13 @@ const getEmbedUrl = (url: string): string => {
                 />
               ) : (
                 <>
-                  <img
-                    src={activeSermon.imageUrl || ''}
+                  <SmartImage
+                    src={activeSermon.imageUrl}
                     alt={activeSermon.title}
-                    loading="lazy"
-                    className="absolute top-0 left-0 w-full h-full object-cover opacity-80 hover:scale-105 transition-transform duration-700"
+                    variant="frame"
+                    ratio={16 / 9}
+                    rounded=""
+                    className="absolute inset-0 h-full w-full"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent opacity-60" />
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -271,11 +274,13 @@ const getEmbedUrl = (url: string): string => {
                 {/* Current Item */}
                 <div className="flex gap-4 p-3 rounded-xl bg-[#8b4bfc] text-[#fffbff] group border border-[#5b0064]/20">
                   <div className="relative w-28 aspect-video rounded-lg overflow-hidden shrink-0">
-                    <img
-                      src={activeSermon.imageUrl || ''}
+                    <SmartImage
+                      src={activeSermon.imageUrl}
                       alt={activeSermon.title}
-                      loading="lazy"
-                      className="w-full h-full object-cover"
+                      variant="frame"
+                      ratio={16 / 9}
+                      rounded=""
+                      className="h-full w-full"
                     />
                     <div className="absolute inset-0 bg-[#5b0064]/40 flex items-center justify-center">
                       <div className="w-5 h-5 bg-white/80 rounded-sm" style={{ clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
@@ -299,11 +304,13 @@ const getEmbedUrl = (url: string): string => {
                     className="flex gap-4 p-3 rounded-xl hover:bg-white/5 group transition-all cursor-pointer"
                   >
                     <div className="relative w-28 aspect-video rounded-lg overflow-hidden shrink-0">
-                      <img
-                        src={rel.imageUrl || ''}
+                      <SmartImage
+                        src={rel.imageUrl}
                         alt={rel.title}
-                        className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity"
-                        loading="lazy"
+                        variant="frame"
+                        ratio={16 / 9}
+                        rounded=""
+                        className="h-full w-full"
                       />
                     </div>
                     <div className="flex flex-col justify-center min-w-0">
