@@ -1,4 +1,7 @@
 @import "tailwindcss";
+:root {
+  --nav-h: 4.875rem;
+}
 @theme {
   --color-primary: #5b0064;
   --color-on-primary: #ffffff;

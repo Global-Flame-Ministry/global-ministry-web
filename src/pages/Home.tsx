@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import SEO from '../components/SEO';
 import { Link, useNavigate } from 'react-router-dom';
@@ -17,18 +17,11 @@ import { getReadTime } from '../utils/readTime';
 import dddPreaching from '../assets/ddd-preaching.jpeg';
 import daddandmumm from '../assets/dadandmum.jpg';
 import auditorium from '../assets/auditorium.jpg';
-import { useScrollAnimation } from '../context/hooks/useScrollAnimation';
+import Reveal from '../components/Reveal';
 import { useAuth } from '../context/useAuthContext';
 import TestimonyModal from '../components/TestimonyModal';
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
-
-const getTransformClass = (direction: string) => {
-  if (direction === 'left')  return 'translate-x-12';
-  if (direction === 'right') return '-translate-x-12';
-  if (direction === 'fade')  return '';
-  return 'translate-y-10';
-};
 
 // Fallback hero content, used only when no slides are configured.
 const DEFAULT_HERO = {
@@ -76,105 +69,6 @@ const formatEventDateRange = (start: string, end: string): string => {
   return `${full(s)} to ${full(e)}`;
 };
 
-interface AnimatedProps {
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-  direction?: 'up' | 'left' | 'right' | 'fade';
-}
-
-// ─── ANIMATED SECTION ────────────────────────────────────────────────────────
-
-const AnimatedSection: React.FC<AnimatedProps> = ({
-  children, className = '', delay = 0, direction = 'up'
-}) => {
-  const { ref, isVisible } = useScrollAnimation();
-  return (
-    <section
-      ref={ref as React.RefObject<HTMLElement>}
-      className={`transition-all duration-700 ease-out
-        ${isVisible
-          ? 'opacity-100 translate-y-0 translate-x-0'
-          : `opacity-0 ${getTransformClass(direction)}`}
-        ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
-      {children}
-    </section>
-  );
-};
-
-// ─── ANIMATED DIV ────────────────────────────────────────────────────────────
-
-const AnimatedDiv: React.FC<AnimatedProps> = ({
-  children, className = '', delay = 0, direction = 'up'
-}) => {
-  const { ref, isVisible } = useScrollAnimation();
-  return (
-    <div
-      ref={ref as React.RefObject<HTMLDivElement>}
-      className={`transition-all duration-700 ease-out
-        ${isVisible
-          ? 'opacity-100 translate-y-0 translate-x-0'
-          : `opacity-0 ${getTransformClass(direction)}`}
-        ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
-      {children}
-    </div>
-  );
-};
-
-// ─── PARTICLE CANVAS ────────────────────────────────────────────────────────
-
-const ParticleCanvas: React.FC = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const particles: { x: number; y: number; vx: number; vy: number; size: number }[] = [];
-    const resize = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-    };
-    window.addEventListener('resize', resize);
-    resize();
-
-    for (let i = 0; i < 50; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        size: Math.random() * 2,
-      });
-    }
-
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = 'rgba(217, 70, 239, 0.3)';
-      particles.forEach(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
-      });
-      requestAnimationFrame(animate);
-    };
-    animate();
-    return () => window.removeEventListener('resize', resize);
-  }, []);
-
-  return <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-10" style={{ width: '100%', height: '100%', overflow: 'hidden' }} />;
-};
-
 // ─── CORE BELIEFS TEASER DATA ─────────────────────────────────────────────────
 
 const featuredBeliefs = [
@@ -201,26 +95,13 @@ const featuredBeliefs = [
 interface BeliefCardProps {
   title: string;
   body: string;
-  delay: number;
-  direction: 'up' | 'left' | 'right';
 }
 
-const BeliefCard: React.FC<BeliefCardProps> = ({ title, body, delay, direction }) => {
-  const { ref, isVisible } = useScrollAnimation({ threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-
-  const getSlide = () => {
-    if (direction === 'left')  return isVisible ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0';
-    if (direction === 'right') return isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0';
-    return isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0';
-  };
-
+const BeliefCard: React.FC<BeliefCardProps> = ({ title, body }) => {
   return (
     <div
-      ref={ref as React.RefObject<HTMLDivElement>}
-      className={`transition-all duration-700 ease-out ${getSlide()}
-        p-6 border border-slate-100 rounded-2xl hover:border-fuchsia-200
-        hover:shadow-md bg-white group`}
-      style={{ transitionDelay: `${delay}ms` }}
+      className="p-6 border border-slate-100 rounded-2xl hover:border-fuchsia-200
+        hover:shadow-md bg-white group"
     >
       <div className="flex items-start gap-4">
         <div className="w-9 h-9 bg-fuchsia-50 rounded-xl flex items-center justify-center
@@ -430,17 +311,6 @@ const Home: React.FC = () => {
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@100..900&display=swap');
         .font-serif { font-family: 'Playfair Display', serif; }
         .font-sans  { font-family: 'Inter', sans-serif; }
-        @keyframes shimmer {
-          0%   { background-position: -200% 0; }
-          100% { background-position:  200% 0; }
-        }
-        .shimmer-text {
-          background: linear-gradient(90deg, #111827 0%, #a21caf 50%, #111827 100%);
-          background-size: 200% auto;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          animation: shimmer 4s infinite linear;
-        }
       `}</style>
 
       <SEO
@@ -450,14 +320,17 @@ const Home: React.FC = () => {
       />
 
       {/* ── HERO ────────────────────────────────────────────────────── */}
-      <section className="relative min-h-[100dvh] h-[100dvh] flex items-start md:items-center justify-center overflow-hidden bg-black max-w-full" style={{ isolation: 'isolate' }}>
+      <section className="relative overflow-hidden bg-black max-w-full" style={{ isolation: 'isolate' }}>
         {heroSlides.length > 0 ? (
-          <>
-            <HeroCarousel slides={heroSlides} intervalMs={HERO_ROTATION_MS} />
-            <ParticleCanvas />
-          </>
+          <HeroCarousel slides={heroSlides} intervalMs={HERO_ROTATION_MS} />
         ) : (
-          <>
+          <div
+            className="relative flex min-h-[100svh] w-full items-center justify-center overflow-hidden"
+            style={{
+              paddingTop: 'calc(var(--nav-h) + clamp(1.5rem, 5vh, 3.5rem))',
+              paddingBottom: '5rem',
+            }}
+          >
             <video
               autoPlay muted loop playsInline
               poster={auditorium}
@@ -476,36 +349,32 @@ const Home: React.FC = () => {
             </video>
             <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70 z-10 pointer-events-none" />
 
-            <ParticleCanvas />
+            <Reveal className="relative z-20 w-full max-w-5xl px-6 text-center">
+              <span className="inline-block py-1 px-4 rounded-full bg-fuchsia-500/20 border border-fuchsia-400/30 text-fuchsia-300 text-[10px] font-black uppercase tracking-[0.4em] mb-8 backdrop-blur-md">
+                {DEFAULT_HERO.label}
+              </span>
+              <h1 className="text-5xl md:text-8xl font-serif text-white tracking-tight mb-8 leading-[0.95]">
+                Raising a People <br />
+                <span className="italic text-fuchsia-400 font-light">of Power.</span>
+              </h1>
+              <p className="text-white/70 text-lg md:text-xl font-light tracking-wide max-w-2xl mx-auto mb-10">
+                Who will <span className="text-fuchsia-400">manifest</span> <span className="text-fuchsia-400">the Kingdom</span> and the realities of the <span className="text-fuchsia-400">fullness</span> of Christ through the Spirit
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link to="/sermons" className="w-auto flex items-center justify-center px-8 py-3 border-2 text-sm font-bold rounded-full uppercase tracking-widest whitespace-nowrap transition-all bg-white text-slate-900 shadow-lg hover:shadow-xl hover:-translate-y-1">
+                  Watch Latest Service
+                </Link>
+                <Link to="/contact" className="w-auto flex items-center justify-center px-8 py-3 border-2 text-sm font-bold rounded-full uppercase tracking-widest whitespace-nowrap transition-all border-white/30 text-white hover:bg-white/10 backdrop-blur-sm">
+                  Contact Us
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Link>
+              </div>
+            </Reveal>
 
-            <div className="relative z-20 w-full text-center px-6 max-w-5xl pt-24 md:pt-0">
-              <AnimatedDiv direction="up" delay={200}>
-                <span className="inline-block py-1 px-4 rounded-full bg-fuchsia-500/20 border border-fuchsia-400/30 text-fuchsia-300 text-[10px] font-black uppercase tracking-[0.4em] mb-8 backdrop-blur-md">
-                  {DEFAULT_HERO.label}
-                </span>
-                <h1 className="text-5xl md:text-8xl font-serif text-white tracking-tight mb-8 leading-[0.95]">
-                  Raising a People <br />
-                  <span className="italic text-fuchsia-400 font-light">of Power.</span>
-                </h1>
-                <p className="text-white/70 text-lg md:text-xl font-light tracking-wide max-w-2xl mx-auto mb-10">
-                  Who will <span className="text-fuchsia-400">manifest</span> <span className="text-fuchsia-400">the Kingdom</span> and the realities of the <span className="text-fuchsia-400">fullness</span> of Christ through the Spirit
-                </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <Link to="/sermons" className="w-auto flex items-center justify-center px-8 py-3 border-2 text-sm font-bold rounded-full uppercase tracking-widest whitespace-nowrap transition-all bg-white text-slate-900 shadow-lg hover:shadow-xl hover:-translate-y-1">
-                    Watch Latest Service
-                  </Link>
-                  <Link to="/contact" className="w-auto flex items-center justify-center px-8 py-3 border-2 text-sm font-bold rounded-full uppercase tracking-widest whitespace-nowrap transition-all border-white/30 text-white hover:bg-white/10 backdrop-blur-sm">
-                    Contact Us
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Link>
-                </div>
-              </AnimatedDiv>
-            </div>
-
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 animate-bounce">
+            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20">
               <ChevronDown className="text-white/40 w-6 h-6" />
             </div>
-          </>
+          </div>
         )}
       </section>
 
@@ -597,7 +466,7 @@ const Home: React.FC = () => {
       </div>
 
       {/* ── DIVINE PRESENCE ──────────────────────────────────────────── */}
-      <AnimatedSection direction="fade" className="relative h-[80vh] flex items-center overflow-hidden bg-slate-900">
+      <Reveal className="relative h-[80vh] flex items-center overflow-hidden bg-slate-900">
         <div className="absolute inset-0 z-0">
           <video autoPlay muted loop playsInline poster={dddPreaching}
             className="w-full h-full object-cover opacity-50 scale-110">
@@ -606,44 +475,42 @@ const Home: React.FC = () => {
           <div className="absolute inset-0 bg-linear-to-r from-slate-900 via-slate-900/40 to-transparent" />
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 w-full">
-          <AnimatedDiv direction="left" delay={200}>
-            <div className="max-w-2xl">
-              <p className="text-[10px] font-black text-white uppercase tracking-[0.4em] mb-4 animate-bob">
-                Every Tuesday <span className="text-fuchsia-300">• 3:00 PM</span>
-              </p>
-              <h2 className="text-white text-4xl md:text-6xl font-serif mb-6 leading-snug">
-                Experience the <br />
-                <span className="italic text-brand-300">Divine Presence</span>
-              </h2>
-              <p className="text-slate-400 text-base mb-8 max-w-md leading-relaxed">
-                Join us every Tuesday for an atmosphere of worship that transcends the ordinary.
-              </p>
-              <div className="flex flex-wrap lg:flex-nowrap items-center gap-3">
-                <button
-                  onClick={() => {
-                    setNavigating(true);
-                    setTimeout(() => navigate('/plan-your-visit'), 800);
-                  }}
-                  className="px-8 py-4 sm:px-10 sm:py-5 bg-[#7C3AED] text-white font-black
-                    uppercase tracking-widest text-[11px] sm:text-[13px] hover:bg-[#6D28D9]
-                    hover:scale-105 rounded-full transition-all duration-200 shadow-2xl
-                    whitespace-nowrap active:scale-95 animate-bob-glow cursor-pointer"
-                >
-                  Plan Your Visit
-                </button>
-                <Link
-                  to="/events"
-                  className="px-8 py-4 sm:px-10 sm:py-5 bg-white/10 text-white font-black
-                    uppercase tracking-widest text-[11px] sm:text-[13px] hover:bg-white/20
-                    transition-all duration-200 backdrop-blur-md rounded-full border border-white/20"
-                >
-                  View All Events
-                </Link>
-              </div>
+          <div className="max-w-2xl">
+            <p className="text-[10px] font-black text-white uppercase tracking-[0.4em] mb-4">
+              Every Tuesday <span className="text-fuchsia-300">• 3:00 PM</span>
+            </p>
+            <h2 className="text-white text-4xl md:text-6xl font-serif mb-6 leading-snug">
+              Experience the <br />
+              <span className="italic text-brand-300">Divine Presence</span>
+            </h2>
+            <p className="text-slate-400 text-base mb-8 max-w-md leading-relaxed">
+              Join us every Tuesday for an atmosphere of worship that transcends the ordinary.
+            </p>
+            <div className="flex flex-wrap lg:flex-nowrap items-center gap-3">
+              <button
+                onClick={() => {
+                  setNavigating(true);
+                  setTimeout(() => navigate('/plan-your-visit'), 800);
+                }}
+                className="px-8 py-4 sm:px-10 sm:py-5 bg-[#7C3AED] text-white font-black
+                  uppercase tracking-widest text-[11px] sm:text-[13px] hover:bg-[#6D28D9]
+                  hover:scale-105 rounded-full transition-all duration-200 shadow-2xl
+                  whitespace-nowrap active:scale-95 cursor-pointer"
+              >
+                Plan Your Visit
+              </button>
+              <Link
+                to="/events"
+                className="px-8 py-4 sm:px-10 sm:py-5 bg-white/10 text-white font-black
+                  uppercase tracking-widest text-[11px] sm:text-[13px] hover:bg-white/20
+                  transition-all duration-200 backdrop-blur-md rounded-full border border-white/20"
+              >
+                View All Events
+              </Link>
             </div>
-          </AnimatedDiv>
+          </div>
         </div>
-      </AnimatedSection>
+      </Reveal>
 
       {/* ── SHORT CLIPS ──────────────────────────────────────────────── */}
       <FeaturedClips />
@@ -651,7 +518,7 @@ const Home: React.FC = () => {
       {/* ── SERMONS ──────────────────────────────────────────────────── */}
       <div className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AnimatedDiv className="flex flex-col md:flex-row justify-between items-end mb-16">
+          <Reveal className="flex flex-col md:flex-row justify-between items-end mb-16">
             <div className="max-w-xl">
               <p className="text-[10px] font-black text-brand-600 uppercase tracking-[0.4em] mb-3">
                 Latest Messages
@@ -660,13 +527,13 @@ const Home: React.FC = () => {
                 Spiritual Insight for a Modern World
               </h2>
             </div>
-          </AnimatedDiv>
+          </Reveal>
 
           {latestSermons.length > 0 ? (
             <>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                {latestSermons.map((sermon, i) => (
-                  <AnimatedDiv key={sermon.id} delay={i * 120} direction="up">
+                {latestSermons.map((sermon) => (
+                  <div key={sermon.id}>
                     <Link to={`/sermons/${sermon.slug || sermon.id}`} className="group block bg-white p-4 rounded-2xl shadow-sm hover:shadow-xl transition-all">
                       <div className="relative aspect-video overflow-hidden rounded-lg mb-3">
                         <SmartImage
@@ -695,7 +562,7 @@ const Home: React.FC = () => {
                         </p>
                       </div>
                     </Link>
-                  </AnimatedDiv>
+                  </div>
                 ))}
               </div>
               <div className="mt-12 flex justify-end">
@@ -709,10 +576,10 @@ const Home: React.FC = () => {
               </div>
             </>
           ) : (
-            <AnimatedDiv className="text-center py-16 border-2 border-dashed border-slate-200 rounded-xl" delay={200}>
+            <div className="text-center py-16 border-2 border-dashed border-slate-200 rounded-xl">
               <Play className="w-12 h-12 text-slate-300 mx-auto mb-4" />
               <p className="text-slate-500 text-lg font-serif italic">No sermons available yet.</p>
-            </AnimatedDiv>
+            </div>
           )}
 
         </div>
@@ -722,18 +589,14 @@ const Home: React.FC = () => {
       {featuredBooks.length > 0 && (
         <section className="py-24 md:py-32 bg-slate-50 overflow-hidden">
           <div className="max-w-[1280px] mx-auto px-6 md:px-12">
-            <AnimatedDiv className="text-center mb-16">
+            <Reveal className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-serif text-slate-900 mb-4">Apostolic Wisdom</h2>
               <p className="text-base md:text-lg text-slate-500 max-w-2xl mx-auto">Foundational texts for the modern believer seeking dominion and deep spiritual intelligence.</p>
-            </AnimatedDiv>
+            </Reveal>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8">
-              {featuredBooks.map((book, idx) => (
-                <div
-                  key={book.id}
-                  className="animate-fadeUp"
-                  style={{ animationDelay: `${idx * 60}ms`, animationFillMode: 'both' }}
-                >
+              {featuredBooks.map((book) => (
+                <div key={book.id}>
                   <Link to="/books" className="group block">
                     <div className="perspective-[1000px]">
                       <div className="transition-all duration-500 hover:scale-[1.02] cursor-pointer">
@@ -777,7 +640,7 @@ const Home: React.FC = () => {
       {latestAnnouncements.length > 0 && (
         <section className="py-24 bg-white border-t border-slate-200">
           <div className="max-w-7xl mx-auto px-6">
-            <AnimatedDiv className="flex flex-col md:flex-row justify-between items-end mb-12">
+            <Reveal className="flex flex-col md:flex-row justify-between items-end mb-12">
               <div>
                 <p className="text-[10px] font-black text-fuchsia-600 uppercase tracking-[0.4em] mb-3">
                   Ministry News
@@ -794,10 +657,10 @@ const Home: React.FC = () => {
               >
                 View All <ArrowRight className="w-3 h-3 ml-2" />
               </Link>
-            </AnimatedDiv>
+            </Reveal>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-              {latestAnnouncements.map((a, i) => (
-                <AnimatedDiv key={a.id} delay={i * 100} direction="up">
+              {latestAnnouncements.map((a) => (
+                <div key={a.id}>
                   <Link
                     to="/announcements"
                     className="group bg-white rounded-xl p-6 border border-slate-100
@@ -819,7 +682,7 @@ const Home: React.FC = () => {
                       })}
                     </span>
                   </Link>
-                </AnimatedDiv>
+                </div>
               ))}
             </div>
           </div>
@@ -827,56 +690,52 @@ const Home: React.FC = () => {
       )}
 
       {/* ── MISSION & VISION ─────────────────────────────────────────── */}
-      <AnimatedSection direction="fade" className="py-24 md:py-40 bg-slate-50 overflow-hidden">
+      <Reveal className="py-24 md:py-40 bg-slate-50 overflow-hidden">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <AnimatedDiv direction="up" delay={100}>
-            <div className="rounded-2xl overflow-hidden shadow-2xl mb-12">
-              <img
-                src={daddandmumm}
-                alt="Leadership"
-                loading="lazy"
-                className="w-full aspect-[4/3] object-cover"
-              />
-            </div>
-          </AnimatedDiv>
+          <div className="rounded-2xl overflow-hidden shadow-2xl mb-12">
+            <img
+              src={daddandmumm}
+              alt="Leadership"
+              loading="lazy"
+              className="w-full aspect-[4/3] object-cover"
+            />
+          </div>
 
-          <AnimatedDiv direction="up" delay={200}>
-            <div>
-              <p className="text-[#a21caf] font-black tracking-[0.4em] uppercase text-[10px] mb-5">
-                Our History
+          <div>
+            <p className="text-[#a21caf] font-black tracking-[0.4em] uppercase text-[10px] mb-5">
+              Our History
+            </p>
+            <h2 className="text-4xl md:text-5xl font-serif font-semibold text-slate-900 mb-8 leading-snug">
+              A Global Mandate for{' '}
+              <span className="italic">Transformation.</span>
+            </h2>
+            <blockquote className="border-l-4 border-[#a21caf] pl-6 py-1 mb-8">
+              <p className="font-serif italic text-xl text-slate-600 leading-relaxed">
+                "The strength of your victory is tied to the strength of your personal
+                altar. — Apostle Danjuma Musa."
               </p>
-              <h2 className="text-4xl md:text-5xl font-serif font-semibold text-slate-900 mb-8 leading-snug">
-                A Global Mandate for{' '}
-                <span className="italic">Transformation.</span>
-              </h2>
-              <blockquote className="border-l-4 border-[#a21caf] pl-6 py-1 mb-8">
-                <p className="font-serif italic text-xl text-slate-600 leading-relaxed">
-                  "The strength of your victory is tied to the strength of your personal
-                  altar. — Apostle Danjuma Musa."
-                </p>
-              </blockquote>
-              <p className="text-slate-500 text-base leading-relaxed mb-8">
-                Inspired by a commitment to spiritual growth and community, Global Flame
-                Ministry provides a sanctuary for those seeking purpose and igniting the
-                passion of Christ in the hearts of men and women worldwide.
-              </p>
-              <Link
-                to="/our-story"
-                className="px-8 py-3.5 border-2 border-slate-900 text-slate-900 font-black
-                  uppercase tracking-widest text-[11px] hover:bg-slate-900 hover:text-white
-                  transition-all inline-block rounded-full"
-              >
-                Explore Heritage
-              </Link>
-            </div>
-          </AnimatedDiv>
+            </blockquote>
+            <p className="text-slate-500 text-base leading-relaxed mb-8">
+              Inspired by a commitment to spiritual growth and community, Global Flame
+              Ministry provides a sanctuary for those seeking purpose and igniting the
+              passion of Christ in the hearts of men and women worldwide.
+            </p>
+            <Link
+              to="/our-story"
+              className="px-8 py-3.5 border-2 border-slate-900 text-slate-900 font-black
+                uppercase tracking-widest text-[11px] hover:bg-slate-900 hover:text-white
+                transition-all inline-block rounded-full"
+            >
+              Explore Heritage
+            </Link>
+          </div>
         </div>
-      </AnimatedSection>
+      </Reveal>
 
       {/* ── CORE BELIEFS ─────────────────────────────────────────────── */}
       <section className="py-20 md:py-32 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AnimatedDiv className="mb-14" direction="up">
+          <Reveal className="mb-14">
             <div className="flex flex-col md:flex-row justify-between items-end">
               <div className="max-w-xl">
                 <p className="text-[10px] font-black uppercase tracking-[0.4em] text-fuchsia-500 mb-4">
@@ -893,24 +752,19 @@ const Home: React.FC = () => {
                 </p>
               </div>
             </div>
-          </AnimatedDiv>
+          </Reveal>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
-            {featuredBeliefs.map((belief, i) => {
-              const directions: Array<'left' | 'right' | 'up'> = ['left', 'right', 'left', 'right'];
-              return (
-                <BeliefCard
-                  key={i}
-                  title={belief.title}
-                  body={belief.body}
-                  delay={i * 100}
-                  direction={directions[i]}
-                />
-              );
-            })}
+            {featuredBeliefs.map((belief, i) => (
+              <BeliefCard
+                key={i}
+                title={belief.title}
+                body={belief.body}
+              />
+            ))}
           </div>
 
-          <AnimatedDiv className="text-center" delay={400}>
+          <div className="text-center">
             <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r
               from-fuchsia-600 to-fuchsia-800 p-8 flex flex-col sm:flex-row
               items-center justify-between gap-6">
@@ -935,7 +789,7 @@ const Home: React.FC = () => {
                 Explore All Beliefs <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
-          </AnimatedDiv>
+          </div>
         </div>
       </section>
 
@@ -961,7 +815,7 @@ const Home: React.FC = () => {
         <section className="py-24 md:py-32 bg-[#09090b] text-white border-t border-gray-800">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="flex items-center gap-3 mb-16">
-              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+              <div className="w-3 h-3 bg-green-500 rounded-full" />
               <h2 className="text-4xl md:text-5xl font-serif text-white">Happening Now</h2>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
@@ -1032,12 +886,12 @@ const Home: React.FC = () => {
 
           {upcomingEvents.length > 0 ? (
             <div className="space-y-6">
-              {upcomingEvents.map((event, i) => {
+              {upcomingEvents.map((event) => {
                 const d = new Date(event.startDate);
                 const day = d.getDate();
                 const monthYear = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase();
                 return (
-                  <AnimatedDiv key={event.id} delay={i * 120} direction="up">
+                  <div key={event.id}>
                     <div
                       className="flex flex-col md:flex-row items-center p-8 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 group hover:border-[#5b0064]/50 transition-all"
                     >
@@ -1060,15 +914,15 @@ const Home: React.FC = () => {
                         </Link>
                       </div>
                     </div>
-                  </AnimatedDiv>
+                  </div>
                 );
               })}
             </div>
           ) : (
-            <AnimatedDiv className="text-center py-16 border border-slate-800 rounded-xl" delay={200}>
+            <div className="text-center py-16 border border-slate-800 rounded-xl">
               <Calendar className="w-8 h-8 text-slate-700 mx-auto mb-3" />
               <p className="text-slate-500 text-sm font-serif italic">No upcoming events. Check back soon.</p>
-            </AnimatedDiv>
+            </div>
           )}
         </div>
       </section>
@@ -1077,7 +931,7 @@ const Home: React.FC = () => {
       <section className="py-24 md:py-40 bg-white border-t border-slate-100">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
-            <AnimatedDiv direction="left">
+            <div>
               <p className="text-[10px] font-black text-fuchsia-600 uppercase tracking-[0.4em] mb-4">Contact Us</p>
               <h2 className="text-4xl md:text-5xl font-serif text-slate-900 mb-10 leading-tight">
                 We are here to <br /><span className="italic text-fuchsia-600">Connect.</span>
@@ -1111,8 +965,8 @@ const Home: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </AnimatedDiv>
-            <AnimatedDiv direction="right" delay={200} className="bg-slate-900 rounded-3xl p-10 md:p-14 text-white shadow-2xl">
+            </div>
+            <div className="bg-slate-900 rounded-3xl p-10 md:p-14 text-white shadow-2xl">
               <h3 className="text-3xl font-serif mb-6">Send a Message</h3>
               <p className="text-white/60 mb-8 font-light">Have a question or need prayer? Reach out to us directly.</p>
               <button onClick={() => navigate('/contact')} className="w-full py-5 bg-white text-slate-900 font-black
@@ -1120,7 +974,7 @@ const Home: React.FC = () => {
                 flex items-center justify-center gap-3">
                 Go to Contact Form <ArrowRight className="w-4 h-4" />
               </button>
-            </AnimatedDiv>
+            </div>
           </div>
         </div>
       </section>

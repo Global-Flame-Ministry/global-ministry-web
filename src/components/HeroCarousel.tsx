@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CalendarDays, MapPin, Clock, Pause, Play } from 'lucide-react';
 import EventTimingBadge from './EventTimingBadge';
@@ -47,8 +47,8 @@ interface HeroCarouselProps {
 
 export const HERO_ROTATION_MS = 8000;
 
-// Crossfade duration for both the image and its text overlay.
-const CROSSFADE_MS = 1000;
+// Simple opacity crossfade between slides (image and its text overlay).
+const CROSSFADE_MS = 600;
 
 // An image at least this wide relative to its height is treated as a landscape
 // photo and cover-fitted; anything narrower is a flyer and shown whole.
@@ -132,6 +132,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides, intervalMs = HERO_R
   const [focusedWithin, setFocusedWithin] = useState(false);
   const [paused, setPaused] = useState(false);
   const [ratios, setRatios] = useState<Record<string, number>>({});
+  const [firstShown, setFirstShown] = useState(false);
   const reduced = usePrefersReducedMotion();
   const finePointer = useFinePointer();
   const controlsRef = useRef<HTMLDivElement>(null);
@@ -168,46 +169,35 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides, intervalMs = HERO_R
     };
   }, [count, intervalMs, paused, hovered, focusedWithin]);
 
-  // Measure each image's natural aspect ratio so we can decide between a
-  // full-bleed landscape cover and an uncropped portrait flyer.
-  const urlsKey = useMemo(() => slides.map(s => s.imageUrl).join('|'), [slides]);
+  // Measure the active image's natural aspect ratio (and only that one) so we
+  // can decide between a full-bleed landscape cover and an uncropped portrait
+  // flyer. This avoids downloading every slide up front.
   useEffect(() => {
+    const slide = slides[safeIndex];
+    if (!slide || ratios[slide.imageUrl] !== undefined) return;
+
     let cancelled = false;
-    let pending = slides.length;
-    if (pending === 0) return;
-
-    const found: Record<string, number> = {};
-    const finish = () => {
-      pending -= 1;
-      if (pending === 0 && !cancelled) setRatios(prev => ({ ...prev, ...found }));
+    const img = new Image();
+    img.onload = () => {
+      if (!cancelled && img.naturalWidth && img.naturalHeight) {
+        setRatios(prev => ({ ...prev, [slide.imageUrl]: img.naturalWidth / img.naturalHeight }));
+      }
     };
-
-    slides.forEach(slide => {
-      const img = new Image();
-      img.onload = () => {
-        if (img.naturalWidth && img.naturalHeight) {
-          found[slide.imageUrl] = img.naturalWidth / img.naturalHeight;
-        }
-        finish();
-      };
-      img.onerror = finish;
-      img.src = slide.imageUrl;
-    });
-
+    img.src = slide.imageUrl;
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlsKey]);
+  }, [safeIndex, slides, ratios]);
 
-  // Preload the next image so transitions are seamless.
+  // Preload the next image only once the first slide has actually been shown.
   const nextIndex = count > 0 ? (safeIndex + 1) % count : 0;
   useEffect(() => {
+    if (!firstShown || count < 2) return;
     const next = slides[nextIndex];
     if (!next) return;
     const img = new Image();
     img.src = next.imageUrl;
-  }, [nextIndex, slides]);
+  }, [firstShown, nextIndex, slides, count]);
 
   const goTo = useCallback(
     (index: number) => setCurrent(((index % count) + count) % count),
@@ -244,7 +234,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides, intervalMs = HERO_R
     <div
       key={active.id}
       className={`hero-text-shadow pointer-events-none ${align}`}
-      style={{ animation: reduced ? undefined : `hero-content-in ${CROSSFADE_MS}ms ease-out both` }}
+      style={{ animation: reduced ? undefined : `hero-fade ${CROSSFADE_MS}ms ease-out both` }}
     >
       <div className={`flex ${rowAlign}`}>
         <span className="inline-block py-1 px-4 rounded-full bg-fuchsia-500/20 border border-fuchsia-400/40 text-fuchsia-200 text-[10px] font-black uppercase tracking-[0.35em] backdrop-blur-sm">
@@ -334,7 +324,11 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides, intervalMs = HERO_R
 
   return (
     <div
-      className="absolute inset-0 overflow-hidden"
+      className="relative flex min-h-[100svh] w-full items-center justify-center overflow-hidden"
+      style={{
+        paddingTop: 'calc(var(--nav-h) + clamp(1.5rem, 5vh, 3.5rem))',
+        paddingBottom: '5rem',
+      }}
       aria-roledescription="carousel"
       aria-label="Homepage highlights"
       onMouseEnter={finePointer ? () => setHovered(true) : undefined}
@@ -351,17 +345,29 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides, intervalMs = HERO_R
     >
       <style>{`
         .hero-text-shadow { text-shadow: 0 2px 18px rgba(0,0,0,0.7), 0 1px 3px rgba(0,0,0,0.6); }
-        @keyframes hero-text-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes hero-kenburns { from { transform: scale(1.04); } to { transform: scale(1.12); } }
+        @keyframes hero-fade { from { opacity: 0; } to { opacity: 1; } }
       `}</style>
 
-      {/* Background layers: a blurred, darkened copy of every image crossfades to
-          give portrait flyers a soft backdrop; landscape images also get a sharp
-          full-bleed cover on top. */}
+      {/* Static, cheap dark-purple backdrop behind portrait flyers. */}
+      <div
+        aria-hidden
+        className="absolute inset-0 z-0"
+        style={{ background: 'linear-gradient(150deg, #1c0b2e 0%, #2b0f45 45%, #0b0614 100%)' }}
+      />
+
+      {/* Landscape photos only: the active slide plus its immediate neighbours,
+          crossfaded with opacity. Portrait slides keep the gradient backdrop. */}
       {slides.map((slide, index) => {
         const isActive = index === safeIndex;
         const ratio = ratios[slide.imageUrl];
         const landscape = ratio !== undefined && ratio >= LANDSCAPE_RATIO;
+        const isNear =
+          index === safeIndex ||
+          (index - safeIndex + count) % count === 1 ||
+          (safeIndex - index + count) % count === 1;
+
+        if (!landscape || !isNear) return null;
+
         return (
           <div
             key={slide.id}
@@ -375,27 +381,13 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides, intervalMs = HERO_R
           >
             <img
               src={slide.imageUrl}
-              alt=""
-              aria-hidden
-              loading="lazy"
-              className="absolute inset-0 h-full w-full scale-110 object-cover opacity-70 blur-2xl"
+              alt={slide.imageAlt ?? slide.title}
+              loading={isActive ? 'eager' : 'lazy'}
+              decoding="async"
+              fetchPriority={isActive && index === 0 ? 'high' : undefined}
+              onLoad={isActive && index === 0 ? () => setFirstShown(true) : undefined}
+              className="absolute inset-0 h-full w-full object-cover object-center"
             />
-            <div aria-hidden className="absolute inset-0 bg-black/45" />
-            {landscape && (
-              <img
-                src={slide.imageUrl}
-                alt={slide.imageAlt ?? slide.title}
-                loading={isActive ? 'eager' : 'lazy'}
-                decoding="async"
-                className="absolute inset-0 h-full w-full object-cover object-center"
-                style={{
-                  animation:
-                    !reduced && isActive
-                      ? `hero-kenburns ${intervalMs}ms ease-out both`
-                      : undefined,
-                }}
-              />
-            )}
           </div>
         );
       })}
@@ -406,9 +398,10 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides, intervalMs = HERO_R
         className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-black/45 via-black/20 to-black/60"
       />
 
-      {/* Active slide content, centred. Portrait flyers sit in their own column
-          (left on desktop, on top on mobile) next to / above the text. */}
-      <div className="absolute inset-0 z-20 flex items-center justify-center px-5 py-24 sm:px-8">
+      {/* Active slide content, in flow so the hero grows with the content.
+          Portrait flyers sit in their own column (left on desktop, on top on
+          mobile) next to / above the text. */}
+      <div className="relative z-20 w-full px-5 sm:px-8">
         {isPortrait ? (
           <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-8 md:grid-cols-[auto_minmax(0,1fr)] md:gap-12">
             <div className="flex justify-center">
@@ -417,8 +410,10 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides, intervalMs = HERO_R
                 alt={active.imageAlt ?? active.title}
                 loading="eager"
                 decoding="async"
-                className="max-h-[42vh] w-auto max-w-full rounded-2xl border border-white/15 object-contain shadow-2xl md:max-h-[74vh]"
-                style={{ animation: reduced ? undefined : `hero-text-in ${CROSSFADE_MS}ms ease-out both` }}
+                fetchPriority={safeIndex === 0 ? 'high' : undefined}
+                onLoad={safeIndex === 0 ? () => setFirstShown(true) : undefined}
+                className="h-auto w-auto max-w-full rounded-2xl border border-white/15 object-contain shadow-2xl max-h-[calc(100svh_-_var(--nav-h)_-_10rem)]"
+                style={{ animation: reduced ? undefined : `hero-fade ${CROSSFADE_MS}ms ease-out both` }}
               />
             </div>
             <div>{content}</div>
@@ -432,7 +427,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides, intervalMs = HERO_R
       {count > 1 && (
         <div
           ref={controlsRef}
-          className="absolute bottom-5 right-5 sm:bottom-6 sm:right-8 z-30 flex items-center gap-3"
+          className="absolute inset-x-0 bottom-6 z-30 flex items-center justify-center gap-3 px-4"
         >
           <div className="flex items-center gap-2.5" aria-label="Hero slides">
             {slides.map((slide, index) => (
