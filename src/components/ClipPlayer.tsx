@@ -15,6 +15,25 @@ import { getClipPoster } from '../utils/clipPoster';
 // Registry of every mounted video so only one plays at a time across the app.
 const playingVideos = new Set<HTMLVideoElement>();
 
+interface WebkitVideoElement extends HTMLVideoElement {
+  webkitEnterFullscreen?: () => void;
+  webkitExitFullscreen?: () => void;
+}
+
+interface FullscreenElement extends HTMLElement {
+  webkitRequestFullscreen?: () => Promise<void> | void;
+}
+
+interface WebkitDocument extends Document {
+  webkitFullscreenElement?: Element | null;
+  webkitExitFullscreen?: () => Promise<void> | void;
+}
+
+interface OrientationLock {
+  lock?: (orientation: string) => Promise<void>;
+  unlock?: () => void;
+}
+
 interface ClipPlayerProps {
   src: string;
   title?: string | null;
@@ -33,11 +52,17 @@ const formatTime = (seconds: number): string => {
 /**
  * Reusable, accessible video player with custom controls.
  *
+ * - The `<video>` element is the single source of truth: `isPlaying`,
+ *   `isBuffering` and `isEnded` are derived from media events, never from
+ *   click handlers.
+ * - One click/tap on the video surface toggles playback; the centre overlay is
+ *   visual only, so a tap can never fire twice.
  * - Respects the source aspect ratio (metadata): landscape video widens the
  *   frame; portrait video is centred with dark, blurred sides.
  * - Derives the poster frame from the video itself (Cloudinary `so_0` or
  *   `#t=0.1`), never a cover image / flyer.
  * - Keyboard: Space/K play-pause, ←/→ seek ±5s, M mute, F fullscreen.
+ * - Fullscreen with pseudo-fullscreen fallback + optional landscape lock.
  * - Only one ClipPlayer anywhere on the page plays at a time.
  */
 const ClipPlayer: React.FC<ClipPlayerProps> = ({
@@ -55,35 +80,39 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
   const effectiveSrc = poster ? src : `${src}${src.includes('#') ? '' : '#t=0.1'}`;
 
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  const [playing, setPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [isEnded, setIsEnded] = useState(false);
   const [muted, setMuted] = useState(autoPlay);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [buffered, setBuffered] = useState(0);
   const [frameRatio, setFrameRatio] = useState(16 / 9);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [nativeFullscreen, setNativeFullscreen] = useState(false);
+  const [pseudoFullscreen, setPseudoFullscreen] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
+  const [message, setMessage] = useState<string | null>(null);
   const [trackedSrc, setTrackedSrc] = useState(effectiveSrc);
+
+  const isFullscreen = nativeFullscreen || pseudoFullscreen;
 
   // Reset transient state whenever the source changes (adjust during render so
   // there is no extra commit/paint cycle on the old clip).
   if (trackedSrc !== effectiveSrc) {
     setTrackedSrc(effectiveSrc);
     setStatus('loading');
-    setPlaying(false);
+    setIsPlaying(false);
+    setIsBuffering(false);
+    setIsEnded(false);
     setCurrent(0);
     setDuration(0);
+    setBuffered(0);
     setFrameRatio(16 / 9);
+    setControlsVisible(true);
+    setMessage(null);
   }
 
-  const revealControls = () => {
-    setControlsVisible(true);
-    if (playing) {
-      if (hideTimer.current) window.clearTimeout(hideTimer.current);
-      hideTimer.current = window.setTimeout(() => setControlsVisible(false), 2500);
-    }
-  };
-
-  // Register play/pause listeners, enforce one-at-a-time, stop on unmount.
+  // Attach media-event listeners. The <video> is the source of truth.
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -91,78 +120,143 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
     const onPlay = () => {
       for (const other of playingVideos) {
         if (other !== video) {
-          try {
-            other.pause();
-          } catch {
-            /* ignore */
-          }
+          try { other.pause(); } catch { /* ignore */ }
         }
       }
       playingVideos.add(video);
-      setPlaying(true);
+      setIsPlaying(true);
+      setIsEnded(false);
+      setIsBuffering(video.readyState < video.HAVE_FUTURE_DATA);
+      setControlsVisible(false);
     };
-    const onPause = () => {
-      playingVideos.delete(video);
-      setPlaying(false);
+    const onPlaying = () => { setIsPlaying(true); setIsBuffering(false); setIsEnded(false); };
+    const onPause = () => { playingVideos.delete(video); setIsPlaying(false); setControlsVisible(true); };
+    const onWaiting = () => setIsBuffering(true);
+    const onStalled = () => setIsBuffering(true);
+    const onSeeked = () => setIsBuffering(false);
+    const onCanPlay = () => { setIsBuffering(false); setStatus('ready'); };
+    const onEnded = () => { playingVideos.delete(video); setIsPlaying(false); setIsEnded(true); setIsBuffering(false); setControlsVisible(true); };
+    const onError = () => { setStatus('error'); setIsPlaying(false); setIsBuffering(false); };
+    const onTimeUpdate = () => setCurrent(video.currentTime);
+    const onDurationChange = () => setDuration(Number.isFinite(video.duration) ? video.duration : 0);
+    const onProgress = () => {
+      if (video.buffered.length > 0) setBuffered(video.buffered.end(video.buffered.length - 1));
+    };
+    const onVolumeChange = () => setMuted(video.muted);
+    const onLoadedMetadata = () => {
+      setDuration(Number.isFinite(video.duration) ? video.duration : 0);
+      const ratio = video.videoWidth > 0 && video.videoHeight > 0
+        ? video.videoWidth / video.videoHeight
+        : 16 / 9;
+      // Landscape widens the frame (clamped); portrait keeps 16:9 so the
+      // dark/blurred sides show around the centred video.
+      setFrameRatio(ratio >= 1 ? Math.min(Math.max(ratio, 16 / 9), 2.2) : 16 / 9);
+      setStatus('ready');
     };
 
     video.addEventListener('play', onPlay);
+    video.addEventListener('playing', onPlaying);
     video.addEventListener('pause', onPause);
-    video.addEventListener('playing', onPause);
+    video.addEventListener('waiting', onWaiting);
+    video.addEventListener('stalled', onStalled);
+    video.addEventListener('seeked', onSeeked);
+    video.addEventListener('canplay', onCanPlay);
+    video.addEventListener('ended', onEnded);
+    video.addEventListener('error', onError);
+    video.addEventListener('timeupdate', onTimeUpdate);
+    video.addEventListener('durationchange', onDurationChange);
+    video.addEventListener('progress', onProgress);
+    video.addEventListener('volumechange', onVolumeChange);
+    video.addEventListener('loadedmetadata', onLoadedMetadata);
 
     return () => {
       video.removeEventListener('play', onPlay);
+      video.removeEventListener('playing', onPlaying);
       video.removeEventListener('pause', onPause);
-      video.removeEventListener('playing', onPause);
+      video.removeEventListener('waiting', onWaiting);
+      video.removeEventListener('stalled', onStalled);
+      video.removeEventListener('seeked', onSeeked);
+      video.removeEventListener('canplay', onCanPlay);
+      video.removeEventListener('ended', onEnded);
+      video.removeEventListener('error', onError);
+      video.removeEventListener('timeupdate', onTimeUpdate);
+      video.removeEventListener('durationchange', onDurationChange);
+      video.removeEventListener('progress', onProgress);
+      video.removeEventListener('volumechange', onVolumeChange);
+      video.removeEventListener('loadedmetadata', onLoadedMetadata);
       video.pause();
       playingVideos.delete(video);
     };
   }, [effectiveSrc]);
 
-  // Pause every other registered video when this one starts.
-  useEffect(() => {
-    if (!playing) return;
-    const video = videoRef.current;
-    for (const other of playingVideos) {
-      if (other !== video) {
-        try {
-          other.pause();
-        } catch {
-          /* ignore */
-        }
-      }
-    }
-  }, [playing]);
-
+  // Autoplay (muted): a rejected promise just shows a paused hint.
   useEffect(() => {
     if (!autoPlay) return;
     const video = videoRef.current;
     if (!video) return;
     video.muted = true;
     const attempt = video.play();
-    if (attempt && typeof attempt.catch === 'function') attempt.catch(() => undefined);
+    if (attempt && typeof attempt.catch === 'function') {
+      attempt.catch(() => setMessage('Tap to play'));
+    }
   }, [autoPlay, effectiveSrc]);
 
+  // Sync fullscreen state from the browser (standard + webkit prefixed).
   useEffect(() => {
-    const onFullscreenChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
-    document.addEventListener('fullscreenchange', onFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
+    const doc = document as WebkitDocument;
+    const onChange = () => setNativeFullscreen(Boolean(document.fullscreenElement || doc.webkitFullscreenElement));
+    document.addEventListener('fullscreenchange', onChange);
+    document.addEventListener('webkitfullscreenchange', onChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', onChange);
+      document.removeEventListener('webkitfullscreenchange', onChange);
+    };
   }, []);
 
-  useEffect(
-    () => () => {
-      if (hideTimer.current) window.clearTimeout(hideTimer.current);
-    },
-    []
-  );
+  // Lock body scroll while in pseudo-fullscreen.
+  useEffect(() => {
+    if (!pseudoFullscreen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previous; };
+  }, [pseudoFullscreen]);
+
+  // Escape leaves pseudo-fullscreen.
+  useEffect(() => {
+    if (!pseudoFullscreen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setPseudoFullscreen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [pseudoFullscreen]);
+
+  // Clear the transient hint.
+  useEffect(() => {
+    if (!message) return;
+    const t = window.setTimeout(() => setMessage(null), 3500);
+    return () => window.clearTimeout(t);
+  }, [message]);
+
+  useEffect(() => () => {
+    if (hideTimer.current) window.clearTimeout(hideTimer.current);
+  }, []);
+
+  const revealControls = () => {
+    setControlsVisible(true);
+    if (hideTimer.current) window.clearTimeout(hideTimer.current);
+    const video = videoRef.current;
+    if (video && !video.paused) {
+      hideTimer.current = window.setTimeout(() => setControlsVisible(false), 2500);
+    }
+  };
 
   const togglePlay = () => {
     const video = videoRef.current;
     if (!video) return;
+    setMessage(null);
     if (video.paused) {
       const attempt = video.play();
       if (attempt && typeof attempt.catch === 'function') {
-        attempt.catch(() => setStatus('error'));
+        attempt.catch(() => setMessage('Playback was blocked. Tap to play.'));
       }
     } else {
       video.pause();
@@ -191,13 +285,53 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
   };
 
   const toggleFullscreen = () => {
-    const el = containerRef.current;
-    if (!el) return;
-    if (document.fullscreenElement) {
-      void document.exitFullscreen();
-    } else if (el.requestFullscreen) {
-      void el.requestFullscreen();
+    const container = containerRef.current as FullscreenElement | null;
+    const video = videoRef.current as WebkitVideoElement | null;
+    if (!container || !video) return;
+
+    if (isFullscreen) {
+      const doc = document as WebkitDocument;
+      if (document.fullscreenElement && document.exitFullscreen) {
+        void document.exitFullscreen().catch(() => undefined);
+      } else if (doc.webkitFullscreenElement && doc.webkitExitFullscreen) {
+        void doc.webkitExitFullscreen();
+      }
+      try {
+        (screen as unknown as { orientation?: OrientationLock }).orientation?.unlock?.();
+      } catch { /* ignore */ }
+      setPseudoFullscreen(false);
+      return;
     }
+
+    const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    // iOS Safari cannot fullscreen a wrapper — use the native video fullscreen.
+    if (isIOS && typeof video.webkitEnterFullscreen === 'function') {
+      video.webkitEnterFullscreen();
+      return;
+    }
+
+    const request = container.requestFullscreen
+      ? () => container.requestFullscreen!()
+      : container.webkitRequestFullscreen
+        ? () => container.webkitRequestFullscreen!()
+        : null;
+
+    if (request) {
+      Promise.resolve(request())
+        .then(() => {
+          try {
+            (screen as unknown as { orientation?: OrientationLock }).orientation
+              ?.lock?.('landscape')
+              .catch(() => undefined);
+          } catch { /* ignore */ }
+        })
+        .catch(() => setPseudoFullscreen(true));
+      return;
+    }
+
+    setPseudoFullscreen(true);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -229,19 +363,6 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
     }
   };
 
-  const handleLoadedMetadata = () => {
-    const video = videoRef.current;
-    if (!video) return;
-    setDuration(Number.isFinite(video.duration) ? video.duration : 0);
-    const ratio = video.videoWidth > 0 && video.videoHeight > 0
-      ? video.videoWidth / video.videoHeight
-      : 16 / 9;
-    // Landscape video widens the frame (clamped); portrait keeps the 16:9
-    // frame so the dark/blurred sides show around the centred video.
-    setFrameRatio(ratio >= 1 ? Math.min(Math.max(ratio, 16 / 9), 2.2) : 16 / 9);
-    setStatus('ready');
-  };
-
   const retry = () => {
     const video = videoRef.current;
     if (!video) return;
@@ -249,7 +370,14 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
     video.load();
   };
 
-  const controlsHidden = playing && status === 'ready' && !controlsVisible;
+  const showCenter = status === 'ready' && (!isPlaying || isEnded || isBuffering);
+  const controlsHidden = isPlaying && !controlsVisible && status === 'ready';
+  const playedPct = duration > 0 ? Math.min(100, (current / duration) * 100) : 0;
+  const bufferedPct = duration > 0 ? Math.min(100, (buffered / duration) * 100) : 0;
+
+  const containerClass = isFullscreen
+    ? 'fixed inset-0 z-[100] h-full w-full max-w-none max-h-none rounded-none'
+    : 'mx-auto w-full max-w-[720px] max-h-[60vh] sm:max-h-[420px] rounded-2xl';
 
   return (
     <div
@@ -259,12 +387,12 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
       aria-label={title ?? 'Video clip'}
       onKeyDown={handleKeyDown}
       onMouseMove={revealControls}
-      onMouseLeave={() => playing && setControlsVisible(false)}
-      onFocus={() => setControlsVisible(true)}
-      style={{ aspectRatio: frameRatio }}
-      className={`relative mx-auto w-full max-w-[720px] max-h-[60vh] overflow-hidden rounded-2xl bg-black
-        shadow-xl outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2
-        sm:max-h-[420px] ${className}`}
+      onMouseLeave={() => { if (isPlaying) setControlsVisible(false); }}
+      onFocus={revealControls}
+      style={isFullscreen ? undefined : { aspectRatio: frameRatio }}
+      className={`relative overflow-hidden bg-black shadow-xl outline-none
+        focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2
+        ${containerClass} ${className}`}
     >
       {/* Blurred backdrop gives portrait clips their dark sides. */}
       {poster && (
@@ -275,6 +403,7 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
         />
       )}
 
+      {/* Single interactive surface: one tap toggles play/pause. */}
       <video
         ref={videoRef}
         src={effectiveSrc}
@@ -283,14 +412,6 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
         playsInline
         muted={muted}
         onClick={togglePlay}
-        onLoadedMetadata={handleLoadedMetadata}
-        onCanPlay={() => setStatus((prev) => (prev === 'error' ? prev : 'ready'))}
-        onError={() => setStatus('error')}
-        onTimeUpdate={() => setCurrent(videoRef.current?.currentTime ?? 0)}
-        onEnded={() => {
-          setPlaying(false);
-          setControlsVisible(true);
-        }}
         aria-label={title ?? 'Video clip'}
         className="relative z-10 mx-auto block h-full w-full cursor-pointer bg-transparent object-contain"
       />
@@ -301,17 +422,24 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
         </div>
       )}
 
-      {status === 'ready' && !playing && (
-        <button
-          type="button"
-          onClick={togglePlay}
-          aria-label={title ? `Play ${title}` : 'Play'}
-          className="group/play absolute inset-0 z-20 flex items-center justify-center cursor-pointer"
+      {/* Centre overlay — visual only (pointer-events-none) so taps hit the video. */}
+      {status === 'ready' && (
+        <div
+          aria-hidden
+          className={`pointer-events-none absolute inset-0 z-20 flex items-center justify-center
+            transition-opacity duration-300 motion-reduce:transition-none
+            ${showCenter ? 'opacity-100' : 'opacity-0'}`}
         >
-          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/25 text-white ring-1 ring-white/40 shadow-lg backdrop-blur-sm transition-transform duration-200 group-hover/play:scale-110 sm:h-20 sm:w-20">
-            <Play className="ml-1 h-7 w-7 fill-current sm:h-9 sm:w-9" />
-          </span>
-        </button>
+          {isBuffering && isPlaying ? (
+            <Loader className="h-8 w-8 animate-spin text-white/85" />
+          ) : (
+            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/25 text-white ring-1 ring-white/40 shadow-lg backdrop-blur-sm sm:h-20 sm:w-20">
+              {isEnded
+                ? <RotateCcw className="h-7 w-7 sm:h-9 sm:w-9" />
+                : <Play className="ml-1 h-7 w-7 fill-current sm:h-9 sm:w-9" />}
+            </span>
+          )}
+        </div>
       )}
 
       {status === 'error' && (
@@ -330,45 +458,81 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
         </div>
       )}
 
-      {/* Controls */}
+      {message && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-24 z-30 flex justify-center px-4">
+          <span className="rounded-full bg-black/75 px-3 py-1 text-[11px] text-white/90">{message}</span>
+        </div>
+      )}
+
+      {pseudoFullscreen && (
+        <button
+          type="button"
+          onClick={toggleFullscreen}
+          aria-label="Exit fullscreen"
+          className="absolute right-3 top-3 z-40 inline-flex min-h-[40px] items-center gap-2 rounded-full
+            bg-black/60 px-4 text-xs font-bold uppercase tracking-widest text-white
+            transition-colors hover:bg-black/80 focus-visible:outline-2 focus-visible:outline-offset-2
+            focus-visible:outline-fuchsia-400 cursor-pointer"
+        >
+          <Minimize className="h-4 w-4" /> Exit
+        </button>
+      )}
+
+      {/* Controls — anchored to the bottom with a gradient scrim. */}
       {status === 'ready' && (
         <div
-          className={`absolute inset-x-0 bottom-0 z-30 flex flex-col gap-1 bg-gradient-to-t
-            from-black/80 to-transparent px-3 pb-3 pt-8 transition-opacity duration-300
-            ${controlsHidden ? 'pointer-events-none opacity-0' : 'opacity-100'}`}
+          className={`absolute inset-x-0 bottom-0 z-30 bg-gradient-to-t from-black/75 to-transparent
+            px-2 pb-1.5 pt-10 transition-opacity duration-300 motion-reduce:transition-none
+            sm:px-3 sm:pb-2 ${controlsHidden ? 'pointer-events-none opacity-0' : 'opacity-100'}`}
         >
-          <input
-            type="range"
-            min={0}
-            max={duration || 0}
-            step={0.1}
-            value={current}
-            onChange={(event) => seekTo(Number(event.target.value))}
-            aria-label="Seek"
-            className="h-1.5 w-full cursor-pointer accent-fuchsia-500"
-          />
-          <div className="flex items-center gap-2 text-white">
+          {/* Progress: buffered + played track with a transparent touch slider on top. */}
+          <div className="relative flex h-6 items-center">
+            <div className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-white/25">
+              <div className="absolute left-0 h-1 rounded-full bg-white/40" style={{ width: `${bufferedPct}%` }} />
+              <div className="absolute left-0 h-1 rounded-full bg-fuchsia-400" style={{ width: `${playedPct}%` }} />
+              <div
+                className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow"
+                style={{ left: `${playedPct}%` }}
+              />
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={duration || 0}
+              step={0.01}
+              value={current}
+              onChange={(event) => seekTo(Number(event.target.value))}
+              aria-label="Seek"
+              className="absolute inset-0 h-6 w-full cursor-pointer touch-none appearance-none bg-transparent opacity-0"
+            />
+          </div>
+
+          <div className="flex items-center gap-1 text-white sm:gap-2">
             <button
               type="button"
               onClick={togglePlay}
-              aria-label={playing ? 'Pause' : 'Play'}
-              className="flex h-9 w-9 items-center justify-center rounded-full transition-colors
+              aria-label={isPlaying ? 'Pause' : 'Play'}
+              className="flex h-10 w-10 items-center justify-center rounded-full transition-colors
                 hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2
-                focus-visible:outline-fuchsia-400 cursor-pointer"
+                focus-visible:outline-fuchsia-400 cursor-pointer sm:h-9 sm:w-9"
             >
-              {playing ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current" />}
+              {isBuffering && isPlaying
+                ? <Loader className="h-5 w-5 animate-spin" />
+                : isPlaying
+                  ? <Pause className="h-5 w-5 fill-current" />
+                  : <Play className="h-5 w-5 fill-current" />}
             </button>
-            <span className="text-xs tabular-nums text-white/80">
+            <span className="whitespace-nowrap text-[11px] tabular-nums text-white/80 sm:text-xs">
               {formatTime(current)} / {formatTime(duration)}
             </span>
-            <div className="ml-auto flex items-center gap-1">
+            <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
               <button
                 type="button"
                 onClick={toggleMute}
                 aria-label={muted ? 'Unmute' : 'Mute'}
-                className="flex h-9 w-9 items-center justify-center rounded-full transition-colors
+                className="flex h-10 w-10 items-center justify-center rounded-full transition-colors
                   hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2
-                  focus-visible:outline-fuchsia-400 cursor-pointer"
+                  focus-visible:outline-fuchsia-400 cursor-pointer sm:h-9 sm:w-9"
               >
                 {muted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
               </button>
@@ -376,9 +540,9 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
                 type="button"
                 onClick={toggleFullscreen}
                 aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-                className="flex h-9 w-9 items-center justify-center rounded-full transition-colors
+                className="flex h-10 w-10 items-center justify-center rounded-full transition-colors
                   hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2
-                  focus-visible:outline-fuchsia-400 cursor-pointer"
+                  focus-visible:outline-fuchsia-400 cursor-pointer sm:h-9 sm:w-9"
               >
                 {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
               </button>
