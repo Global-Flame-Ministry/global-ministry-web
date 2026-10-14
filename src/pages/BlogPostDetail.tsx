@@ -7,8 +7,10 @@ import BlogCard from '../components/blog/BlogCard';
 import BlogSidebar from '../components/blog/BlogSidebar';
 import ShareButtons from '../components/blog/ShareButtons';
 import SmartImage from '../components/SmartImage';
+import ClipPlayer from '../components/ClipPlayer';
+import EventTimingBadge from '../components/EventTimingBadge';
 import { getReadTime } from '../utils/readTime';
-import type { BlogBlockDto } from '../types';
+import ContentBlock from '../components/blog/ContentBlock';
 
 function AuthorAvatar({ name, size = 'md' }: { name: string; size?: 'md' | 'lg' }) {
   const initials = name
@@ -31,42 +33,6 @@ function DepartmentBadge({ department }: { department: string }) {
       {department}
     </span>
   );
-}
-
-function ContentBlock({ block }: { block: BlogBlockDto }) {
-  switch (block.blockType) {
-    case 'Heading':
-      return (
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mt-10 mb-4 border-l-4 border-[#5b0064] pl-4">
-          {block.content}
-        </h2>
-      );
-    case 'Paragraph':
-      return (
-        <p className="w-full max-w-full text-gray-700 text-[17px] leading-relaxed mb-6 whitespace-pre-wrap text-justify">
-          {block.content}
-        </p>
-      );
-    case 'Image':
-      return (
-        <SmartImage
-          src={block.imageUrl}
-          alt={block.imageUrl?.split('/').pop() ?? 'Blog post image'}
-          variant="article"
-        />
-      );
-    case 'Quote': {
-      const [quote, author] = (block.content ?? '').split('|').map((s) => s.trim());
-      return (
-        <blockquote className="my-8 bg-purple-50 border-l-4 border-[#5b0064] p-6 rounded-r-2xl">
-          <p className="text-xl italic text-gray-800 mb-2">{`"${quote}"`}</p>
-          {author && <p className="text-sm font-semibold text-gray-700">{author}</p>}
-        </blockquote>
-      );
-    }
-    default:
-      return null;
-  }
 }
 
 const BlogPostDetail: React.FC = () => {
@@ -157,8 +123,8 @@ const BlogPostDetail: React.FC = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-10">
-          <article>
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-10">
+          <article className="min-w-0">
             <div className="flex flex-wrap items-center gap-4 mb-6">
               {post.department && <DepartmentBadge department={post.department} />}
               <div className="flex items-center gap-2 text-[#51424f] text-sm">
@@ -169,14 +135,20 @@ const BlogPostDetail: React.FC = () => {
             </div>
 
             <h1
-              className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#1a1c20] leading-tight mb-6"
+              className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#1a1c20] leading-tight mb-6 break-words"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
               {post.title}
             </h1>
 
+            {(post.eventStartsAt || post.eventEndsAt) && (
+              <div className="mb-6">
+                <EventTimingBadge startsAt={post.eventStartsAt} endsAt={post.eventEndsAt} />
+              </div>
+            )}
+
             {post.excerpt && (
-              <p className="text-lg text-[#51424f] leading-relaxed mb-8 border-l-4 border-[#d5c0d1] pl-4">
+              <p className="text-lg text-[#51424f] leading-relaxed mb-8 border-l-4 border-[#d5c0d1] pl-4 break-words">
                 {post.excerpt}
               </p>
             )}
@@ -192,15 +164,8 @@ const BlogPostDetail: React.FC = () => {
             )}
 
             {post.videoUrl && (
-              <div className="w-full mb-10 rounded-2xl overflow-hidden bg-black">
-                <video
-                  controls
-                  playsInline
-                  preload="metadata"
-                  poster={post.coverImageUrl ?? undefined}
-                  className="w-full"
-                  src={post.videoUrl}
-                />
+              <div className="w-full mb-10">
+                <ClipPlayer src={post.videoUrl} title={post.title} />
               </div>
             )}
 
@@ -244,7 +209,7 @@ const BlogPostDetail: React.FC = () => {
             )}
           </article>
 
-          <aside className="lg:sticky lg:top-28 lg:self-start">
+          <aside className="min-w-0 lg:sticky lg:top-28 lg:self-start">
             <BlogSidebar />
           </aside>
         </div>

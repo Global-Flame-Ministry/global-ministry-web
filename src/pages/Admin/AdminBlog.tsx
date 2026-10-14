@@ -1,13 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Plus, Trash2, RefreshCw, Search, Pencil,
-  X, Eye, EyeOff, ChevronUp, ChevronDown,
-  Quote, FileText, BookOpen, Image, Star,
+  X, Eye, EyeOff, Star,
 } from 'lucide-react';
 import { blogApi } from '../../api/blogApi';
 import type {
   BlogPostResponseDto,
-  CreateBlogBlockDto,
   CreateBlogPostDto,
   UpdateBlogPostDto,
 } from '../../types';
@@ -15,13 +13,8 @@ import toast from 'react-hot-toast';
 import { useAdminTheme } from '../../context/AdminThemeContext';
 import ImageUpload from '../../components/ImageUpload';
 import VideoUpload from '../../components/VideoUpload';
-
-const BLOCK_TYPES = ['Heading', 'Paragraph', 'Image', 'Quote'] as const;
-type BlockType = (typeof BLOCK_TYPES)[number];
-
-interface EditorBlock extends CreateBlogBlockDto {
-  id: string;
-}
+import ContentBlockEditor from '../../components/ContentBlockEditor';
+import { buildBlockDtos, type EditorBlock } from '../../components/blog/contentBlocks';
 
 const defaultPostForm = (): CreateBlogPostDto => ({
   title: '',
@@ -34,11 +27,36 @@ const defaultPostForm = (): CreateBlogPostDto => ({
   blocks: [],
   conferenceTheme: undefined,
   themeScripture: undefined,
+  eventStartsAt: undefined,
+  eventEndsAt: undefined,
 });
+
+// The admin enters event times in West Africa Time (Africa/Lagos). Nigeria is a
+// fixed UTC+1, so we can map to/from UTC with a constant offset — the API stores
+// and returns UTC, the pickers show Lagos wall-clock time.
+const LAGOS_OFFSET = '+01:00';
+
+const lagosLocalToUtcIso = (value?: string | null): string | undefined => {
+  if (!value) return undefined;
+  const d = new Date(`${value}:00${LAGOS_OFFSET}`);
+  return isNaN(d.getTime()) ? undefined : d.toISOString();
+};
+
+const utcIsoToLagosLocal = (value?: string | null): string | undefined => {
+  if (!value) return undefined;
+  const d = new Date(/(?:Z|[+-]\d{2}:?\d{2})$/.test(value) ? value : `${value}Z`);
+  if (isNaN(d.getTime())) return undefined;
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Africa/Lagos',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(d);
+  const get = (type: string) => parts.find(p => p.type === type)?.value ?? '00';
+  return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}`;
+};
 
 const AdminBlog: React.FC = () => {
   const { isDark } = useAdminTheme();
-  const blocksScrollRef = useRef<HTMLDivElement>(null);
   const [posts, setPosts] = useState<BlogPostResponseDto[]>([]);
   const [pageNumber, setPageNumber] = useState(1);
   const pageSize = 10;
@@ -123,6 +141,8 @@ const AdminBlog: React.FC = () => {
         blocks: mappedBlocks,
         conferenceTheme: post.conferenceTheme ?? undefined,
         themeScripture: post.themeScripture ?? undefined,
+        eventStartsAt: utcIsoToLagosLocal(post.eventStartsAt),
+        eventEndsAt: utcIsoToLagosLocal(post.eventEndsAt),
       });
       setBlocks(mappedBlocks);
     } else {
@@ -133,45 +153,6 @@ const AdminBlog: React.FC = () => {
     setShowEditor(true);
   };
 
-  const addBlock = (type: BlockType) => {
-    setBlocks(prev => [
-      ...prev,
-      {
-        id: `${type}-${Date.now()}-${prev.length}`,
-        blockType: type,
-        content: '',
-        imageUrl: undefined,
-        displayOrder: prev.length + 1,
-      },
-    ]);
-    setTimeout(() => {
-      blocksScrollRef.current?.scrollTo({
-        top: blocksScrollRef.current.scrollHeight,
-        behavior: 'smooth',
-      });
-    }, 50);
-  };
-
-  const moveBlock = (index: number, direction: 'up' | 'down') => {
-    setBlocks(prev => {
-      const next = [...prev];
-      const swapIndex = direction === 'up' ? index - 1 : index + 1;
-      if (swapIndex < 0 || swapIndex >= next.length) return prev;
-      [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
-      return next.map((block, idx) => ({ ...block, displayOrder: idx + 1 }));
-    });
-  };
-
-  const removeBlock = (index: number) => {
-    setBlocks(prev =>
-      prev.filter((_, i) => i !== index).map((block, idx) => ({ ...block, displayOrder: idx + 1 }))
-    );
-  };
-
-  const setBlockField = (index: number, field: keyof CreateBlogBlockDto, value: string | undefined | number) => {
-    setBlocks(prev => prev.map((block, idx) => idx === index ? { ...block, [field]: value } : block));
-  };
-
   const savePost = async () => {
     if (!form.title.trim()) { toast.error('Title is required'); return; }
     if (!form.department) { toast.error('Department is required'); return; }
@@ -180,14 +161,14 @@ const AdminBlog: React.FC = () => {
       return;
     }
 
-    const sortedBlocks: CreateBlogBlockDto[] = blocks
-      .map((block, idx) => ({
-        blockType: block.blockType,
-        content: block.blockType === 'Image' ? undefined : block.content,
-        imageUrl: block.blockType === 'Image' ? block.imageUrl : undefined,
-        displayOrder: idx + 1,
-      }))
-      .filter(block => block.blockType !== 'Image' || block.imageUrl) as CreateBlogBlockDto[];
+    const eventStartsAtIso = lagosLocalToUtcIso(form.eventStartsAt);
+    const eventEndsAtIso = lagosLocalToUtcIso(form.eventEndsAt);
+    if (eventStartsAtIso && eventEndsAtIso && new Date(eventEndsAtIso) < new Date(eventStartsAtIso)) {
+      toast.error('Event end date/time must be on or after the start.');
+      return;
+    }
+
+    const sortedBlocks = buildBlockDtos(blocks);
 
     const payload: CreateBlogPostDto = {
       title: form.title.trim(),
@@ -200,6 +181,8 @@ const AdminBlog: React.FC = () => {
       blocks: sortedBlocks,
       conferenceTheme: form.conferenceTheme?.trim() || undefined,
       themeScripture: form.themeScripture?.trim() || undefined,
+      eventStartsAt: eventStartsAtIso,
+      eventEndsAt: eventEndsAtIso,
     };
 
     setIsSaving(true);
@@ -468,6 +451,45 @@ const AdminBlog: React.FC = () => {
                 </label>
               )}
 
+              {/* Optional event dates (Africa/Lagos). Powers the live timing badge. */}
+              <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Event dates (optional)</p>
+                  <p className="text-xs text-slate-500">
+                    Times are West Africa Time (WAT / Africa/Lagos). Leave blank for a non-event post.
+                  </p>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <label className="space-y-2 text-sm text-slate-700">
+                    Starts
+                    <input
+                      type="datetime-local"
+                      value={form.eventStartsAt ?? ''}
+                      onChange={e => setForm(prev => ({ ...prev, eventStartsAt: e.target.value || undefined }))}
+                      className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${style.input}`}
+                    />
+                  </label>
+                  <label className="space-y-2 text-sm text-slate-700">
+                    Ends
+                    <input
+                      type="datetime-local"
+                      value={form.eventEndsAt ?? ''}
+                      onChange={e => setForm(prev => ({ ...prev, eventEndsAt: e.target.value || undefined }))}
+                      className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${style.input}`}
+                    />
+                  </label>
+                </div>
+                {(() => {
+                  const start = lagosLocalToUtcIso(form.eventStartsAt);
+                  const end = lagosLocalToUtcIso(form.eventEndsAt);
+                  return start && end && end < start ? (
+                    <p className="text-xs font-medium text-red-600">
+                      End must be on or after the start.
+                    </p>
+                  ) : null;
+                })()}
+              </div>
+
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="space-y-2 text-sm text-slate-700">
                   Excerpt
@@ -493,73 +515,12 @@ const AdminBlog: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">Content Blocks</p>
-                  <p className="text-sm text-slate-500">Add headings, paragraphs, quotes, and images in order.</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {BLOCK_TYPES.map(type => (
-                    <button type="button" key={type} onClick={() => addBlock(type)}
-                      className="inline-flex min-h-[44px] items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-[#a21caf] hover:text-[#a21caf]">
-                      {type === 'Heading' ? <FileText className="h-4 w-4" /> : type === 'Image' ? <Image className="h-4 w-4" /> : type === 'Quote' ? <Quote className="h-4 w-4" /> : <BookOpen className="h-4 w-4" />}
-                      {type}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {blocks.length === 0 && (
-                  <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-slate-500">
-                    Add one or more blocks to build the blog post layout.
-                  </div>
-                )}
-                {blocks.map((block, index) => (
-                  <div key={block.id} className="rounded-3xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
-                    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="text-sm font-semibold text-slate-900">{block.blockType} Block</div>
-                      <div className="flex items-center gap-2">
-                        <button type="button" onClick={() => moveBlock(index, 'up')}
-                          className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 transition hover:bg-[#f3e8ff] hover:text-[#7c3aed]">
-                          <ChevronUp className="h-4 w-4" />
-                        </button>
-                        <button type="button" onClick={() => moveBlock(index, 'down')}
-                          className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 transition hover:bg-[#f3e8ff] hover:text-[#7c3aed]">
-                          <ChevronDown className="h-4 w-4" />
-                        </button>
-                        <button type="button" onClick={() => removeBlock(index)}
-                          className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-red-600 transition hover:bg-red-100">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-                    {block.blockType === 'Paragraph' && (
-                      <textarea value={block.content} onChange={e => setBlockField(index, 'content', e.target.value)}
-                        rows={4} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition"
-                        placeholder="Paragraph text..." />
-                    )}
-                    {block.blockType === 'Heading' && (
-                      <input value={block.content} onChange={e => setBlockField(index, 'content', e.target.value)}
-                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition"
-                        placeholder="Heading text..." />
-                    )}
-                    {block.blockType === 'Quote' && (
-                      <textarea value={block.content} onChange={e => setBlockField(index, 'content', e.target.value)}
-                        rows={3} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition"
-                        placeholder="Quote text | Author name" />
-                    )}
-                    {block.blockType === 'Image' && (
-                      <ImageUpload
-                        label="Block Image"
-                        value={block.imageUrl ?? null}
-                        onChange={(url) => setBlockField(index, 'imageUrl', url ?? undefined)}
-                        onUploadingChange={handleUploadingChange}
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
+              <ContentBlockEditor
+                blocks={blocks}
+                onChange={setBlocks}
+                onUploadingChange={handleUploadingChange}
+                emptyHint="Add one or more blocks to build the blog post layout."
+              />
             </div>
 
             <div className="flex-shrink-0 sticky bottom-0 z-10 border-t border-slate-200 bg-white px-6 py-4">

@@ -11,8 +11,14 @@ export const heroApi = {
   getFeaturedClips: () =>
     api.get<ApiResponse<HeroSlide[]>>('/api/media/clips/featured'),
 
+  getClipBySlug: (slug: string) =>
+    api.get<ApiResponse<HeroSlide>>(`/api/media/clips/${slug}`),
+
   getAllSlides: () =>
     api.get<ApiResponse<HeroSlide[]>>('/api/ministry/hero-slides'),
+
+  getSlideById: (id: number) =>
+    api.get<ApiResponse<HeroSlide>>(`/api/ministry/hero-slides/${id}`),
 
   createSlide: (dto: CreateHeroSlideDto) =>
     api.post<ApiResponse<HeroSlide>>('/api/ministry/hero-slides', dto),

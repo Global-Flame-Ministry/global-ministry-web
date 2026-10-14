@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { Play, X, Film, AlertCircle, Loader } from 'lucide-react';
 import SEO from '../components/SEO';
 import SmartImage from '../components/SmartImage';
+import ClipPlayer from '../components/ClipPlayer';
 import { heroApi } from '../api/heroApi';
 import { getPosterUrl } from '../components/HeroCarousel';
 import type { HeroSlide } from '../types';
@@ -55,16 +57,8 @@ const ClipModal: React.FC<{ clip: HeroSlide; onClose: () => void }> = ({ clip, o
           <X className="w-4 h-4" /> Close
         </button>
         <div className="rounded-2xl overflow-hidden bg-black shadow-2xl border border-white/10">
-          <video
-            src={clip.url}
-            poster={getPosterUrl(clip.url)}
-            controls
-            autoPlay={false}
-            preload="metadata"
-            playsInline
-            className="w-full max-h-[70vh] bg-black"
-          />
-          {(clip.title || clip.subtitle) && (
+          <ClipPlayer src={clip.url} title={clip.title} />
+          {(clip.title || clip.subtitle || (clip.hasWriteUp && clip.slug)) && (
             <div className="px-6 py-4 bg-[#111]">
               {clip.title && (
                 <h3 className="font-serif text-lg text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -72,6 +66,16 @@ const ClipModal: React.FC<{ clip: HeroSlide; onClose: () => void }> = ({ clip, o
                 </h3>
               )}
               {clip.subtitle && <p className="text-sm text-white/60 mt-1">{clip.subtitle}</p>}
+              {clip.hasWriteUp && clip.slug && (
+                <Link
+                  to={`/clips/${clip.slug}`}
+                  onClick={onClose}
+                  className="inline-flex items-center gap-1.5 mt-3 text-[10px] font-bold uppercase tracking-[0.2em]
+                    text-fuchsia-300 hover:text-white transition-colors"
+                >
+                  Watch and read <span aria-hidden>→</span>
+                </Link>
+              )}
             </div>
           )}
         </div>
@@ -146,21 +150,24 @@ const Clips: React.FC = () => {
         {!isLoading && !isError && clips.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {clips.map(clip => (
-              <button
+              <div
                 key={clip.id}
-                type="button"
-                onClick={() => setActiveClip(clip)}
-                className="group text-left rounded-xl overflow-hidden bg-white shadow-[0_10px_30px_-10px_rgba(91,0,100,0.15),0_4px_12px_-5px_rgba(113,42,226,0.1)] transition-all hover:-translate-y-2 cursor-pointer"
+                className="group rounded-xl overflow-hidden bg-white shadow-[0_10px_30px_-10px_rgba(91,0,100,0.15),0_4px_12px_-5px_rgba(113,42,226,0.1)] transition-all hover:-translate-y-2"
               >
-                <div className="relative aspect-video overflow-hidden bg-black">
+                <button
+                  type="button"
+                  onClick={() => setActiveClip(clip)}
+                  aria-label={`Play ${clip.title || 'clip'}`}
+                  className="relative block w-full aspect-video overflow-hidden bg-black cursor-pointer"
+                >
                   <ClipThumbnail clip={clip} />
-                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
+                  <span className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
                   <span className="absolute inset-0 flex items-center justify-center">
                     <span className="w-14 h-14 rounded-full bg-white/90 text-[#5b0064] flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110">
                       <Play className="w-6 h-6 fill-current ml-0.5" />
                     </span>
                   </span>
-                </div>
+                </button>
                 <div className="p-5">
                   <h3
                     className="font-serif text-lg text-[#1a1c20] leading-tight group-hover:text-[#5b0064] transition-colors"
@@ -171,8 +178,19 @@ const Clips: React.FC = () => {
                   {clip.subtitle && (
                     <p className="text-sm text-[#51424f] mt-1 line-clamp-2">{clip.subtitle}</p>
                   )}
+                  {clip.slug && (
+                    <div className="mt-4">
+                      <Link
+                        to={`/clips/${clip.slug}`}
+                        className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#712ae2] hover:text-[#5b0064] transition-colors"
+                      >
+                        {clip.hasWriteUp ? 'Watch and read' : 'Watch'}
+                        <span aria-hidden>→</span>
+                      </Link>
+                    </div>
+                  )}
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         )}

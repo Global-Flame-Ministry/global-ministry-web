@@ -17,6 +17,7 @@ import Sermons           from './pages/Sermons';
 import SermonDetail      from './pages/SermonDetail';
 import SeriesDetail      from './pages/SeriesDetail';
 import Clips             from './pages/Clips';
+import ClipDetail        from './pages/ClipDetail';
 import Events            from './pages/Events';
 import EventDetails      from './pages/EventDetails';
 import Ministries        from './pages/Ministries';
@@ -51,6 +52,7 @@ import Admin               from './pages/Admin/Admin';
 import AdminContacts       from './pages/Admin/AdminContacts';
 import AdminAnnouncements  from './pages/Admin/AdminAnnouncements';
 import AdminHeroSlides     from './pages/Admin/AdminHeroSlides';
+import AdminClipWriteUp    from './pages/Admin/AdminClipWriteUp';
 import AdminEvents         from './pages/Admin/AdminEvents';
 import AdminSermons        from './pages/Admin/AdminSermons';
 import AdminPrayerRequests from './pages/Admin/AdminPrayerRequests';
@@ -200,6 +202,8 @@ const App: React.FC = () => {
               element={<PublicLayout fullBleed><SermonDetail /></PublicLayout>} />
             <Route path="/clips"
               element={<PublicLayout fullBleed><Clips /></PublicLayout>} />
+            <Route path="/clips/:slug"
+              element={<PublicLayout fullBleed><ClipDetail /></PublicLayout>} />
             <Route path="/events"
               element={<PublicLayout><Events /></PublicLayout>} />
             <Route path="/events/:slug"
@@ -276,6 +280,8 @@ const App: React.FC = () => {
                 element={<AdminLayout><AdminBlog /></AdminLayout>} />
               <Route path="hero-slides"
                 element={<AdminLayout><AdminHeroSlides /></AdminLayout>} />
+              <Route path="clips/:id/write-up"
+                element={<AdminLayout><AdminClipWriteUp /></AdminLayout>} />
             </Route>
 
             {/* 404 */}

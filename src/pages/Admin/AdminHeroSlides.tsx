@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Plus, Trash2, RefreshCw, Pencil,
-  X, Eye, EyeOff, ChevronUp, ChevronDown, Image as ImageIcon, Film, LayoutGrid, Star
+  X, Eye, EyeOff, ChevronUp, ChevronDown, Image as ImageIcon, Film, LayoutGrid, Star, FileText
 } from 'lucide-react';
 import { heroApi } from '../../api/heroApi';
 import type { CreateHeroSlideDto, HeroSlide } from '../../types';
@@ -29,6 +30,7 @@ const emptyForm = (displayOrder = 0): CreateHeroSlideDto => ({
 
 const AdminHeroSlides = () => {
   const { isDark } = useAdminTheme();
+  const navigate = useNavigate();
 
   const t = {
     bg:         isDark ? 'bg-[#0d0d0d] text-white'     : 'bg-slate-50 text-slate-900',
@@ -151,6 +153,10 @@ const AdminHeroSlides = () => {
 
   const handleSave = async () => {
     if (!form.url.trim()) { toast.error('Please upload media first'); return; }
+    if (form.mediaType === 'Video' && !form.title?.trim()) {
+      toast.error('A title is required for a video clip.');
+      return;
+    }
     setIsSaving(true);
     setSaveError(null);
     try {
@@ -159,7 +165,16 @@ const AdminHeroSlides = () => {
         if (res.data.isSuccess) { toast.success('Updated'); closeForm(); fetchSlides(); }
       } else {
         const res = await heroApi.createSlide(form);
-        if (res.data.isSuccess) { toast.success('Created'); closeForm(); fetchSlides(); }
+        if (res.data.isSuccess) {
+          toast.success('Created');
+          const created = res.data.data;
+          closeForm();
+          fetchSlides();
+          // A new video clip has no write-up yet — open the editor right away.
+          if (form.mediaType === 'Video' && created?.id) {
+            navigate(`/admin/clips/${created.id}/write-up`);
+          }
+        }
       }
     } catch (err: unknown) {
       const message =
@@ -258,7 +273,8 @@ const AdminHeroSlides = () => {
       <div className={`px-8 py-4 border-b ${t.border}`}>
         <p className={`text-sm ${t.subtext}`}>
           Photos rotate on the homepage hero every {HERO_ROTATION_MS / 1000} seconds (by display order).
-          Featured home events appear first, ahead of these image slides.
+          Featured home events appear first, ahead of these image slides. Video clips are listed on the
+          Clips page — use the write-up button on a clip to add its story page.
         </p>
       </div>
 
@@ -323,6 +339,11 @@ const AdminHeroSlides = () => {
                         <Star className="w-2.5 h-2.5 fill-current" /> Featured
                       </span>
                     )}
+                    {s.mediaType === 'Video' && s.hasWriteUp && (
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-600 flex-shrink-0 flex items-center gap-1">
+                        <FileText className="w-2.5 h-2.5" /> Write-up
+                      </span>
+                    )}
                   </div>
                   {s.subtitle && <p className={`text-xs truncate mb-1 ${t.subtext}`}>{s.subtitle}</p>}
                   <div className="flex items-center gap-3">
@@ -334,6 +355,12 @@ const AdminHeroSlides = () => {
                 </div>
 
                 <div className="flex items-center gap-2 flex-shrink-0">
+                  {s.mediaType === 'Video' && (
+                    <Link to={`/admin/clips/${s.id}/write-up`} title="Edit write-up"
+                      className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}>
+                      <FileText className={`w-4 h-4 ${t.subtext}`} />
+                    </Link>
+                  )}
                   <button onClick={() => handleToggleActive(s)} className={`p-2 rounded-lg transition-colors ${t.btnGhost}`}>
                     {s.isActive ? <EyeOff className={`w-4 h-4 ${t.subtext}`} /> : <Eye className={`w-4 h-4 ${t.subtext}`} />}
                   </button>
@@ -406,13 +433,19 @@ const AdminHeroSlides = () => {
                     onUploadingChange={setIsUploading}
                   />
                 ) : (
-                  <VideoUpload
-                    label=""
-                    compact
-                    value={form.url || null}
-                    onChange={url => setForm(f => ({ ...f, url: url ?? '' }))}
-                    onUploadingChange={setIsUploading}
-                  />
+                  <>
+                    <VideoUpload
+                      label=""
+                      compact
+                      value={form.url || null}
+                      onChange={url => setForm(f => ({ ...f, url: url ?? '' }))}
+                      onUploadingChange={setIsUploading}
+                    />
+                    <p className={`text-xs mt-2 ${t.label}`}>
+                      A poster frame is taken from the video automatically — no cover image needed.
+                      After saving, add the write-up from the clip row.
+                    </p>
+                  </>
                 )}
               </div>
 
@@ -428,11 +461,17 @@ const AdminHeroSlides = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Title</label>
+                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
+                    Title{form.mediaType === 'Video' && <span className="text-fuchsia-500"> *</span>}
+                  </label>
                   <input type="text" value={form.title ?? ''} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                    placeholder="Slide title (optional)"
+                    placeholder={form.mediaType === 'Video' ? 'Clip title (required)' : 'Slide headline (optional)'}
                     className={`w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all ${t.modalInput}`} />
-                  <p className={`text-xs mt-1 ${t.label}`}>Headline shown over the image on the homepage hero.</p>
+                  <p className={`text-xs mt-1 ${t.label}`}>
+                    {form.mediaType === 'Video'
+                      ? 'Clip title (shown on the clips page and in cards)'
+                      : 'Headline shown over the image on the homepage hero.'}
+                  </p>
                 </div>
                 <div>
                   <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Display Order</label>
@@ -444,9 +483,13 @@ const AdminHeroSlides = () => {
               <div>
                 <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Subtitle</label>
                 <input type="text" value={form.subtitle ?? ''} onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))}
-                  placeholder="Short caption (optional)"
+                  placeholder={form.mediaType === 'Video' ? 'Short summary (optional)' : 'Short caption (optional)'}
                   className={`w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all ${t.modalInput}`} />
-                <p className={`text-xs mt-1 ${t.label}`}>Used as the small label above the headline only when Label is empty.</p>
+                <p className={`text-xs mt-1 ${t.label}`}>
+                  {form.mediaType === 'Video'
+                    ? 'Short summary shown on cards'
+                    : 'Used as the small label above the headline only when Label is empty.'}
+                </p>
               </div>
 
               <div>

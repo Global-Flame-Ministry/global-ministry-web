@@ -159,7 +159,7 @@ export default function EventDetails() {
               )}
             </div>
 
-            <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mt-2 mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mt-2 mb-6 break-words" style={{ fontFamily: "'Playfair Display', serif" }}>
               {event.title}
             </h1>
 
@@ -207,7 +207,7 @@ export default function EventDetails() {
 
             {event.description && (
               <div className="prose prose-gray max-w-none">
-                <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap text-justify">
+                <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
                   {event.description}
                 </p>
               </div>

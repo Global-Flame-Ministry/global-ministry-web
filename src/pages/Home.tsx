@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import SEO from '../components/SEO';
 import { Link, useNavigate } from 'react-router-dom';
@@ -291,86 +291,89 @@ const Home: React.FC = () => {
   const featuredBooks = featuredBooksData ?? [];
   const latestBlogPosts = latestBlogPostsData ?? [];
 
-  // Hero = featured events (by startDate) FIRST, then image slides (by displayOrder).
-  // Video slides are intentionally excluded from the hero.
-  const imageSlides = (heroSlidesData ?? [])
-    .filter(s => s.mediaType === 'Image')
-    .sort((a, b) => a.displayOrder - b.displayOrder);
+  // Hero = featured events (by startDate) FIRST, then image slides (by
+  // displayOrder), then featured blog posts. Video slides are intentionally
+  // excluded. Memoised so the carousel's timer/preload effects stay stable.
+  const heroSlides = useMemo<HeroSlideView[]>(() => {
+    const imageSlides = (heroSlidesData ?? [])
+      .filter(s => s.mediaType === 'Image')
+      .sort((a, b) => a.displayOrder - b.displayOrder);
 
-  const eventSlides: HeroSlideView[] = (featuredEventsData ?? [])
-    .filter(e => !!e.imageUrl && !e.isCancelled)
-    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-    .map(e => {
-      const openRegistration = e.acceptsRegistrations && (e.canRegister ?? true);
-      return {
-        id: `event-${e.id}`,
-        kind: 'event' as const,
-        imageUrl: e.imageUrl as string,
-        imageAlt: e.title,
-        label: 'Featured Event',
-        title: e.title,
-        theme: e.conferenceTheme,
-        scripture: e.anchorScripture,
-        scriptureReference: e.anchorScriptureReference,
-        dateText: formatEventDateRange(e.startDate, e.endDate),
-        location: e.location,
-        primaryCta: { text: 'View Details', href: `/events/${e.slug}` },
-        secondaryCta: openRegistration
-          ? { text: 'Register Now', href: `/events/${e.slug}#register` }
-          : undefined,
+    const eventSlides: HeroSlideView[] = (featuredEventsData ?? [])
+      .filter(e => !!e.imageUrl && !e.isCancelled)
+      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+      .map(e => {
+        const openRegistration = e.acceptsRegistrations && (e.canRegister ?? true);
+        return {
+          id: `event-${e.id}`,
+          kind: 'event' as const,
+          imageUrl: e.imageUrl as string,
+          imageAlt: e.title,
+          label: 'Featured Event',
+          title: e.title,
+          theme: e.conferenceTheme,
+          scripture: e.anchorScripture,
+          scriptureReference: e.anchorScriptureReference,
+          dateText: formatEventDateRange(e.startDate, e.endDate),
+          location: e.location,
+          eventStartsAt: e.startDate,
+          eventEndsAt: e.endDate,
+          primaryCta: { text: 'View Details', href: `/events/${e.slug}` },
+          secondaryCta: openRegistration
+            ? { text: 'Register Now', href: `/events/${e.slug}#register` }
+            : undefined,
+        };
+      });
+
+    const imageSlideViews: HeroSlideView[] = imageSlides.map(s => {
+      const target = s.targetUrl?.trim();
+      const view: HeroSlideView = {
+        id: `slide-${s.id}`,
+        kind: 'slide',
+        imageUrl: s.url,
+        imageAlt: s.title ?? 'Global Flame Ministry',
+        // Admin-managed label wins; fall back to subtitle, then the default.
+        label: s.label?.trim() || s.subtitle || DEFAULT_HERO.label,
+        title: s.title || DEFAULT_HERO.title,
+        description: s.title ? null : DEFAULT_HERO.description,
       };
+      // Only render a button when there is a real target — never a dead link.
+      if (target) {
+        view.primaryCta = { text: s.buttonText?.trim() || 'Learn more', href: target };
+      }
+      return view;
     });
 
-  const imageSlideViews: HeroSlideView[] = imageSlides.map(s => {
-    const target = s.targetUrl?.trim();
-    const view: HeroSlideView = {
-      id: `slide-${s.id}`,
-      kind: 'slide',
-      imageUrl: s.url,
-      imageAlt: s.title ?? 'Global Flame Ministry',
-      // Admin-managed label wins; fall back to subtitle, then the default.
-      label: s.label?.trim() || s.subtitle || DEFAULT_HERO.label,
-      title: s.title || DEFAULT_HERO.title,
-      description: s.title ? null : DEFAULT_HERO.description,
-    };
-    // Only render a button when there is a real target — never a dead link.
-    if (target) {
-      view.primaryCta = { text: s.buttonText?.trim() || 'Learn more', href: target };
-    }
-    return view;
-  });
+    // Featured blog posts (newest featured first) become the last hero slides.
+    const blogSlides: HeroSlideView[] = (featuredBlogPostsData ?? [])
+      .filter(p => !!p.coverImageUrl)
+      .map(p => {
+        const excerpt = toPlainText(p.excerpt);
+        const readTime = getReadTime(p.blocks);
+        const published = formatPublishedDate(p.createdOn);
+        return {
+          id: `blog-${p.id}`,
+          kind: 'blog' as const,
+          imageUrl: p.coverImageUrl as string,
+          imageAlt: p.title,
+          // Department label wins; fall back to a generic blog label.
+          label: p.department?.trim() || 'From the Blog',
+          title: p.title,
+          description: excerpt || null,
+          meta: [readTime > 0 ? `${readTime} min read` : '', published]
+            .filter(Boolean)
+            .join(' · '),
+          eventStartsAt: p.eventStartsAt,
+          eventEndsAt: p.eventEndsAt,
+          primaryCta: { text: 'Read article', href: `/blog/${p.slug}` },
+          secondaryCta: { text: 'All posts', href: '/blog' },
+        };
+      });
 
-  // Featured blog posts (newest featured first) become the last hero slides.
-  const blogSlides: HeroSlideView[] = (featuredBlogPostsData ?? [])
-    .filter(p => !!p.coverImageUrl)
-    .map(p => {
-      const excerpt = toPlainText(p.excerpt);
-      const readTime = getReadTime(p.blocks);
-      const published = formatPublishedDate(p.createdOn);
-      return {
-        id: `blog-${p.id}`,
-        kind: 'blog' as const,
-        imageUrl: p.coverImageUrl as string,
-        imageAlt: p.title,
-        // Department label wins; fall back to a generic blog label.
-        label: p.department?.trim() || 'From the Blog',
-        title: p.title,
-        description: excerpt || null,
-        meta: [readTime > 0 ? `${readTime} min read` : '', published]
-          .filter(Boolean)
-          .join(' · '),
-        primaryCta: { text: 'Read article', href: `/blog/${p.slug}` },
-        secondaryCta: { text: 'All posts', href: '/blog' },
-      };
-    });
-
-  // Order: events first, then image slides by displayOrder, then blog posts.
-  // Truncating from the end guarantees blog posts never bump events or slides.
-  const heroSlides: HeroSlideView[] = [
-    ...eventSlides,
-    ...imageSlideViews,
-    ...blogSlides,
-  ].slice(0, HERO_MAX_SLIDES);
+    // Order: events first, then image slides, then blog posts. Truncating from
+    // the end guarantees blog posts never bump events or slides.
+    return [...eventSlides, ...imageSlideViews, ...blogSlides].slice(0, HERO_MAX_SLIDES);
+  }, [heroSlidesData, featuredEventsData, featuredBlogPostsData]);
   const [showTestimonyModal, setShowTestimonyModal] = useState(false);
 
   // ── Sign-up bar state ─────────────────────────────────────────────────────

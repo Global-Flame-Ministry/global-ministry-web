@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Play, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { heroApi } from '../../api/heroApi';
-import { getPosterUrl } from '../HeroCarousel';
+import ClipPlayer from '../ClipPlayer';
 import type { HeroSlide } from '../../types';
 
 const FeaturedClips: React.FC = () => {
@@ -68,20 +68,16 @@ const FeaturedClips: React.FC = () => {
         </div>
 
         <div className="mx-auto max-w-4xl">
-          <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-xl">
+          <div className="relative rounded-2xl overflow-hidden bg-slate-900 shadow-xl">
             {inView ? (
-              <video
+              <ClipPlayer
                 key={current.id}
                 src={current.url}
-                poster={getPosterUrl(current.url)}
-                controls
-                preload="metadata"
-                playsInline
-                className="w-full h-full object-contain bg-black"
-                aria-label={current.title ?? 'Featured clip'}
+                title={current.title}
+                autoPlay
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center
+              <div className="w-full aspect-video flex items-center justify-center
                 bg-linear-to-br from-[#5b0064] to-[#712ae2]">
                 <span className="w-16 h-16 rounded-full bg-white/90 text-[#5b0064]
                   flex items-center justify-center shadow-lg">
@@ -91,7 +87,7 @@ const FeaturedClips: React.FC = () => {
             )}
           </div>
 
-          {(current.title || current.subtitle) && (
+          {(current.title || current.subtitle || current.slug) && (
             <div className="mt-6 text-center px-4">
               {current.title && (
                 <h3 className="font-serif text-2xl text-slate-900 leading-snug">
@@ -100,6 +96,15 @@ const FeaturedClips: React.FC = () => {
               )}
               {current.subtitle && (
                 <p className="text-slate-500 text-sm mt-1.5">{current.subtitle}</p>
+              )}
+              {current.slug && (
+                <Link
+                  to={`/clips/${current.slug}`}
+                  className="inline-flex items-center gap-1 mt-3 text-[10px] font-bold uppercase tracking-[0.25em]
+                    text-brand-600 hover:text-fuchsia-600 transition-colors"
+                >
+                  {current.hasWriteUp ? 'Watch and read' : 'Watch'} <ArrowRight className="w-3 h-3" />
+                </Link>
               )}
             </div>
           )}

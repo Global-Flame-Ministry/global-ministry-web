@@ -79,6 +79,7 @@ export interface HeroSlide {
   id: number;
   mediaType: HeroSlideMediaType;
   url: string;
+  slug?: string | null;
   title?: string | null;
   subtitle?: string | null;
   label?: string | null;
@@ -90,11 +91,16 @@ export interface HeroSlide {
   featuredOrder: number;
   createdOn: string;
   updatedAt?: string | null;
+  /** True when the clip has a write-up (one or more content blocks). */
+  hasWriteUp?: boolean;
+  /** Populated only by the single-clip (by slug) endpoint. */
+  contentBlocks?: BlogBlockDto[] | null;
 }
 
 export interface CreateHeroSlideDto {
   mediaType: HeroSlideMediaType;
   url: string;
+  slug?: string;
   title?: string;
   subtitle?: string;
   label?: string;
@@ -104,6 +110,8 @@ export interface CreateHeroSlideDto {
   isActive: boolean;
   isFeatured: boolean;
   featuredOrder: number;
+  /** Structured write-up blocks reusing the blog block model. */
+  contentBlocks?: CreateBlogBlockDto[];
 }
 
 export interface UpdateHeroSlideDto extends CreateHeroSlideDto {}
@@ -349,6 +357,8 @@ export interface BlogPostResponseDto {
   department: string;
   conferenceTheme: string | null;
   themeScripture: string | null;
+  eventStartsAt: string | null;
+  eventEndsAt: string | null;
   videoUrl: string | null;
   blocks: BlogBlockDto[];
 }
@@ -369,6 +379,8 @@ export interface CreateBlogPostDto {
   department: string;
   conferenceTheme?: string;
   themeScripture?: string;
+  eventStartsAt?: string | null;
+  eventEndsAt?: string | null;
   videoUrl?: string;
   blocks: CreateBlogBlockDto[];
 }

@@ -114,7 +114,6 @@ const ArticleImage: React.FC<CommonProps & { caption?: string }> = ({
             decoding="async"
             onLoad={() => setLoaded(true)}
             onError={() => setFailed(true)}
-            style={{ maxWidth: naturalMaxWidth }}
             className={`h-auto w-auto max-w-full max-h-[70vh] sm:max-h-[560px] rounded-2xl border
               border-[#d5c0d1]/30 object-contain shadow-sm
               ${loaded ? 'opacity-100' : 'opacity-0'}
