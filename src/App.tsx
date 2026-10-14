@@ -16,6 +16,7 @@ import Home              from './pages/Home';
 import Sermons           from './pages/Sermons';
 import SermonDetail      from './pages/SermonDetail';
 import SeriesDetail      from './pages/SeriesDetail';
+import Clips             from './pages/Clips';
 import Events            from './pages/Events';
 import EventDetails      from './pages/EventDetails';
 import Ministries        from './pages/Ministries';
@@ -197,6 +198,8 @@ const App: React.FC = () => {
               element={<PublicLayout fullBleed><SeriesDetail /></PublicLayout>} />
             <Route path="/sermons/:slug"
               element={<PublicLayout fullBleed><SermonDetail /></PublicLayout>} />
+            <Route path="/clips"
+              element={<PublicLayout fullBleed><Clips /></PublicLayout>} />
             <Route path="/events"
               element={<PublicLayout><Events /></PublicLayout>} />
             <Route path="/events/:slug"

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Play, X, Film, AlertCircle, Loader } from 'lucide-react';
 import SEO from '../components/SEO';
+import SmartImage from '../components/SmartImage';
 import { heroApi } from '../api/heroApi';
 import { getPosterUrl } from '../components/HeroCarousel';
 import type { HeroSlide } from '../types';
@@ -10,11 +11,13 @@ const ClipThumbnail: React.FC<{ clip: HeroSlide }> = ({ clip }) => {
   const poster = getPosterUrl(clip.url);
   if (poster) {
     return (
-      <img
+      <SmartImage
         src={poster}
         alt={clip.title ?? 'Short clip'}
-        loading="lazy"
-        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        variant="frame"
+        ratio={16 / 9}
+        rounded=""
+        className="h-full w-full"
       />
     );
   }

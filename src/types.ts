@@ -81,6 +81,8 @@ export interface HeroSlide {
   url: string;
   title?: string | null;
   subtitle?: string | null;
+  label?: string | null;
+  buttonText?: string | null;
   targetUrl?: string | null;
   displayOrder: number;
   isActive: boolean;
@@ -95,6 +97,8 @@ export interface CreateHeroSlideDto {
   url: string;
   title?: string;
   subtitle?: string;
+  label?: string;
+  buttonText?: string;
   targetUrl?: string;
   displayOrder: number;
   isActive: boolean;
@@ -214,10 +218,18 @@ export interface EventDto {
   module: string;
   isCancelled: boolean;
   isFeaturedOnHome: boolean;
+  featuredOn?: string | null;
   acceptsRegistrations: boolean;
+  maxRegistrations?: number | null;
+  seatsTaken?: number;
+  canRegister?: boolean;
   acceptsDonations: boolean;
   donationLabel: string | null;
+  conferenceTheme: string | null;
+  anchorScripture: string | null;
+  anchorScriptureReference: string | null;
   createdOn: string;
+  updatedOn?: string | null;
 }
 
 // TESTIMONY 
@@ -331,6 +343,7 @@ export interface BlogPostResponseDto {
   authorId: string;
   authorName: string;
   isPublished: boolean;
+  isFeaturedOnHero: boolean;
   createdOn: string;
   updatedOn: string | null;
   department: string;
@@ -352,6 +365,7 @@ export interface CreateBlogPostDto {
   excerpt?: string;
   coverImageUrl?: string;
   isPublished: boolean;
+  isFeaturedOnHero?: boolean;
   department: string;
   conferenceTheme?: string;
   themeScripture?: string;
@@ -363,6 +377,7 @@ export type UpdateBlogPostDto = CreateBlogPostDto;
 
 export interface BlogQueryObject {
   isPublished?: boolean;
+  featuredOnHero?: boolean;
   searchTerm?: string;
   pageNumber?: number;
   pageSize?: number;

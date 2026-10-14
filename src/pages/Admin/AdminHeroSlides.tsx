@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Plus, Trash2, RefreshCw, Pencil,
-  X, Eye, EyeOff, ChevronUp, ChevronDown, Image as ImageIcon, Film, LayoutGrid
+  X, Eye, EyeOff, ChevronUp, ChevronDown, Image as ImageIcon, Film, LayoutGrid, Star
 } from 'lucide-react';
 import { heroApi } from '../../api/heroApi';
 import type { CreateHeroSlideDto, HeroSlide } from '../../types';
@@ -9,16 +9,22 @@ import toast from 'react-hot-toast';
 import { useAdminTheme } from '../../context/AdminThemeContext';
 import ImageUpload from '../../components/ImageUpload';
 import VideoUpload from '../../components/VideoUpload';
-import { getPosterUrl } from '../../components/HeroCarousel';
+import { getPosterUrl, HERO_ROTATION_MS } from '../../components/HeroCarousel';
+
+const MAX_FEATURED_CLIPS = 3;
 
 const emptyForm = (displayOrder = 0): CreateHeroSlideDto => ({
   mediaType: 'Image',
   url: '',
   title: '',
   subtitle: '',
+  label: '',
+  buttonText: '',
   targetUrl: '',
   displayOrder,
   isActive: true,
+  isFeatured: false,
+  featuredOrder: 0,
 });
 
 const AdminHeroSlides = () => {
@@ -53,9 +59,19 @@ const AdminHeroSlides = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<HeroSlide | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const isDirty = initialForm != null && JSON.stringify(form) !== JSON.stringify(initialForm);
   const isBusy  = isSaving || isUploading;
+
+  const featuredClips = useMemo(
+    () => slides.filter(s => s.mediaType === 'Video' && s.isFeatured && s.isActive),
+    [slides]
+  );
+  const isCurrentSlideFeatured = editing != null && featuredClips.some(f => f.id === editing.id);
+  const featuredLimitReached = featuredClips.length >= MAX_FEATURED_CLIPS;
+  const featureToggleDisabled =
+    form.mediaType === 'Video' && featuredLimitReached && !isCurrentSlideFeatured;
 
   const fetchSlides = useCallback(async () => {
     setIsLoading(true);
@@ -75,6 +91,7 @@ const AdminHeroSlides = () => {
     setEditing(null);
     setInitialForm(null);
     setIsUploading(false);
+    setSaveError(null);
   }, []);
 
   // Default new slides to the end of the list
@@ -87,6 +104,7 @@ const AdminHeroSlides = () => {
     setForm(f);
     setInitialForm(f);
     setIsUploading(false);
+    setSaveError(null);
     setShowForm(true);
   };
 
@@ -96,14 +114,19 @@ const AdminHeroSlides = () => {
       url: s.url,
       title: s.title ?? '',
       subtitle: s.subtitle ?? '',
+      label: s.label ?? '',
+      buttonText: s.buttonText ?? '',
       targetUrl: s.targetUrl ?? '',
       displayOrder: s.displayOrder,
       isActive: s.isActive,
+      isFeatured: s.isFeatured,
+      featuredOrder: s.featuredOrder,
     };
     setEditing(s);
     setForm(f);
     setInitialForm(f);
     setIsUploading(false);
+    setSaveError(null);
     setShowForm(true);
   };
 
@@ -129,6 +152,7 @@ const AdminHeroSlides = () => {
   const handleSave = async () => {
     if (!form.url.trim()) { toast.error('Please upload media first'); return; }
     setIsSaving(true);
+    setSaveError(null);
     try {
       if (editing) {
         const res = await heroApi.updateSlide(editing.id, form);
@@ -137,7 +161,13 @@ const AdminHeroSlides = () => {
         const res = await heroApi.createSlide(form);
         if (res.data.isSuccess) { toast.success('Created'); closeForm(); fetchSlides(); }
       }
-    } catch { toast.error('Failed to save'); }
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Failed to save';
+      setSaveError(message);
+      toast.error(message);
+    }
     finally { setIsSaving(false); }
   };
 
@@ -148,9 +178,13 @@ const AdminHeroSlides = () => {
         url: s.url,
         title: s.title ?? undefined,
         subtitle: s.subtitle ?? undefined,
+        label: s.label ?? undefined,
+        buttonText: s.buttonText ?? undefined,
         targetUrl: s.targetUrl ?? undefined,
         displayOrder: s.displayOrder,
         isActive: !s.isActive,
+        isFeatured: s.isFeatured,
+        featuredOrder: s.featuredOrder,
       });
       if (res.data.isSuccess && res.data.data) {
         setSlides(prev => prev.map(x => x.id === s.id ? res.data.data! : x));
@@ -171,13 +205,17 @@ const AdminHeroSlides = () => {
       await Promise.all([
         heroApi.updateSlide(a.id, {
           mediaType: a.mediaType, url: a.url, title: a.title ?? undefined,
-          subtitle: a.subtitle ?? undefined, targetUrl: a.targetUrl ?? undefined,
+          subtitle: a.subtitle ?? undefined, label: a.label ?? undefined,
+          buttonText: a.buttonText ?? undefined, targetUrl: a.targetUrl ?? undefined,
           displayOrder: b.displayOrder, isActive: a.isActive,
+          isFeatured: a.isFeatured, featuredOrder: a.featuredOrder,
         }),
         heroApi.updateSlide(b.id, {
           mediaType: b.mediaType, url: b.url, title: b.title ?? undefined,
-          subtitle: b.subtitle ?? undefined, targetUrl: b.targetUrl ?? undefined,
+          subtitle: b.subtitle ?? undefined, label: b.label ?? undefined,
+          buttonText: b.buttonText ?? undefined, targetUrl: b.targetUrl ?? undefined,
           displayOrder: a.displayOrder, isActive: b.isActive,
+          isFeatured: b.isFeatured, featuredOrder: b.featuredOrder,
         }),
       ]);
       toast.success('Order updated');
@@ -219,8 +257,8 @@ const AdminHeroSlides = () => {
 
       <div className={`px-8 py-4 border-b ${t.border}`}>
         <p className={`text-sm ${t.subtext}`}>
-          Photos and videos rotate on the homepage hero every 15 seconds (oldest first).
-          Videos play muted and loop; on slow connections they fall back to a poster image.
+          Photos rotate on the homepage hero every {HERO_ROTATION_MS / 1000} seconds (by display order).
+          Featured home events appear first, ahead of these image slides.
         </p>
       </div>
 
@@ -280,11 +318,16 @@ const AdminHeroSlides = () => {
                     <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-fuchsia-500/20 text-fuchsia-600 flex-shrink-0">
                       Order {s.displayOrder}
                     </span>
+                    {s.mediaType === 'Video' && s.isFeatured && (
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 flex-shrink-0 flex items-center gap-1">
+                        <Star className="w-2.5 h-2.5 fill-current" /> Featured
+                      </span>
+                    )}
                   </div>
                   {s.subtitle && <p className={`text-xs truncate mb-1 ${t.subtext}`}>{s.subtitle}</p>}
                   <div className="flex items-center gap-3">
                     <span className={`text-[10px] ${t.mutedtext}`}>
-                      {new Date(s.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      {new Date(s.createdOn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </span>
                     {s.targetUrl && <span className={`text-[10px] ${t.mutedtext} truncate`}>→ {s.targetUrl}</span>}
                   </div>
@@ -328,7 +371,13 @@ const AdminHeroSlides = () => {
                     <button
                       key={type}
                       type="button"
-                      onClick={() => setForm(f => ({ ...f, mediaType: type, url: '' }))}
+                      onClick={() => setForm(f => ({
+                        ...f,
+                        mediaType: type,
+                        url: '',
+                        isFeatured: type === 'Video' ? f.isFeatured : false,
+                        ...(type === 'Video' ? { label: '', buttonText: '' } : {}),
+                      }))}
                       className={`flex items-center justify-center gap-2 px-4 py-2.5 border rounded-xl text-sm font-bold uppercase tracking-widest transition-all ${
                         form.mediaType === type
                           ? 'bg-fuchsia-600 text-white border-fuchsia-600'
@@ -344,7 +393,9 @@ const AdminHeroSlides = () => {
 
               <div>
                 <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>
-                  {form.mediaType === 'Image' ? 'Photo' : 'Video Clip'} — rotates every 15s
+                  {form.mediaType === 'Image'
+                    ? `Photo — rotates with the others every ${HERO_ROTATION_MS / 1000} seconds`
+                    : 'Video Clip'}
                 </label>
                 {form.mediaType === 'Image' ? (
                   <ImageUpload
@@ -365,12 +416,23 @@ const AdminHeroSlides = () => {
                 )}
               </div>
 
+              {form.mediaType === 'Image' && (
+                <div>
+                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Label (small text above the title)</label>
+                  <input type="text" value={form.label ?? ''} onChange={e => setForm(f => ({ ...f, label: e.target.value }))}
+                    placeholder="Small text above the title (optional)" maxLength={60}
+                    className={`w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all ${t.modalInput}`} />
+                  <p className={`text-xs mt-1 ${t.label}`}>Small text shown above the title on the homepage hero. Falls back to the subtitle when empty.</p>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Title</label>
                   <input type="text" value={form.title ?? ''} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                     placeholder="Slide title (optional)"
                     className={`w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all ${t.modalInput}`} />
+                  <p className={`text-xs mt-1 ${t.label}`}>Headline shown over the image on the homepage hero.</p>
                 </div>
                 <div>
                   <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Display Order</label>
@@ -384,6 +446,7 @@ const AdminHeroSlides = () => {
                 <input type="text" value={form.subtitle ?? ''} onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))}
                   placeholder="Short caption (optional)"
                   className={`w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all ${t.modalInput}`} />
+                <p className={`text-xs mt-1 ${t.label}`}>Used as the small label above the headline only when Label is empty.</p>
               </div>
 
               <div>
@@ -391,7 +454,18 @@ const AdminHeroSlides = () => {
                 <input type="text" value={form.targetUrl ?? ''} onChange={e => setForm(f => ({ ...f, targetUrl: e.target.value }))}
                   placeholder="https://... (optional)"
                   className={`w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all ${t.modalInput}`} />
+                <p className={`text-xs mt-1 ${t.label}`}>Where the hero button and slide link to (e.g. /plan-your-visit).</p>
               </div>
+
+              {form.mediaType === 'Image' && (
+                <div>
+                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Button Text</label>
+                  <input type="text" value={form.buttonText ?? ''} onChange={e => setForm(f => ({ ...f, buttonText: e.target.value }))}
+                    placeholder="e.g. Learn more (optional)" maxLength={40}
+                    className={`w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all ${t.modalInput}`} />
+                  <p className={`text-xs mt-1 ${t.label}`}>Text for the hero button. Shown only when a Target Link is set.</p>
+                </div>
+              )}
 
               <label className="flex items-center gap-3 cursor-pointer">
                 <div onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))}
@@ -400,9 +474,50 @@ const AdminHeroSlides = () => {
                 </div>
                 <span className={`text-sm ${t.subtext}`}>Show on homepage</span>
               </label>
+
+              {form.mediaType === 'Video' && (
+                <div className="space-y-1">
+                  <div
+                    onClick={() => {
+                      if (featureToggleDisabled) return;
+                      setForm(f => ({ ...f, isFeatured: !f.isFeatured }));
+                    }}
+                    className={`flex items-center gap-3 ${featureToggleDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  >
+                    <div className={`w-11 h-6 rounded-full transition-colors ${form.isFeatured ? 'bg-amber-500' : t.toggle}`}>
+                      <div className={`w-5 h-5 bg-white rounded-full mt-0.5 transition-transform ${form.isFeatured ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                    </div>
+                    <span className={`text-sm flex items-center gap-2 ${t.subtext}`}>
+                      <Star className="w-4 h-4 text-amber-500" /> Feature on home page
+                    </span>
+                  </div>
+                  {featureToggleDisabled ? (
+                    <div className={`text-xs pl-14 space-y-1 ${t.label}`}>
+                      <p>Maximum of 3 featured clips. Unfeature one first.</p>
+                      {featuredClips.length > 0 && (
+                        <p>
+                          Currently featured:{' '}
+                          {featuredClips.map(f => f.title || 'Untitled clip').join(', ')}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className={`text-xs pl-14 ${t.label}`}>
+                      Featured clips appear in the home Short Clips section
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Fixed footer */}
+            {saveError && (
+              <div className="px-6 pb-3 shrink-0">
+                <p className="text-xs text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                  {saveError}
+                </p>
+              </div>
+            )}
             <div className={`px-6 py-4 border-t shrink-0 flex gap-3 justify-end ${t.border}`}>
               <button onClick={closeForm} disabled={isBusy}
                 className={`px-4 py-2 rounded-lg text-sm transition-colors disabled:opacity-50 ${t.btnGhost}`}>
