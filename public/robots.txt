@@ -7,5 +7,6 @@ Disallow: /register
 Disallow: /forgot-password
 Disallow: /reset-password
 Disallow: /resend-confirmation
+Disallow: /confirm-email-change
 
 Sitemap: https://globalflameministry.org/sitemap.xml
