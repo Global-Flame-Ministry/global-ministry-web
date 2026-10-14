@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Plus, Trash2, RefreshCw, Search, Pencil,
-  X, Calendar, MapPin, Filter, Ban, Building2
+  X, Calendar, MapPin, Filter, Ban, Building2, Star
 } from 'lucide-react';
 import { eventApi, type CreateEventDto, type UpdateEventDto } from '../../api/eventApi';
 import { ministryApi } from '../../api/ministryApi';
@@ -18,6 +18,8 @@ const emptyForm = (): CreateEventDto => ({
   ministryId: null,
   acceptsDonations: false, donationLabel: '',
   acceptsRegistrations: false,
+  isFeaturedOnHome: false,
+  conferenceTheme: '', anchorScripture: '', anchorScriptureReference: '',
 });
 
 const TEXT_FIELDS: { label: string; key: keyof CreateEventDto; placeholder: string }[] = [
@@ -115,6 +117,10 @@ const AdminEvents = () => {
       acceptsDonations:     e.acceptsDonations,
       donationLabel:        e.donationLabel ?? '',
       acceptsRegistrations: e.acceptsRegistrations,
+      isFeaturedOnHome:     e.isFeaturedOnHome,
+      conferenceTheme:          e.conferenceTheme ?? '',
+      anchorScripture:          e.anchorScripture ?? '',
+      anchorScriptureReference: e.anchorScriptureReference ?? '',
     });
     setIsCancelledForm(e.isCancelled);
     setShowForm(true);
@@ -134,6 +140,9 @@ const AdminEvents = () => {
         description:   form.description?.trim()   || undefined,
         donationLabel: form.donationLabel?.trim() || undefined,
         ministryId:    form.ministryId || null,
+        conferenceTheme:          form.conferenceTheme?.trim()          || undefined,
+        anchorScripture:          form.anchorScripture?.trim()          || undefined,
+        anchorScriptureReference: form.anchorScriptureReference?.trim() || undefined,
       };
 
       if (editing) {
@@ -149,6 +158,10 @@ const AdminEvents = () => {
           acceptsDonations:     sanitized.acceptsDonations,
           donationLabel:        sanitized.donationLabel,
           acceptsRegistrations: sanitized.acceptsRegistrations,
+          isFeaturedOnHome:     sanitized.isFeaturedOnHome,
+          conferenceTheme:          sanitized.conferenceTheme,
+          anchorScripture:          sanitized.anchorScripture,
+          anchorScriptureReference: sanitized.anchorScriptureReference,
         };
         const res = await eventApi.update(editing.id, updateDto);
         if (res.data.isSuccess) { toast.success('Event updated'); setShowForm(false); fetchEvents(); }
@@ -244,6 +257,11 @@ const AdminEvents = () => {
                     <p className="font-bold text-sm truncate">{e.title}</p>
                     {e.isCancelled && (
                       <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-500/20 text-red-500">Cancelled</span>
+                    )}
+                    {e.isFeaturedOnHome && (
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 flex items-center gap-1">
+                        <Star className="w-2.5 h-2.5" />Featured
+                      </span>
                     )}
                     <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-fuchsia-500/20 text-fuchsia-600">{e.module}</span>
                     {e.ministryName && (
@@ -371,6 +389,69 @@ const AdminEvents = () => {
                   placeholder="Donation button label (optional)"
                   className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`} />
               )}
+
+              <div className={`rounded-xl border p-4 space-y-4 ${t.border}`}>
+                <div className={isDark ? 'bg-white/5 -m-4 mb-0 p-4 rounded-t-xl' : 'bg-slate-50 -m-4 mb-0 p-4 rounded-t-xl'}>
+                  <p className={`text-xs font-bold uppercase tracking-widest ${t.label}`}>Conference Details</p>
+                  <p className={`text-xs mt-1 ${t.subtext}`}>Shown on the home hero when this event is featured.</p>
+                </div>
+
+                <div>
+                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Conference Theme</label>
+                  <input type="text" value={form.conferenceTheme}
+                    onChange={e => setForm(p => ({ ...p, conferenceTheme: e.target.value }))}
+                    placeholder="e.g. The Wealth of the Nations"
+                    className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`} />
+                </div>
+
+                <div>
+                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Anchor Scripture</label>
+                  <textarea rows={3} value={form.anchorScripture}
+                    onChange={e => setForm(p => ({ ...p, anchorScripture: e.target.value }))}
+                    placeholder="The anchor scripture text..."
+                    className={`w-full px-4 py-3 border rounded-xl text-sm outline-none resize-none ${t.modalInput}`} />
+                </div>
+
+                <div>
+                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Scripture Reference</label>
+                  <input type="text" value={form.anchorScriptureReference}
+                    onChange={e => setForm(p => ({ ...p, anchorScriptureReference: e.target.value }))}
+                    placeholder="e.g. Isaiah 60:5"
+                    className={`w-full px-4 py-3 border rounded-xl text-sm outline-none ${t.modalInput}`} />
+                </div>
+
+                {(form.conferenceTheme || form.anchorScripture) && (
+                  <div className="rounded-lg bg-gradient-to-t from-black/90 to-black/40 p-4 text-white">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-fuchsia-300 mb-2">Hero Preview</p>
+                    {form.conferenceTheme && (
+                      <p className="font-serif italic text-sm mb-1">Theme: {form.conferenceTheme}</p>
+                    )}
+                    {form.anchorScripture && (
+                      <blockquote className="border-l-2 border-fuchsia-400/60 pl-3">
+                        <p className="text-xs text-white/85 italic line-clamp-3">&ldquo;{form.anchorScripture}&rdquo;</p>
+                        {form.anchorScriptureReference && (
+                          <cite className="not-italic block mt-1 text-[10px] font-bold uppercase tracking-widest text-fuchsia-300">
+                            {form.anchorScriptureReference}
+                          </cite>
+                        )}
+                      </blockquote>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-3 cursor-pointer"
+                  onClick={() => setForm(p => ({ ...p, isFeaturedOnHome: !p.isFeaturedOnHome }))}>
+                  <div className={`w-11 h-6 rounded-full transition-colors ${form.isFeaturedOnHome ? 'bg-fuchsia-600' : t.toggle}`}>
+                    <div className={`w-5 h-5 bg-white rounded-full mt-0.5 transition-transform ${form.isFeaturedOnHome ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  </div>
+                  <span className={`text-sm flex items-center gap-2 ${t.subtext}`}>
+                    <Star className="w-4 h-4 text-amber-500" /> Feature on home page
+                  </span>
+                </div>
+                <p className={`text-xs pl-14 ${t.label}`}>Appears in the home hero until the event ends</p>
+              </div>
 
               {editing && (
                 <div className="flex items-center gap-3 cursor-pointer" onClick={() => setIsCancelledForm(v => !v)}>

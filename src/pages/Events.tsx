@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, X, Calendar, MapPin, ArrowLeft, Loader } from 'lucide-react';
 import { eventApi } from '../api/eventApi';
+import SmartImage from '../components/SmartImage';
 import type { EventDto } from '../types';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
@@ -44,12 +45,12 @@ const Events: React.FC = () => {
   });
 
   const { data: upcomingEvents = [], isLoading: isLoadingUpcoming } = useQuery({
-    queryKey: ['upcomingEvents'],
+    queryKey: ['eventsPageUpcoming'],
     queryFn: () => eventApi.getUpcoming({ pageSize: 20 }).then(res => res.data.data?.items ?? []),
   });
 
   const { data: ongoingEvents = [] } = useQuery({
-    queryKey: ['ongoingEvents'],
+    queryKey: ['eventsPageOngoing'],
     queryFn: () => eventApi.getOngoing({ pageSize: 20 }).then(res => res.data.data?.items ?? []),
   });
 
@@ -86,16 +87,15 @@ const EventCard: React.FC<{
       transform: 'translateY(32px)',
       transition: 'opacity 0.7s ease-out, transform 0.7s ease-out',
     }} className="flex flex-col md:flex-row gap-8 pb-16 border-b border-gray-100 last:border-b-0 cursor-pointer">
-      <div className="w-full md:w-1/2 overflow-hidden rounded-xl bg-gray-100">
-        {event.imageUrl ? (
-          <img src={event.imageUrl} alt={event.title} loading="lazy"
-            className="w-full aspect-video object-cover" />
-        ) : (
-          <div className="w-full aspect-video bg-gradient-to-br from-fuchsia-100 to-purple-100
-            flex items-center justify-center">
-            <Calendar className="w-12 h-12 text-fuchsia-300" />
-          </div>
-        )}
+      <div className="w-full md:w-1/2">
+        <SmartImage
+          src={event.imageUrl}
+          alt={event.title}
+          variant="frame"
+          ratio={16 / 9}
+          rounded="rounded-xl"
+          className="w-full"
+        />
       </div>
       <div className="w-full md:w-1/2 flex flex-col justify-center">
         <div className="flex items-center gap-2 mb-3">
@@ -344,22 +344,14 @@ const EventCard: React.FC<{
                   className="bg-white rounded-xl overflow-hidden shadow-sm
                     border border-gray-100 group"
                 >
-                  <div className="h-52 sm:h-56 overflow-hidden bg-gray-100">
-                    {event.imageUrl ? (
-                      <img
-                        src={event.imageUrl}
-                        alt={event.title}
-                        loading="lazy"
-                        className="w-full h-full object-cover object-center grayscale
-                          group-hover:grayscale-0 transition-all duration-500
-                          group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-slate-200 flex items-center justify-center">
-                        <Calendar className="w-12 h-12 text-slate-300" />
-                      </div>
-                    )}
-                  </div>
+                  <SmartImage
+                    src={event.imageUrl}
+                    alt={event.title}
+                    variant="frame"
+                    ratio={16 / 10}
+                    rounded=""
+                    className="w-full grayscale transition-all duration-500 group-hover:grayscale-0"
+                  />
                   <div className="p-5 sm:p-6">
                     <span className="text-fuchsia-600 text-xs font-bold uppercase tracking-widest">
                       {event.module}

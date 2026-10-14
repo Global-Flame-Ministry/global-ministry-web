@@ -13,6 +13,10 @@ export interface CreateEventDto {
   acceptsRegistrations: boolean;
   acceptsDonations: boolean;
   donationLabel?: string;
+  isFeaturedOnHome?: boolean;
+  conferenceTheme?: string;
+  anchorScripture?: string;
+  anchorScriptureReference?: string;
 }
 
 export interface UpdateEventDto {
@@ -27,6 +31,10 @@ export interface UpdateEventDto {
   acceptsRegistrations: boolean;
   acceptsDonations: boolean;
   donationLabel?: string;
+  isFeaturedOnHome?: boolean;
+  conferenceTheme?: string;
+  anchorScripture?: string;
+  anchorScriptureReference?: string;
 }
 
 export const eventApi = {
@@ -51,6 +59,7 @@ export const eventApi = {
     module?: string;
     upcomingOnly?: boolean;
     isCancelled?: boolean;
+    isFeaturedOnHome?: boolean;
   }) =>
     api.get<ApiResponse<PagedResult<EventDto>>>('/api/ministry/events', { params }),
 

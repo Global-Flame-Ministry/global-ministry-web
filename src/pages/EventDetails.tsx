@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Calendar, MapPin, Clock, Building2, Loader } from 'lucide-react';
 import { eventApi } from '../api/eventApi';
 import api from '../api/axios';
+import SmartImage from '../components/SmartImage';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -136,14 +137,12 @@ export default function EventDetails() {
         ) : event ? (
           <article>
             {event.imageUrl && (
-              <div className="w-full overflow-hidden mb-6">
-                <img
-                  src={event.imageUrl}
-                  alt={event.title}
-                  loading="lazy"
-                  className="w-full h-[300px] sm:h-[450px] object-cover rounded-xl"
-                />
-              </div>
+              <SmartImage
+                src={event.imageUrl}
+                alt={event.title}
+                variant="article"
+                className="mb-6"
+              />
             )}
 
             <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -163,6 +162,33 @@ export default function EventDetails() {
             <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mt-2 mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>
               {event.title}
             </h1>
+
+            {(event.conferenceTheme || event.anchorScripture) && (
+              <div className="mb-8 rounded-2xl bg-gradient-to-br from-fuchsia-50 to-white border border-fuchsia-100 p-6">
+                {event.conferenceTheme && (
+                  <>
+                    <p className="text-xs font-bold uppercase tracking-[0.3em] text-fuchsia-600 mb-2">
+                      Conference Theme
+                    </p>
+                    <p className="text-xl md:text-2xl font-serif italic text-slate-900 mb-4">
+                      {event.conferenceTheme}
+                    </p>
+                  </>
+                )}
+                {event.anchorScripture && (
+                  <blockquote className="border-l-4 border-fuchsia-400 pl-5">
+                    <p className="text-gray-700 italic leading-relaxed">
+                      &ldquo;{event.anchorScripture}&rdquo;
+                    </p>
+                    {event.anchorScriptureReference && (
+                      <cite className="not-italic block mt-2 text-sm font-bold uppercase tracking-widest text-fuchsia-600">
+                        {event.anchorScriptureReference}
+                      </cite>
+                    )}
+                  </blockquote>
+                )}
+              </div>
+            )}
 
             <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mb-8 pb-8 border-b border-gray-200">
               <div className="flex items-center gap-2 text-gray-600">
@@ -187,7 +213,7 @@ export default function EventDetails() {
               </div>
             )}
 
-            <div className="mt-10 flex flex-wrap gap-4">
+            <div id="register" className="mt-10 scroll-mt-24 flex flex-wrap gap-4">
               {event.acceptsRegistrations && getEventStatus() !== 'Past' && event.isCancelled !== true && (
                 <button
                   onClick={() => setShowRegModal(true)}
