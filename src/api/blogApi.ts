@@ -47,6 +47,12 @@ export const blogApi = {
       params: sanitizeParams(query),
     }),
 
+  // Published posts that are featured on the home hero, newest featured first.
+  getFeaturedPosts: (query?: BlogQueryObject) =>
+    api.get<ApiResponse<PagedResult<BlogPostResponseDto>>>('/api/blog', {
+      params: sanitizeParams({ featuredOnHero: true, ...query }),
+    }),
+
   getBlogPostBySlug: (slug: string) =>
     api.get<ApiResponse<BlogPostResponseDto>>(`/api/blog/${slug}`),
 

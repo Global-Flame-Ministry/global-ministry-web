@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { CalendarDays, Flame } from 'lucide-react';
+import { CalendarDays } from 'lucide-react';
 import { getReadTime } from '../../utils/readTime';
+import SmartImage from '../SmartImage';
 import type { BlogPostResponseDto } from '../../types';
 
 const formatDate = (value: string) =>
@@ -23,21 +24,14 @@ const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
       className="group flex flex-col overflow-hidden rounded-2xl bg-white border border-[#d5c0d1]/40
         cinematic-shadow transition-all duration-300 hover:-translate-y-1"
     >
-      <div className="aspect-[16/10] overflow-hidden bg-[#f3f3f9]">
-        {post.coverImageUrl ? (
-          <img
-            src={post.coverImageUrl}
-            alt={post.title}
-            loading="lazy"
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          />
-        ) : (
-          <div className="w-full h-full bg-linear-to-br from-[#f3f3f9] to-[#e9d5ff]
-            flex items-center justify-center">
-            <Flame className="w-10 h-10 text-[#b57edc]" />
-          </div>
-        )}
-      </div>
+      <SmartImage
+        src={post.coverImageUrl}
+        alt={post.title}
+        variant="frame"
+        ratio={16 / 10}
+        rounded=""
+        className="w-full"
+      />
 
       <div className="flex flex-1 flex-col p-5">
         <div className="flex items-center gap-2">

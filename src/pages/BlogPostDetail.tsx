@@ -6,6 +6,7 @@ import { blogApi } from '../api/blogApi';
 import BlogCard from '../components/blog/BlogCard';
 import BlogSidebar from '../components/blog/BlogSidebar';
 import ShareButtons from '../components/blog/ShareButtons';
+import SmartImage from '../components/SmartImage';
 import { getReadTime } from '../utils/readTime';
 import type { BlogBlockDto } from '../types';
 
@@ -48,14 +49,11 @@ function ContentBlock({ block }: { block: BlogBlockDto }) {
       );
     case 'Image':
       return (
-        <figure className="my-8 w-full mx-auto">
-          <img
-            src={block.imageUrl ?? ''}
-            alt={block.imageUrl?.split('/').pop() ?? 'Blog post image'}
-            loading="lazy"
-            className="w-full rounded-2xl object-cover"
-          />
-        </figure>
+        <SmartImage
+          src={block.imageUrl}
+          alt={block.imageUrl?.split('/').pop() ?? 'Blog post image'}
+          variant="article"
+        />
       );
     case 'Quote': {
       const [quote, author] = (block.content ?? '').split('|').map((s) => s.trim());
@@ -184,19 +182,25 @@ const BlogPostDetail: React.FC = () => {
             )}
 
             {post.coverImageUrl && (
-              <div className="w-full mb-10 rounded-2xl overflow-hidden">
-                <img
-                  src={post.coverImageUrl}
-                  alt={post.title}
-                  loading="lazy"
-                  className="w-full h-auto object-cover"
-                />
-              </div>
+              <SmartImage
+                src={post.coverImageUrl}
+                alt={post.title}
+                variant="article"
+                priority
+                className="mb-10"
+              />
             )}
 
             {post.videoUrl && (
-              <div className="w-full mb-10 rounded-2xl overflow-hidden">
-                <video controls className="w-full" src={post.videoUrl} />
+              <div className="w-full mb-10 rounded-2xl overflow-hidden bg-black">
+                <video
+                  controls
+                  playsInline
+                  preload="metadata"
+                  poster={post.coverImageUrl ?? undefined}
+                  className="w-full"
+                  src={post.videoUrl}
+                />
               </div>
             )}
 
@@ -231,7 +235,7 @@ const BlogPostDetail: React.FC = () => {
                 >
                   Related Posts
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                   {relatedPosts.map((relatedPost) => (
                     <BlogCard key={relatedPost.id} post={relatedPost} />
                   ))}

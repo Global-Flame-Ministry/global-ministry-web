@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Newspaper, Tag as TagIcon } from 'lucide-react';
+import { Tag as TagIcon } from 'lucide-react';
 import { blogApi } from '../../api/blogApi';
+import SmartImage from '../SmartImage';
 
 const formatDate = (value: string) =>
   new Date(value).toLocaleDateString('en-US', {
@@ -38,19 +39,12 @@ const BlogSidebar: React.FC = () => {
         <div className="mt-4 space-y-4">
           {latest.map(post => (
             <Link key={post.id} to={`/blog/${post.slug}`} className="group flex gap-3">
-              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-[#f3f3f9]">
-                {post.coverImageUrl ? (
-                  <img
-                    src={post.coverImageUrl}
-                    alt={post.title}
-                    loading="lazy"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-[#b57edc]">
-                    <Newspaper className="h-5 w-5" />
-                  </div>
-                )}
+              <div className="h-12 w-12 shrink-0">
+                <SmartImage
+                  src={post.coverImageUrl}
+                  alt={post.title}
+                  variant="thumb"
+                />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-[#1a1c20] line-clamp-2

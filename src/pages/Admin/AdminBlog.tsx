@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import {
   Plus, Trash2, RefreshCw, Search, Pencil,
   X, Eye, EyeOff, ChevronUp, ChevronDown,
-  Quote, FileText, BookOpen, Image,
+  Quote, FileText, BookOpen, Image, Star,
 } from 'lucide-react';
 import { blogApi } from '../../api/blogApi';
 import type {
@@ -30,6 +30,7 @@ const defaultPostForm = (): CreateBlogPostDto => ({
   videoUrl: undefined,
   department: 'Daughters of honour',
   isPublished: false,
+  isFeaturedOnHero: false,
   blocks: [],
   conferenceTheme: undefined,
   themeScripture: undefined,
@@ -49,8 +50,10 @@ const AdminBlog: React.FC = () => {
   const [form, setForm] = useState<CreateBlogPostDto>(defaultPostForm());
   const [blocks, setBlocks] = useState<EditorBlock[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [uploadCount, setUploadCount] = useState(0);
   const [deleteTarget, setDeleteTarget] = useState<BlogPostResponseDto | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [featuredPosts, setFeaturedPosts] = useState<BlogPostResponseDto[]>([]);
 
   const style = useMemo(() => ({
     bg: isDark ? 'bg-[#0d0d0d] text-white' : 'bg-slate-50 text-slate-900',
@@ -59,6 +62,10 @@ const AdminBlog: React.FC = () => {
     input: isDark ? 'bg-zinc-900 border-zinc-700 text-white' : 'bg-white border-slate-200 text-slate-900',
     muted: isDark ? 'text-zinc-400' : 'text-slate-500',
   }), [isDark]);
+
+  const handleUploadingChange = useCallback((uploading: boolean) => {
+    setUploadCount(prev => Math.max(0, prev + (uploading ? 1 : -1)));
+  }, []);
 
   const fetchPosts = useCallback(async () => {
     setIsLoading(true);
@@ -79,7 +86,19 @@ const AdminBlog: React.FC = () => {
     }
   }, [pageNumber, pageSize, search]);
 
+  const loadFeatured = useCallback(async () => {
+    try {
+      const res = await blogApi.getAllBlogPosts({ featuredOnHero: true, pageSize: 50 });
+      if (res.data.isSuccess && res.data.data) {
+        setFeaturedPosts(res.data.data.items);
+      }
+    } catch {
+      setFeaturedPosts([]);
+    }
+  }, []);
+
   useEffect(() => { fetchPosts(); }, [fetchPosts]);
+  useEffect(() => { loadFeatured(); }, [loadFeatured]);
   useEffect(() => { setPageNumber(1); }, [search]);
 
   const loadEditor = (post?: BlogPostResponseDto) => {
@@ -100,6 +119,7 @@ const AdminBlog: React.FC = () => {
         videoUrl: post.videoUrl ?? undefined,
         department: post.department ?? 'Daughters of honour',
         isPublished: post.isPublished,
+        isFeaturedOnHero: post.isFeaturedOnHero,
         blocks: mappedBlocks,
         conferenceTheme: post.conferenceTheme ?? undefined,
         themeScripture: post.themeScripture ?? undefined,
@@ -155,6 +175,10 @@ const AdminBlog: React.FC = () => {
   const savePost = async () => {
     if (!form.title.trim()) { toast.error('Title is required'); return; }
     if (!form.department) { toast.error('Department is required'); return; }
+    if (form.videoUrl && !form.coverImageUrl) {
+      toast.error('Add a cover image — it is used as the video poster and on cards.');
+      return;
+    }
 
     const sortedBlocks: CreateBlogBlockDto[] = blocks
       .map((block, idx) => ({
@@ -172,6 +196,7 @@ const AdminBlog: React.FC = () => {
       videoUrl: form.videoUrl?.trim() || undefined,
       department: form.department,
       isPublished: form.isPublished,
+      isFeaturedOnHero: form.isFeaturedOnHero ?? false,
       blocks: sortedBlocks,
       conferenceTheme: form.conferenceTheme?.trim() || undefined,
       themeScripture: form.themeScripture?.trim() || undefined,
@@ -185,6 +210,7 @@ const AdminBlog: React.FC = () => {
           toast.success('Blog post updated');
           setShowEditor(false);
           fetchPosts();
+          loadFeatured();
         } else {
           toast.error(res.data.message || 'Update failed');
         }
@@ -194,12 +220,16 @@ const AdminBlog: React.FC = () => {
           toast.success('Blog post created');
           setShowEditor(false);
           fetchPosts();
+          loadFeatured();
         } else {
           toast.error(res.data.message || 'Create failed');
         }
       }
-    } catch {
-      toast.error('Failed to save blog post');
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Failed to save blog post';
+      toast.error(message);
     } finally {
       setIsSaving(false);
     }
@@ -213,6 +243,7 @@ const AdminBlog: React.FC = () => {
       toast.success('Blog post deleted');
       setDeleteTarget(null);
       fetchPosts();
+      loadFeatured();
     } catch {
       toast.error('Failed to delete blog post');
     } finally {
@@ -226,11 +257,28 @@ const AdminBlog: React.FC = () => {
       if (res.data.isSuccess && res.data.data) {
         setPosts(prev => prev.map(item => item.id === post.id ? res.data.data! : item));
         toast.success(post.isPublished ? 'Post unpublished' : 'Post published');
+        loadFeatured();
       }
     } catch {
       toast.error('Failed to toggle publish state');
     }
   };
+
+  const isCurrentlyFeatured = editing?.isFeaturedOnHero ?? false;
+  const isUploading = uploadCount > 0;
+  const otherFeaturedPosts = featuredPosts.filter(p => p.id !== editing?.id);
+  const featureBlockReason =
+    !form.isPublished
+      ? 'Publish the post before it can be featured in the hero.'
+      : !form.coverImageUrl
+        ? 'Add a cover image before the post can be featured in the hero.'
+        : otherFeaturedPosts.length >= 2
+          ? `Maximum of 2 featured posts reached. Currently featured: ${otherFeaturedPosts
+              .map(p => `"${p.title}"`)
+              .join(', ')}.`
+          : null;
+  // A post that is already featured can always be un-featured.
+  const featureToggleDisabled = !isCurrentlyFeatured && !!featureBlockReason;
 
   return (
     <div className={`min-h-screen ${style.bg}`}>
@@ -282,7 +330,19 @@ const AdminBlog: React.FC = () => {
                 ) : (
                   posts.map(post => (
                     <tr key={post.id} className="border-t border-slate-200 hover:bg-slate-50">
-                      <td className="px-4 py-4 text-slate-800">{post.title}</td>
+                      <td className="px-4 py-4 text-slate-800">
+                        <div className="flex items-center gap-2">
+                          <span>{post.title}</span>
+                          {post.isFeaturedOnHero && (
+                            <span
+                              className="inline-flex items-center gap-1 rounded-full bg-fuchsia-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-fuchsia-700"
+                              title="Featured in the home hero"
+                            >
+                              <Star className="h-3 w-3" /> Hero
+                            </span>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-4 py-4 text-slate-600">{post.department}</td>
                       <td className="px-4 py-4">
                         <span className={`inline-flex rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] ${post.isPublished ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'}`}>
@@ -422,11 +482,13 @@ const AdminBlog: React.FC = () => {
                     label="Cover Image"
                     value={form.coverImageUrl ?? null}
                     onChange={(url) => setForm(prev => ({ ...prev, coverImageUrl: url ?? undefined }))}
+                    onUploadingChange={handleUploadingChange}
                   />
                   <VideoUpload
                     label="Header Video (optional)"
                     value={form.videoUrl ?? null}
                     onChange={(url) => setForm(prev => ({ ...prev, videoUrl: url ?? undefined }))}
+                    onUploadingChange={handleUploadingChange}
                   />
                 </div>
               </div>
@@ -492,6 +554,7 @@ const AdminBlog: React.FC = () => {
                         label="Block Image"
                         value={block.imageUrl ?? null}
                         onChange={(url) => setBlockField(index, 'imageUrl', url ?? undefined)}
+                        onUploadingChange={handleUploadingChange}
                       />
                     )}
                   </div>
@@ -500,21 +563,44 @@ const AdminBlog: React.FC = () => {
             </div>
 
             <div className="flex-shrink-0 sticky bottom-0 z-10 border-t border-slate-200 bg-white px-6 py-4">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <label className="inline-flex min-h-[44px] items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-                  <input type="checkbox" checked={form.isPublished}
-                    onChange={e => setForm(prev => ({ ...prev, isPublished: e.target.checked }))}
-                    className="h-4 w-4 rounded border-slate-300 text-[#a21caf] focus:ring-[#a21caf]" />
-                  Publish now
-                </label>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex flex-col gap-2">
+                  <label className="inline-flex min-h-[44px] items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                    <input type="checkbox" checked={form.isPublished}
+                      onChange={e => setForm(prev => ({ ...prev, isPublished: e.target.checked }))}
+                      className="h-4 w-4 rounded border-slate-300 text-[#a21caf] focus:ring-[#a21caf]" />
+                    Publish now
+                  </label>
+                  <label className={`inline-flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm ${
+                    featureToggleDisabled
+                      ? 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400'
+                      : 'border-slate-200 bg-slate-50 text-slate-700'
+                  }`}>
+                    <input type="checkbox" checked={form.isFeaturedOnHero ?? false}
+                      disabled={featureToggleDisabled}
+                      onChange={e => setForm(prev => ({ ...prev, isFeaturedOnHero: e.target.checked }))}
+                      className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#a21caf] focus:ring-[#a21caf] disabled:cursor-not-allowed" />
+                    <span>
+                      <span className="font-semibold">Feature in home hero</span>
+                      <span className="mt-0.5 block text-xs text-slate-500">
+                        Shows the cover photo, title and excerpt in the hero. Maximum 2 at a time.
+                      </span>
+                      {featureToggleDisabled && featureBlockReason && (
+                        <span className="mt-1 block text-xs font-medium text-amber-600">
+                          {featureBlockReason}
+                        </span>
+                      )}
+                    </span>
+                  </label>
+                </div>
                 <div className="flex flex-wrap gap-3">
                   <button type="button" onClick={() => setShowEditor(false)}
                     className="inline-flex min-h-[44px] items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
                     Cancel
                   </button>
-                  <button type="button" onClick={savePost} disabled={isSaving}
+                  <button type="button" onClick={savePost} disabled={isSaving || isUploading}
                     className="inline-flex min-h-[44px] items-center justify-center rounded-2xl bg-[#a21caf] px-4 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-white transition hover:bg-[#7c3aed] disabled:cursor-not-allowed disabled:opacity-60">
-                    {isSaving ? 'Saving...' : editing ? 'Update Post' : 'Create Post'}
+                    {isUploading ? 'Uploading…' : isSaving ? 'Saving...' : editing ? 'Update Post' : 'Create Post'}
                   </button>
                 </div>
               </div>
