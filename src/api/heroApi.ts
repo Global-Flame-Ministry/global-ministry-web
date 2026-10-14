@@ -5,6 +5,12 @@ export const heroApi = {
   getActiveSlides: () =>
     api.get<ApiResponse<HeroSlide[]>>('/api/media/hero'),
 
+  getClips: () =>
+    api.get<ApiResponse<HeroSlide[]>>('/api/media/clips'),
+
+  getFeaturedClips: () =>
+    api.get<ApiResponse<HeroSlide[]>>('/api/media/clips/featured'),
+
   getAllSlides: () =>
     api.get<ApiResponse<HeroSlide[]>>('/api/ministry/hero-slides'),
 

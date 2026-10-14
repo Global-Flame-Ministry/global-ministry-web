@@ -3,19 +3,22 @@ import { useQuery } from '@tanstack/react-query';
 import SEO from '../components/SEO';
 import { Link, useNavigate } from 'react-router-dom';
 import { announcementApi } from '../api/announcementApi';
-import { Calendar, Play, ArrowRight, Heart, HandHeart, Star, Library, ShieldCheck, Flame, HeartHandshake, Phone, Mail, MapPin, ChevronDown, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Calendar, Play, ArrowRight, Heart, HandHeart, Star, Library, ShieldCheck, HeartHandshake, Phone, Mail, MapPin, ChevronDown, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { sermonApi } from '../api/sermonApi';
 import { eventApi } from '../api/eventApi';
 import { bookApi } from '../api/bookApi';
 import { blogApi } from '../api/blogApi';
 import { heroApi } from '../api/heroApi';
-import HeroCarousel from '../components/HeroCarousel';
+import HeroCarousel, { HERO_ROTATION_MS } from '../components/HeroCarousel';
+import FeaturedClips from '../components/home/FeaturedClips';
+import BlogCard from '../components/blog/BlogCard';
 import dddPreaching from '../assets/ddd-preaching.jpeg';
 import daddandmumm from '../assets/dadandmum.jpg';
 import auditorium from '../assets/auditorium.jpg';
 import { useScrollAnimation } from '../context/hooks/useScrollAnimation';
 import { useAuth } from '../context/useAuthContext';
 import TestimonyModal from '../components/TestimonyModal';
+import type { HeroSlide } from '../types';
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
@@ -224,13 +227,46 @@ const Home: React.FC = () => {
     queryFn: () => heroApi.getActiveSlides().then(res => res.data.data ?? []),
     staleTime: 10 * 60 * 1000,
   });
+  const { data: featuredEventsData } = useQuery({
+    queryKey: ['homeFeaturedEvents'],
+    queryFn: () => eventApi.getAll({ isFeaturedOnHome: true, pageSize: 10 }).then(res => res.data.data?.items ?? []),
+    staleTime: 5 * 60 * 1000,
+  });
 
   const latestSermons = latestSermonsData ?? [];
   const upcomingEvents = upcomingEventsData ?? [];
   const latestAnnouncements = latestAnnouncementsData ?? [];
   const featuredBooks = featuredBooksData ?? [];
   const latestBlogPosts = latestBlogPostsData ?? [];
-  const heroSlides = heroSlidesData ?? [];
+
+  // Hero = image slides (by displayOrder) then featured upcoming events (by startDate).
+  // Video slides are intentionally excluded from the hero.
+  const imageSlides = (heroSlidesData ?? [])
+    .filter(s => s.mediaType === 'Image')
+    .sort((a, b) => a.displayOrder - b.displayOrder);
+
+  const featuredEventSlides: HeroSlide[] = (featuredEventsData ?? [])
+    .filter(e => !!e.imageUrl)
+    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+    .map(e => ({
+      id: 1000000 + e.id,
+      mediaType: 'Image' as const,
+      url: e.imageUrl as string,
+      title: e.title,
+      subtitle: new Date(e.startDate).toLocaleString('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric',
+        hour: 'numeric', minute: '2-digit'
+      }),
+      targetUrl: `/events/${e.slug}`,
+      displayOrder: 0,
+      isActive: true,
+      isFeatured: false,
+      featuredOrder: 0,
+      createdOn: e.createdOn,
+      updatedAt: null,
+    }));
+
+  const heroSlides: HeroSlide[] = [...imageSlides, ...featuredEventSlides];
   const [showTestimonyModal, setShowTestimonyModal] = useState(false);
 
   // ── Sign-up bar state ─────────────────────────────────────────────────────
@@ -309,7 +345,7 @@ const Home: React.FC = () => {
       {/* ── HERO ────────────────────────────────────────────────────── */}
       <section className="relative min-h-[100dvh] h-[100dvh] flex items-start md:items-center justify-center overflow-hidden bg-black max-w-full" style={{ isolation: 'isolate' }}>
         {heroSlides.length > 0 ? (
-          <HeroCarousel slides={heroSlides} />
+          <HeroCarousel slides={heroSlides} intervalMs={HERO_ROTATION_MS} />
         ) : (
           <video
             autoPlay muted loop playsInline
@@ -328,7 +364,7 @@ const Home: React.FC = () => {
             <source src="/assets/home-bg.mp4" type="video/mp4" />
           </video>
         )}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70 z-10 pointer-events-none" />
 
         <ParticleCanvas />
 
@@ -496,6 +532,9 @@ const Home: React.FC = () => {
           </AnimatedDiv>
         </div>
       </AnimatedSection>
+
+      {/* ── SHORT CLIPS ──────────────────────────────────────────────── */}
+      <FeaturedClips />
 
       {/* ── SERMONS ──────────────────────────────────────────────────── */}
       <div className="py-20 bg-white">
@@ -798,46 +837,11 @@ const Home: React.FC = () => {
           <div className="max-w-7xl mx-auto px-6">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-2xl font-bold text-slate-900">Latest from the Blog</h3>
-              <Link to="/blog" className="text-sm font-semibold text-[#a21caf] hover:text-[#7c3aed]">View All →</Link>
+              <Link to="/blog" className="text-sm font-semibold text-[#a21caf] hover:text-[#7c3aed]">View all posts →</Link>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {latestBlogPosts.map((post) => (
-                <article key={post.id} className="group bg-white rounded-2xl shadow-sm border border-gray-100
-                  overflow-hidden hover:shadow-xl hover:border-purple-200 transition-all">
-                  <Link to={`/blog/${post.slug}`} className="block">
-                    <div className="aspect-[16/10] overflow-hidden bg-gray-100">
-                      {post.coverImageUrl ? (
-                        <img src={post.coverImageUrl} alt={post.title} loading="lazy"
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-purple-100 to-fuchsia-100
-                          flex items-center justify-center">
-                          <Flame className="w-10 h-10 text-purple-300" />
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                  <div className="p-6">
-                    {post.department && (
-                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-fuchsia-600">
-                        {post.department}
-                      </span>
-                    )}
-                    <Link to={`/blog/${post.slug}`} className="block mt-2">
-                      <h4 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-purple-700 transition-colors">
-                        {post.title}
-                      </h4>
-                    </Link>
-                    {post.excerpt && (
-                      <p className="mt-2 text-gray-600 text-sm line-clamp-3 leading-relaxed">{post.excerpt}</p>
-                    )}
-                    <div className="mt-4">
-                      <Link to={`/blog/${post.slug}`} className="text-sm font-medium text-purple-600 hover:text-purple-800">
-                        Read more →
-                      </Link>
-                    </div>
-                  </div>
-                </article>
+                <BlogCard key={post.id} post={post} />
               ))}
             </div>
           </div>

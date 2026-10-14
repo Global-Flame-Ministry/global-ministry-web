@@ -1,62 +1,88 @@
-import React, { useEffect, useState } from 'react';
-import SEO from '../components/SEO';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, ArrowLeft, Flame, Loader } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { Search, Newspaper, Loader2 } from 'lucide-react';
+import SEO from '../components/SEO';
+import BlogCard from '../components/blog/BlogCard';
 import { blogApi } from '../api/blogApi';
 import type { BlogQueryObject } from '../types';
 
+const PAGE_SIZE = 9;
+
 const BlogPage: React.FC = () => {
-  const navigate = useNavigate();
-  const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize] = useState(9);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const category = searchParams.get('category') ?? '';
+
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [activeDepartment, setActiveDepartment] = useState<string>('All');
+  const [pagination, setPagination] = useState({ key: '', page: 1 });
+
+  const filterKey = `${category}|${debouncedSearch}`;
+  const pageNumber = pagination.key === filterKey ? pagination.page : 1;
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
-      setPageNumber(1);
-    }, 300);
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 300);
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  const { data: queryData, isLoading, error, refetch } = useQuery({
-    queryKey: ['publishedBlogPosts', pageNumber, pageSize, activeDepartment, debouncedSearch],
+  const { data: postsData, isLoading, error, refetch } = useQuery({
+    queryKey: ['publishedBlogPosts', pageNumber, PAGE_SIZE, category, debouncedSearch],
     queryFn: async () => {
-      const query: BlogQueryObject = { pageNumber, pageSize };
-      if (activeDepartment !== 'All') query.department = activeDepartment;
+      const query: BlogQueryObject = { pageNumber, pageSize: PAGE_SIZE };
+      if (category) query.department = category;
       if (debouncedSearch) query.searchTerm = debouncedSearch;
       const response = await blogApi.getPublishedPosts(query);
       if (!response.data.isSuccess) throw new Error(response.data.message || 'Failed to load posts');
-      return { items: response.data.data?.items ?? [], totalCount: response.data.data?.totalCount ?? 0 };
+      return {
+        items: response.data.data?.items ?? [],
+        totalCount: response.data.data?.totalCount ?? 0,
+      };
     },
   });
 
-  const posts = queryData?.items ?? [];
-  const totalCount = queryData?.totalCount ?? 0;
-  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-  const departments = [...new Set(posts.map(p => p.department).filter(Boolean))];
+  const { data: departments = [] } = useQuery({
+    queryKey: ['blogDepartments'],
+    queryFn: () => blogApi.getDepartments().then(res => res.data.data ?? []),
+  });
+
+  const posts = postsData?.items ?? [];
+  const totalCount = postsData?.totalCount ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+  const selectCategory = (department: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (department) next.set('category', department);
+    else next.delete('category');
+    setSearchParams(next);
+  };
 
   return (
     <div className="min-h-screen bg-[#f9f9ff] pt-20">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@100..900&display=swap');
+      `}</style>
       <SEO
         title="Blog — Stories & Insights"
         description="Inspiring stories, spiritual insights, and community updates from Global Flame Ministry."
         url="https://globalflameministry.org/blog"
       />
 
-      <section className="max-w-[1280px] mx-auto px-5 md:px-16 pt-4 pb-4 text-center">
-        <p className="text-sm uppercase tracking-widest font-black animate-shimmer mb-4">Blog</p>
-        <h1 className="font-serif text-[28px] md:text-[44px] font-bold text-[#1a1c20] mb-2 tracking-tight leading-[1.1]">
-          Stories <span className="italic font-normal">and</span> <span className="animate-shimmer">Insights</span>
+      <section className="max-w-[1280px] mx-auto px-5 md:px-16 pt-10 pb-6">
+        <span className="inline-flex items-center gap-2 rounded-full bg-[#f3f3f9] px-3 py-1
+          text-xs font-semibold text-[#5b0064]">
+          <Newspaper className="h-3.5 w-3.5" /> Blog
+        </span>
+        <h1
+          className="mt-4 font-serif text-[32px] md:text-[44px] font-bold text-[#1a1c20] leading-[1.1] tracking-tight"
+          style={{ fontFamily: "'Playfair Display', serif" }}
+        >
+          Stories <span className="italic font-normal">and</span> Insights
         </h1>
-        <p className="text-sm text-[#51424f] max-w-2xl mx-auto mb-4 leading-relaxed">
+        <p className="mt-3 text-sm md:text-base text-[#51424f] max-w-2xl leading-relaxed">
           Discover inspiring stories, spiritual insights, and community updates from our ministry family.
         </p>
 
-        <div className="max-w-3xl mx-auto space-y-3">
+        <div className="mt-6 max-w-2xl">
           <div className="relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#837280] group-focus-within:text-[#5b0064] transition-colors" />
             <input
@@ -64,174 +90,101 @@ const BlogPage: React.FC = () => {
               placeholder="Search stories, or authors..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 rounded-xl border border-[#d5c0d1] bg-[#f3f3f9] focus:ring-2 focus:ring-[#5b0064]/20 focus:border-[#5b0064] outline-none transition-all text-base"
+              className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-[#d5c0d1] bg-[#f3f3f9]
+                focus:ring-2 focus:ring-[#5b0064]/20 focus:border-[#5b0064] outline-none transition-all text-base"
             />
-          </div>
-
-          <div className="flex items-center justify-center gap-4 md:gap-8 overflow-x-auto no-scrollbar pb-2">
-            <button
-              type="button"
-              onClick={() => { setActiveDepartment('All'); setPageNumber(1); }}
-              className={`px-2 py-1 text-sm font-semibold whitespace-nowrap transition-all border-b-2 cursor-pointer ${
-                activeDepartment === 'All'
-                  ? 'border-[#5b0064] text-[#5b0064]'
-                  : 'border-transparent text-[#51424f] hover:text-[#5b0064]'
-              }`}
-            >
-              All Posts
-            </button>
-            {departments.map((dept) => (
-              <button
-                key={dept}
-                type="button"
-                onClick={() => { setActiveDepartment(dept); setPageNumber(1); }}
-                className={`px-2 py-1 text-sm font-semibold whitespace-nowrap transition-all border-b-2 cursor-pointer ${
-                  activeDepartment === dept
-                    ? 'border-[#5b0064] text-[#5b0064]'
-                    : 'border-transparent text-[#51424f] hover:text-[#5b0064]'
-                }`}
-              >
-                {dept}
-              </button>
-            ))}
           </div>
         </div>
       </section>
 
-      <main className="max-w-[1280px] mx-auto px-5 md:px-16 pb-10">
-        <div className="mb-2">
+      <main className="max-w-[1280px] mx-auto px-5 md:px-16 pb-16">
+        <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2 mb-8">
           <button
-            onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-2 text-[#51424f] font-bold uppercase tracking-widest text-xs hover:text-[#5b0064] transition-all duration-200 cursor-pointer"
+            type="button"
+            onClick={() => selectCategory('')}
+            className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              !category ? 'bg-[#5b0064] text-white' : 'bg-[#f3f3f9] text-[#51424f] hover:text-[#5b0064]'
+            }`}
           >
-            <ArrowLeft className="w-4 h-4" /> Back
+            All
           </button>
+          {departments.map((dept) => (
+            <button
+              key={dept.name}
+              type="button"
+              onClick={() => selectCategory(dept.name)}
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                category === dept.name
+                  ? 'bg-[#5b0064] text-white'
+                  : 'bg-[#f3f3f9] text-[#51424f] hover:text-[#5b0064]'
+              }`}
+            >
+              {dept.name}
+            </button>
+          ))}
         </div>
 
-        {error && (
-          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
+        {error ? (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
             <p className="font-medium">Something went wrong</p>
             <p className="text-sm">{error instanceof Error ? error.message : 'An error occurred'}</p>
             <button
               type="button"
               onClick={() => refetch()}
-              className="mt-2 text-sm font-medium text-red-800 hover:underline"
+              className="mt-2 text-sm font-medium text-red-800 hover:underline cursor-pointer"
             >
               Try again
             </button>
           </div>
-        )}
-
-        <p className="text-sm text-[#51424f] mb-3">
-          Showing {posts.length} of {totalCount} posts
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {isLoading ? (
-            <div className="col-span-full flex items-center justify-center py-40">
-              <Loader className="animate-spin text-fuchsia-600 w-8 h-8" />
+        ) : isLoading ? (
+          <div className="flex items-center justify-center py-40">
+            <Loader2 className="animate-spin text-[#5b0064] w-8 h-8" />
+          </div>
+        ) : posts.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {posts.map((post) => (
+                <BlogCard key={post.id} post={post} />
+              ))}
             </div>
-          ) : posts.length > 0 ? (
-            posts.map((post) => {
-              const formattedDate = new Date(post.createdOn).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-              });
-              const initials = post.authorName
-                .split(' ')
-                .map((n) => n[0])
-                .join('')
-                .toUpperCase()
-                .slice(0, 2);
-              return (
-                <article
-                  key={post.id}
-                  className="flex flex-col group cinematic-shadow rounded-2xl bg-white p-4 transition-all duration-300"
-                >
-                  <Link to={`/blog/${post.slug}`} className="overflow-hidden rounded-xl mb-3 aspect-video relative block">
-                    {post.coverImageUrl ? (
-                      <img
-                        src={post.coverImageUrl}
-                        alt={post.title}
-                        loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-purple-100 to-fuchsia-100 flex items-center justify-center">
-                        <Flame className="w-12 h-12 text-purple-300" />
-                      </div>
-                    )}
-                  </Link>
-                  <div className="px-2 space-y-3 flex-grow flex flex-col">
-                    <span className="inline-block text-[#5b0064] font-bold text-xs uppercase tracking-widest">
-                      {post.department}
-                    </span>
-                    <Link to={`/blog/${post.slug}`}>
-                      <h3 className="font-semibold text-lg text-[#1a1c20] group-hover:text-[#5b0064] transition-colors line-clamp-2 leading-tight">
-                        {post.title}
-                      </h3>
-                    </Link>
-                    {post.excerpt && (
-                      <p className="text-[#51424f] text-sm leading-relaxed line-clamp-2">
-                        {post.excerpt}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between pt-3 border-t border-[#d5c0d1]/30 mt-auto">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#80008c] flex items-center justify-center text-white font-bold text-xs">
-                          {initials}
-                        </div>
-                        <span className="text-sm font-medium text-[#1a1c20]">{post.authorName}</span>
-                      </div>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-[#51424f]">
-                        {formattedDate}
-                      </span>
-                    </div>
-                    <Link
-                      to={`/blog/${post.slug}`}
-                      className="inline-flex items-center gap-2 text-[#5b0064] font-bold text-sm group-hover:gap-4 transition-all"
-                    >
-                      Read more <span className="transition-transform group-hover:translate-x-1">→</span>
-                    </Link>
-                  </div>
-                </article>
-              );
-            })
-          ) : (
-            <div className="col-span-full flex flex-col items-center justify-center py-16 px-4">
-              <div className="w-20 h-20 rounded-full bg-purple-100 flex items-center justify-center mb-4">
-                <Search className="w-10 h-10 text-purple-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-[#1a1c20] mb-2">No posts found</h3>
-              <p className="text-[#51424f] text-center max-w-md">
-                {debouncedSearch
-                  ? `We couldn't find any posts matching "${debouncedSearch}". Try adjusting your search or filter.`
-                  : 'There are no blog posts available at the moment. Check back soon!'}
-              </p>
-            </div>
-          )}
-        </div>
 
-        {!isLoading && (
-          <div className="mt-12 flex items-center justify-center gap-2">
-            <button
-              disabled={pageNumber <= 1}
-              onClick={() => setPageNumber(p => Math.max(1, p - 1))}
-              className="px-3 py-1.5 rounded-lg border border-[#d5c0d1] text-sm font-semibold text-[#51424f] hover:border-[#5b0064] hover:text-[#5b0064] disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
-            >
-              ← Prev
-            </button>
-            <span className="text-sm text-[#51424f] whitespace-nowrap">
-              {pageNumber} / {totalPages}
-            </span>
-            <button
-              disabled={pageNumber >= totalPages}
-              onClick={() => setPageNumber(p => Math.min(totalPages, p + 1))}
-              className="px-3 py-1.5 rounded-lg border border-[#d5c0d1] text-sm font-semibold text-[#51424f] hover:border-[#5b0064] hover:text-[#5b0064] disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
-            >
-              Next →
-            </button>
+            <div className="mt-12 flex items-center justify-center gap-2">
+              <button
+                type="button"
+                disabled={pageNumber <= 1}
+                onClick={() => setPagination({ key: filterKey, page: pageNumber - 1 })}
+                className="px-3 py-1.5 rounded-lg border border-[#d5c0d1] text-sm font-semibold text-[#51424f]
+                  hover:border-[#5b0064] hover:text-[#5b0064] disabled:opacity-50 disabled:cursor-not-allowed
+                  transition whitespace-nowrap cursor-pointer"
+              >
+                ← Prev
+              </button>
+              <span className="text-sm text-[#51424f] whitespace-nowrap">
+                {pageNumber} / {totalPages}
+              </span>
+              <button
+                type="button"
+                disabled={pageNumber >= totalPages}
+                onClick={() => setPagination({ key: filterKey, page: pageNumber + 1 })}
+                className="px-3 py-1.5 rounded-lg border border-[#d5c0d1] text-sm font-semibold text-[#51424f]
+                  hover:border-[#5b0064] hover:text-[#5b0064] disabled:opacity-50 disabled:cursor-not-allowed
+                  transition whitespace-nowrap cursor-pointer"
+              >
+                Next →
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16 px-4">
+            <div className="w-20 h-20 rounded-full bg-[#f3f3f9] flex items-center justify-center mb-4">
+              <Search className="w-10 h-10 text-[#b57edc]" />
+            </div>
+            <h3 className="text-xl font-semibold text-[#1a1c20] mb-2">No posts found</h3>
+            <p className="text-[#51424f] text-center max-w-md">
+              {debouncedSearch
+                ? `We couldn't find any posts matching "${debouncedSearch}". Try adjusting your search or filter.`
+                : 'There are no blog posts available at the moment. Check back soon!'}
+            </p>
           </div>
         )}
       </main>

@@ -84,7 +84,9 @@ export interface HeroSlide {
   targetUrl?: string | null;
   displayOrder: number;
   isActive: boolean;
-  createdAt: string;
+  isFeatured: boolean;
+  featuredOrder: number;
+  createdOn: string;
   updatedAt?: string | null;
 }
 
@@ -96,6 +98,8 @@ export interface CreateHeroSlideDto {
   targetUrl?: string;
   displayOrder: number;
   isActive: boolean;
+  isFeatured: boolean;
+  featuredOrder: number;
 }
 
 export interface UpdateHeroSlideDto extends CreateHeroSlideDto {}
@@ -209,6 +213,7 @@ export interface EventDto {
   ministrySlug: string | null;
   module: string;
   isCancelled: boolean;
+  isFeaturedOnHome: boolean;
   acceptsRegistrations: boolean;
   acceptsDonations: boolean;
   donationLabel: string | null;
@@ -364,6 +369,11 @@ export interface BlogQueryObject {
   sortBy?: string;
   isDescending?: boolean;
   department?: string;
+}
+
+export interface BlogDepartmentDto {
+  name: string;
+  count: number;
 }
 
 export interface DonationStatsDto {

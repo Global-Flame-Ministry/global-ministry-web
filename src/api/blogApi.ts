@@ -1,6 +1,7 @@
 import api from './axios';
 import type {
   ApiResponse,
+  BlogDepartmentDto,
   BlogPostResponseDto,
   CreateBlogPostDto,
   UpdateBlogPostDto,
@@ -50,5 +51,10 @@ export const blogApi = {
     api.get<ApiResponse<BlogPostResponseDto>>(`/api/blog/${slug}`),
 
   getDepartments: () =>
-    api.get<ApiResponse<string[]>>('/api/blog/departments'),
+    api.get<ApiResponse<BlogDepartmentDto[]>>('/api/blog/departments'),
+
+  getRelated: (slug: string, take = 3) =>
+    api.get<ApiResponse<BlogPostResponseDto[]>>(`/api/blog/${slug}/related`, {
+      params: { take },
+    }),
 };
