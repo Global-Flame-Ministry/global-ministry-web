@@ -34,6 +34,21 @@ interface OrientationLock {
   unlock?: () => void;
 }
 
+// A clip at least this wide relative to its height is landscape and fills the
+// width; anything narrower is portrait/square and is shown in its natural tall
+// size against a solid dark stage.
+export const LANDSCAPE_RATIO = 1.2;
+
+// Widest a landscape clip may render (px). Overridable per instance.
+const DEFAULT_MAX_WIDTH = 720;
+
+export interface ClipRatioInfo {
+  /** Natural videoWidth / videoHeight. */
+  ratio: number;
+  /** True when the clip is portrait or square (ratio below LANDSCAPE_RATIO). */
+  isPortrait: boolean;
+}
+
 interface ClipPlayerProps {
   src: string;
   title?: string | null;
@@ -42,6 +57,10 @@ interface ClipPlayerProps {
   autoPlay?: boolean;
   /** Seconds into the clip to use as the poster frame (its own frame). Default 1.5s. */
   posterTime?: number;
+  /** Widest a landscape clip may render, in px. Default 720. */
+  maxWidth?: number;
+  /** Called whenever the clip's natural aspect ratio becomes known. */
+  onRatioChange?: (info: ClipRatioInfo) => void;
 }
 
 const formatTime = (seconds: number): string => {
@@ -63,8 +82,13 @@ const withPosterFragment = (url: string, time: number): string =>
  *   click handlers.
  * - One click/tap on the video surface toggles playback; the centre overlay is
  *   visual only, so a tap can never fire twice.
- * - Respects the source aspect ratio (metadata): landscape video widens the
- *   frame; portrait video is centred with dark, blurred sides.
+ * - The frame is sized from the clip's natural ratio (read on `loadedmetadata`)
+ *   so the whole picture is always visible — `object-contain`, never cover.
+ *   Landscape clips fill the width up to `maxWidth`; portrait/square clips get
+ *   their natural tall size (capped at 70svh desktop / 75svh mobile / 640px)
+ *   centred on a solid dark stage. A neutral 16/9 skeleton shows until the
+ *   first metadata arrives, and the previous clip's size is kept across a
+ *   source change so switching clips never jumps.
  * - Derives the poster frame from the video itself at `posterTime` (Cloudinary
  *   `so_<posterTime>` or `#t=<posterTime>`), never a cover image / flyer.
  * - The centre play affordance and the bottom-left Play button run the exact
@@ -79,12 +103,19 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
   className = '',
   autoPlay = false,
   posterTime = 1.5,
+  maxWidth = DEFAULT_MAX_WIDTH,
+  onRatioChange,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hideTimer = useRef<number | null>(null);
   // Set when a play() request was aborted by a pending load/seek so we can retry.
   const pendingPlayRef = useRef(false);
+  // Keep the latest callback without re-binding the media listeners.
+  const onRatioChangeRef = useRef(onRatioChange);
+  useEffect(() => {
+    onRatioChangeRef.current = onRatioChange;
+  });
 
   // Poster is always the video's own frame — never a cover image.
   const poster = getClipPoster(src, posterTime);
@@ -99,7 +130,10 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
   const [buffered, setBuffered] = useState(0);
-  const [frameRatio, setFrameRatio] = useState(16 / 9);
+  // Natural width/height ratio, or `null` until the first metadata loads.
+  const [ratio, setRatio] = useState<number | null>(null);
+  // Intrinsic height (px) so portrait clips are never upscaled past their size.
+  const [naturalHeight, setNaturalHeight] = useState(0);
   const [nativeFullscreen, setNativeFullscreen] = useState(false);
   const [pseudoFullscreen, setPseudoFullscreen] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
@@ -109,7 +143,8 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
   const isFullscreen = nativeFullscreen || pseudoFullscreen;
 
   // Reset transient state whenever the source changes (adjust during render so
-  // there is no extra commit/paint cycle on the old clip).
+  // there is no extra commit/paint cycle on the old clip). The measured ratio
+  // is intentionally kept so the frame does not jump before the new metadata.
   if (trackedSrc !== effectiveSrc) {
     setTrackedSrc(effectiveSrc);
     setStatus('loading');
@@ -119,7 +154,6 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
     setCurrent(0);
     setDuration(0);
     setBuffered(0);
-    setFrameRatio(16 / 9);
     setControlsVisible(true);
     setMessage(null);
   }
@@ -165,12 +199,18 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
     const onVolumeChange = () => setMuted(video.muted);
     const onLoadedMetadata = () => {
       setDuration(Number.isFinite(video.duration) ? video.duration : 0);
-      const ratio = video.videoWidth > 0 && video.videoHeight > 0
+      const naturalRatio = video.videoWidth > 0 && video.videoHeight > 0
         ? video.videoWidth / video.videoHeight
         : 16 / 9;
-      // Landscape widens the frame (clamped); portrait keeps 16:9 so the
-      // dark/blurred sides show around the centred video.
-      setFrameRatio(ratio >= 1 ? Math.min(Math.max(ratio, 16 / 9), 2.2) : 16 / 9);
+      if (import.meta.env.DEV) {
+        console.log(
+          `[ClipPlayer] videoWidth=${video.videoWidth} videoHeight=${video.videoHeight} ratio=${naturalRatio.toFixed(3)}`
+        );
+      }
+      // Size the frame from the clip itself so the whole picture is always shown.
+      setRatio(naturalRatio);
+      setNaturalHeight(video.videoHeight || 0);
+      onRatioChangeRef.current?.({ ratio: naturalRatio, isPortrait: naturalRatio < LANDSCAPE_RATIO });
       setStatus('ready');
     };
 
@@ -413,9 +453,25 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
   const playedPct = duration > 0 ? Math.min(100, (current / duration) * 100) : 0;
   const bufferedPct = duration > 0 ? Math.min(100, (buffered / duration) * 100) : 0;
 
-  const containerClass = isFullscreen
-    ? 'fixed inset-0 z-[100] h-full w-full max-w-none max-h-none rounded-none'
-    : 'mx-auto w-full max-w-[720px] max-h-[60vh] sm:max-h-[420px] rounded-2xl';
+  const isPortrait = ratio !== null && ratio < LANDSCAPE_RATIO;
+  const showSkeleton = ratio === null;
+
+  const stageClass = isFullscreen
+    ? 'fixed inset-0 z-[100] h-full w-full max-w-none rounded-none'
+    : 'mx-auto w-full max-w-full rounded-2xl';
+  // The stage is full-width only for portrait clips (so its dark sides show);
+  // landscape clips shrink-wrap to `maxWidth` and stay centred.
+  const stageStyle: React.CSSProperties | undefined =
+    isFullscreen || isPortrait ? undefined : { maxWidth };
+  const frameStyle: React.CSSProperties = isFullscreen
+    ? { width: '100%', height: '100%' }
+    : isPortrait
+      ? {
+          aspectRatio: ratio ?? 1,
+          maxWidth: '100%',
+          maxHeight: naturalHeight > 0 ? `${naturalHeight}px` : undefined,
+        }
+      : { width: '100%', aspectRatio: ratio ?? 16 / 9 };
 
   return (
     <div
@@ -427,34 +483,42 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
       onMouseMove={revealControls}
       onMouseLeave={() => { if (isPlaying) setControlsVisible(false); }}
       onFocus={revealControls}
-      style={isFullscreen ? undefined : { aspectRatio: frameRatio }}
-      className={`relative overflow-hidden bg-black shadow-xl outline-none
-        focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2
-        ${containerClass} ${className}`}
+      style={stageStyle}
+      className={`relative flex items-center justify-center overflow-hidden bg-[#0b0b0f] shadow-xl
+        outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2
+        ${stageClass} ${className}`}
     >
-      {/* Blurred backdrop gives portrait clips their dark sides. */}
-      {poster && (
-        <div
-          aria-hidden
-          className="absolute inset-0 scale-110 bg-cover bg-center opacity-60 blur-2xl"
-          style={{ backgroundImage: `url(${poster})` }}
+      <style>{`
+        .clip-frame-portrait { height: min(75svh, 640px); }
+        @media (min-width: 1024px) { .clip-frame-portrait { height: min(70svh, 640px); } }
+      `}</style>
+
+      {/* The frame is sized to the clip's own ratio, so the video fills it
+          exactly with object-contain — never cropped, never pillarboxed. */}
+      <div
+        className={`relative z-10 overflow-hidden rounded-2xl ${isPortrait && !isFullscreen ? 'clip-frame-portrait' : ''}`}
+        style={frameStyle}
+      >
+        {/* Single interactive surface: one tap toggles play/pause. */}
+        <video
+          ref={videoRef}
+          src={effectiveSrc}
+          poster={poster}
+          preload="metadata"
+          playsInline
+          muted={muted}
+          onClick={togglePlay}
+          aria-label={title ?? 'Video clip'}
+          className="block h-full w-full cursor-pointer bg-transparent object-contain"
         />
+
+      {showSkeleton && status !== 'error' && (
+        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-[#191922]">
+          <Loader className="h-8 w-8 animate-spin text-white/60" />
+        </div>
       )}
 
-      {/* Single interactive surface: one tap toggles play/pause. */}
-      <video
-        ref={videoRef}
-        src={effectiveSrc}
-        poster={poster}
-        preload="metadata"
-        playsInline
-        muted={muted}
-        onClick={togglePlay}
-        aria-label={title ?? 'Video clip'}
-        className="relative z-10 mx-auto block h-full w-full cursor-pointer bg-transparent object-contain"
-      />
-
-      {status === 'loading' && (
+      {!showSkeleton && status === 'loading' && (
         <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/60">
           <Loader className="h-8 w-8 animate-spin text-white/80" />
         </div>
@@ -588,6 +652,7 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

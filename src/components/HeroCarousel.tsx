@@ -50,6 +50,9 @@ export const HERO_ROTATION_MS = 8000;
 // Simple opacity crossfade between slides (image and its text overlay).
 const CROSSFADE_MS = 600;
 
+// The slide copy glides in from the right on every rotation (never just pops in).
+const CONTENT_IN_MS = 700;
+
 // An image at least this wide relative to its height is treated as a landscape
 // photo and cover-fitted; anything narrower is a flyer and shown whole.
 const LANDSCAPE_RATIO = 1.2;
@@ -234,7 +237,11 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides, intervalMs = HERO_R
     <div
       key={active.id}
       className={`hero-text-shadow pointer-events-none ${align}`}
-      style={{ animation: reduced ? undefined : `hero-fade ${CROSSFADE_MS}ms ease-out both` }}
+      style={{
+        animation: reduced
+          ? undefined
+          : `hero-slide-in ${CONTENT_IN_MS}ms cubic-bezier(0.22, 1, 0.36, 1) both`,
+      }}
     >
       <div className={`flex ${rowAlign}`}>
         <span className="inline-block py-1 px-4 rounded-full bg-fuchsia-500/20 border border-fuchsia-400/40 text-fuchsia-200 text-[10px] font-black uppercase tracking-[0.35em] backdrop-blur-sm">
@@ -346,6 +353,10 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides, intervalMs = HERO_R
       <style>{`
         .hero-text-shadow { text-shadow: 0 2px 18px rgba(0,0,0,0.7), 0 1px 3px rgba(0,0,0,0.6); }
         @keyframes hero-fade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes hero-slide-in {
+          from { opacity: 0; transform: translate3d(2.5rem, 0, 0); }
+          to   { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
       `}</style>
 
       {/* Static, cheap dark-purple backdrop behind portrait flyers. */}
