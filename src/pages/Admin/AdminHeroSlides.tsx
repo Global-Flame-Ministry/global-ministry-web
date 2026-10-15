@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Plus, Trash2, RefreshCw, Pencil,
@@ -13,6 +13,16 @@ import VideoUpload from '../../components/VideoUpload';
 import { getPosterUrl, HERO_ROTATION_MS } from '../../components/HeroCarousel';
 
 const MAX_FEATURED_CLIPS = 3;
+
+/** Flattens a clip's write-up blocks into plain text for quick editing. */
+const blocksToText = (blocks?: HeroSlide['contentBlocks']): string =>
+  (blocks ?? [])
+    .slice()
+    .sort((a, b) => a.displayOrder - b.displayOrder)
+    .filter(b => b.blockType !== 'Image')
+    .map(b => b.content ?? '')
+    .filter(Boolean)
+    .join('\n\n');
 
 const emptyForm = (displayOrder = 0): CreateHeroSlideDto => ({
   mediaType: 'Image',
@@ -62,8 +72,16 @@ const AdminHeroSlides = () => {
   const [deleteTarget, setDeleteTarget] = useState<HeroSlide | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [writeUp, setWriteUp] = useState('');
+  const [initialWriteUp, setInitialWriteUp] = useState('');
+  const [writeUpHasRichBlocks, setWriteUpHasRichBlocks] = useState(false);
+  const [isLoadingWriteUp, setIsLoadingWriteUp] = useState(false);
+  const writeUpTouchedRef = useRef(false);
 
-  const isDirty = initialForm != null && JSON.stringify(form) !== JSON.stringify(initialForm);
+  const isDirty = initialForm != null && (
+    JSON.stringify(form) !== JSON.stringify(initialForm) ||
+    writeUp !== initialWriteUp
+  );
   const isBusy  = isSaving || isUploading;
 
   const featuredClips = useMemo(
@@ -107,6 +125,11 @@ const AdminHeroSlides = () => {
     setInitialForm(f);
     setIsUploading(false);
     setSaveError(null);
+    setWriteUp('');
+    setInitialWriteUp('');
+    setWriteUpHasRichBlocks(false);
+    setIsLoadingWriteUp(false);
+    writeUpTouchedRef.current = false;
     setShowForm(true);
   };
 
@@ -129,7 +152,28 @@ const AdminHeroSlides = () => {
     setInitialForm(f);
     setIsUploading(false);
     setSaveError(null);
+    setWriteUp('');
+    setInitialWriteUp('');
+    setWriteUpHasRichBlocks(false);
+    writeUpTouchedRef.current = false;
     setShowForm(true);
+
+    if (s.mediaType === 'Video') {
+      setIsLoadingWriteUp(true);
+      heroApi.getSlideById(s.id)
+        .then(res => {
+          if (writeUpTouchedRef.current) return;
+          const blocks = res.data.data?.contentBlocks ?? [];
+          const text = blocksToText(blocks);
+          setWriteUp(text);
+          setInitialWriteUp(text);
+          setWriteUpHasRichBlocks(blocks.some(b => b.blockType !== 'Image' && b.blockType !== 'Paragraph'));
+        })
+        .catch(() => { /* leave the field blank if the write-up cannot be loaded */ })
+        .finally(() => setIsLoadingWriteUp(false));
+    } else {
+      setIsLoadingWriteUp(false);
+    }
   };
 
   // Lock body scroll while the modal is open
@@ -160,26 +204,41 @@ const AdminHeroSlides = () => {
     setIsSaving(true);
     setSaveError(null);
     try {
+      // Only touch the write-up when the admin actually edited it. An empty
+      // list clears it; leaving it untouched (undefined) preserves the blocks.
+      const writeUpChanged = writeUp !== initialWriteUp;
+      const contentBlocks: CreateHeroSlideDto['contentBlocks'] =
+        form.mediaType === 'Video' && writeUpChanged
+          ? (writeUp.trim()
+              ? [{ blockType: 'Paragraph', content: writeUp.trim(), displayOrder: 1 }]
+              : [])
+          : undefined;
+      const payload: CreateHeroSlideDto = { ...form, contentBlocks };
+
       if (editing) {
-        const res = await heroApi.updateSlide(editing.id, form);
+        const res = await heroApi.updateSlide(editing.id, payload);
         if (res.data.isSuccess) { toast.success('Updated'); closeForm(); fetchSlides(); }
       } else {
-        const res = await heroApi.createSlide(form);
+        const res = await heroApi.createSlide(payload);
         if (res.data.isSuccess) {
           toast.success('Created');
           const created = res.data.data;
           closeForm();
           fetchSlides();
-          // A new video clip has no write-up yet — open the editor right away.
-          if (form.mediaType === 'Video' && created?.id) {
+          // Only open the write-up editor when the admin did not write anything here.
+          if (form.mediaType === 'Video' && !writeUp.trim() && created?.id) {
             navigate(`/admin/clips/${created.id}/write-up`);
           }
         }
       }
     } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        'Failed to save';
+      const data = (err as {
+        response?: { data?: { message?: string; title?: string; errors?: Record<string, string[]> } };
+      })?.response?.data;
+      const firstValidationError = data?.errors
+        ? Object.values(data.errors).flat().find(Boolean)
+        : undefined;
+      const message = data?.message || firstValidationError || data?.title || 'Failed to save';
       setSaveError(message);
       toast.error(message);
     }
@@ -443,7 +502,7 @@ const AdminHeroSlides = () => {
                     />
                     <p className={`text-xs mt-2 ${t.label}`}>
                       A poster frame is taken from the video automatically — no cover image needed.
-                      After saving, add the write-up from the clip row.
+                      Add the write-up below (you can also fine-tune it later from the clip row).
                     </p>
                   </>
                 )}
@@ -465,6 +524,7 @@ const AdminHeroSlides = () => {
                     Title{form.mediaType === 'Video' && <span className="text-fuchsia-500"> *</span>}
                   </label>
                   <input type="text" value={form.title ?? ''} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                    maxLength={200}
                     placeholder={form.mediaType === 'Video' ? 'Clip title (required)' : 'Slide headline (optional)'}
                     className={`w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all ${t.modalInput}`} />
                   <p className={`text-xs mt-1 ${t.label}`}>
@@ -483,18 +543,42 @@ const AdminHeroSlides = () => {
               <div>
                 <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Subtitle</label>
                 <input type="text" value={form.subtitle ?? ''} onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))}
+                  maxLength={300}
                   placeholder={form.mediaType === 'Video' ? 'Short summary (optional)' : 'Short caption (optional)'}
                   className={`w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all ${t.modalInput}`} />
                 <p className={`text-xs mt-1 ${t.label}`}>
                   {form.mediaType === 'Video'
-                    ? 'Short summary shown on cards'
+                    ? 'Short summary shown on cards. For the full story, use the write-up below.'
                     : 'Used as the small label above the headline only when Label is empty.'}
                 </p>
               </div>
 
+              {form.mediaType === 'Video' && (
+                <div>
+                  <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Write-up / Content</label>
+                  <textarea
+                    value={writeUp}
+                    onChange={e => { writeUpTouchedRef.current = true; setWriteUp(e.target.value); }}
+                    rows={6}
+                    maxLength={10000}
+                    disabled={isLoadingWriteUp}
+                    placeholder={isLoadingWriteUp
+                      ? 'Loading the existing write-up…'
+                      : 'Paste the full write-up for this clip — it appears on the clip’s own page when visitors click it.'}
+                    className={`w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all resize-y disabled:opacity-60 ${t.modalInput}`}
+                  />
+                  <p className={`text-xs mt-1 ${t.label}`}>
+                    Shown on the clip’s public page (opening the clip in the Short Clips section).
+                    {writeUpHasRichBlocks ? ' Saving here replaces the existing formatted write-up with this text.' : ''}
+                    {editing ? ' Leave blank to keep it unchanged.' : ''}
+                  </p>
+                </div>
+              )}
+
               <div>
                 <label className={`text-xs font-bold uppercase tracking-widest mb-1.5 block ${t.label}`}>Target Link</label>
                 <input type="text" value={form.targetUrl ?? ''} onChange={e => setForm(f => ({ ...f, targetUrl: e.target.value }))}
+                  maxLength={500}
                   placeholder="https://... (optional)"
                   className={`w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all ${t.modalInput}`} />
                 <p className={`text-xs mt-1 ${t.label}`}>Where the hero button and slide link to (e.g. /plan-your-visit).</p>
