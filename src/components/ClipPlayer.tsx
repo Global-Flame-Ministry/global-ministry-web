@@ -40,6 +40,8 @@ interface ClipPlayerProps {
   className?: string;
   /** Start muted and attempt playback (used for in-view autoplay). Never plays with sound. */
   autoPlay?: boolean;
+  /** Seconds into the clip to use as the poster frame (its own frame). Default 1.5s. */
+  posterTime?: number;
 }
 
 const formatTime = (seconds: number): string => {
@@ -48,6 +50,10 @@ const formatTime = (seconds: number): string => {
   const secs = Math.floor(seconds % 60);
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
+
+/** Nudges the browser to render the video's own frame at `time` (no poster image needed). */
+const withPosterFragment = (url: string, time: number): string =>
+  url.includes('#') ? url : `${url}#t=${time}`;
 
 /**
  * Reusable, accessible video player with custom controls.
@@ -59,8 +65,10 @@ const formatTime = (seconds: number): string => {
  *   visual only, so a tap can never fire twice.
  * - Respects the source aspect ratio (metadata): landscape video widens the
  *   frame; portrait video is centred with dark, blurred sides.
- * - Derives the poster frame from the video itself (Cloudinary `so_0` or
- *   `#t=0.1`), never a cover image / flyer.
+ * - Derives the poster frame from the video itself at `posterTime` (Cloudinary
+ *   `so_<posterTime>` or `#t=<posterTime>`), never a cover image / flyer.
+ * - The centre play affordance and the bottom-left Play button run the exact
+ *   same single `togglePlay`, which reads the element's own `paused` state.
  * - Keyboard: Space/K play-pause, ←/→ seek ±5s, M mute, F fullscreen.
  * - Fullscreen with pseudo-fullscreen fallback + optional landscape lock.
  * - Only one ClipPlayer anywhere on the page plays at a time.
@@ -70,14 +78,18 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
   title,
   className = '',
   autoPlay = false,
+  posterTime = 1.5,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hideTimer = useRef<number | null>(null);
+  // Set when a play() request was aborted by a pending load/seek so we can retry.
+  const pendingPlayRef = useRef(false);
 
-  const poster = getClipPoster(src);
-  // For non-Cloudinary sources nudge the first frame into view with `#t=0.1`.
-  const effectiveSrc = poster ? src : `${src}${src.includes('#') ? '' : '#t=0.1'}`;
+  // Poster is always the video's own frame — never a cover image.
+  const poster = getClipPoster(src, posterTime);
+  // For non-Cloudinary sources nudge the first frame into view with `#t=<posterTime>`.
+  const effectiveSrc = poster ? src : withPosterFragment(src, posterTime);
 
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [isPlaying, setIsPlaying] = useState(false);
@@ -134,7 +146,15 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
     const onWaiting = () => setIsBuffering(true);
     const onStalled = () => setIsBuffering(true);
     const onSeeked = () => setIsBuffering(false);
-    const onCanPlay = () => { setIsBuffering(false); setStatus('ready'); };
+    const onCanPlay = () => {
+      setIsBuffering(false);
+      setStatus('ready');
+      // A first tap that was aborted by the initial load retries itself here.
+      if (pendingPlayRef.current) {
+        pendingPlayRef.current = false;
+        if (video.paused) video.play().catch(() => { /* surfaced via media events */ });
+      }
+    };
     const onEnded = () => { playingVideos.delete(video); setIsPlaying(false); setIsEnded(true); setIsBuffering(false); setControlsVisible(true); };
     const onError = () => { setStatus('error'); setIsPlaying(false); setIsBuffering(false); };
     const onTimeUpdate = () => setCurrent(video.currentTime);
@@ -249,16 +269,34 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
     }
   };
 
+  const startPlayback = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    const attempt = video.play();
+    if (attempt && typeof attempt.catch === 'function') {
+      attempt.catch((err: unknown) => {
+        const name = (err as { name?: string } | null)?.name;
+        if (name === 'AbortError') {
+          // A pending load/seek aborted this request — retry from `canplay`.
+          pendingPlayRef.current = true;
+        } else if (name === 'NotAllowedError') {
+          setMessage('Playback was blocked. Tap to play.');
+        } else {
+          setMessage('Playback could not start.');
+        }
+      });
+    }
+  };
+
   const togglePlay = () => {
     const video = videoRef.current;
     if (!video) return;
     setMessage(null);
-    if (video.paused) {
-      const attempt = video.play();
-      if (attempt && typeof attempt.catch === 'function') {
-        attempt.catch(() => setMessage('Playback was blocked. Tap to play.'));
-      }
+    // Read the element's own state — never a React flag that can lag a frame.
+    if (video.paused || video.ended) {
+      startPlayback();
     } else {
+      pendingPlayRef.current = false;
       video.pause();
     }
   };
@@ -417,7 +455,7 @@ const ClipPlayer: React.FC<ClipPlayerProps> = ({
       />
 
       {status === 'loading' && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60">
+        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/60">
           <Loader className="h-8 w-8 animate-spin text-white/80" />
         </div>
       )}
